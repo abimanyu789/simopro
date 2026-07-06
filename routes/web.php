@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +12,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Master Data - Bahan Baku
     Route::resource('bahan-baku', BahanBakuController::class);
+
+    // Master Data - Produk
+    Route::resource('produk', ProdukController::class);
 });
 
 require __DIR__.'/settings.php';

@@ -1,0 +1,57 @@
+export interface Produk {
+    id: number;
+    kode_produk: string;
+    nama_produk: string;
+    ukuran: string | null;
+    warna: string | null;
+    harga_jual: number | null;
+    stok: number;
+    minimum_stok: number | null;
+    bom_category_id: number | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ProdukFormData {
+    kode_produk: string;
+    nama_produk: string;
+    ukuran: string;
+    warna: string;
+    harga_jual: number | null;
+    stok: number;
+    minimum_stok: number | null;
+}
+
+export interface ProdukPagination {
+    data: Produk[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+}
+
+export interface ProdukIndexProps {
+    produks: ProdukPagination;
+    filters: {
+        search?: string;
+    };
+}
+
+export interface ProdukCreateProps {
+    produk?: never;
+}
+
+export interface ProdukEditProps {
+    produk: Produk;
+}
+
+export interface ProdukShowProps {
+    produk: Produk;
+}

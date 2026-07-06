@@ -36,19 +36,45 @@ dari satu modul dalam satu percakapan.
 - [x] Sidebar link updated
 - [x] Test manual: CRUD berfungsi, validasi OK, search & pagination OK ✅
 
-## 4. Master Data — Produk
-- [ ] Migration + Seeder
-- [ ] Model + FormRequest
-- [ ] Controller CRUD + filter/search/import/export
-- [ ] React page
-- [ ] Test CRUD + validasi "produk harus punya BOM" (setelah modul BOM selesai)
+## 4. Master Data — Produk ✅ SELESAI (pending commit)
+- [x] Migration `produk` table (singular, `bom_category_id` nullable tanpa FK — FK ditambahkan di Modul 5)
+- [x] Seeder `ProdukSeeder` (20 data dummy produk sepatu, PRD-001 s/d PRD-020)
+- [x] Model `Produk` dengan `$table = 'produk'`, fillable, casts
+- [x] FormRequest `ProdukRequest` (kode unik, required, min values, bahasa Indonesia)
+- [x] Controller `ProdukController` (resource CRUD, search: kode/nama/warna, sort: created_at DESC, paginate 15)
+- [x] Route resource `produk`
+- [x] TypeScript types `produk.ts` + export di `types/index.ts`
+- [x] Reusable component `ProdukForm` (shared create & edit)
+- [x] Reusable component `ProdukDeleteDialog` (shadcn Dialog)
+- [x] React Pages: Index (table + search + pagination + low-stock indicator), Create, Edit, Show
+- [x] Sidebar update (Produk → `produk.index()`)
+- [x] Wayfinder route di-generate (`resources/js/routes/produk/index.ts`)
+- [ ] Test manual:
+      - CRUD berhasil
+      - Search & Pagination berhasil
+      - `bom_category_id` masih nullable
+      - Produk dapat dibuat tanpa BOM
 
 ## 5. Bill of Materials (BOM)
-- [ ] Migration `bom_categorie` + `bom_detail` (singular, sesuai database-schema.md — bukan `boms`/`bom_details`)
-- [ ] Model + relasi ke Produk & BahanBaku
-- [ ] Service: hitung total kebutuhan bahan
-- [ ] Controller + React page (form tambah/edit komposisi)
-- [ ] Test: 1 produk 1 BOM aktif, qty tidak boleh 0
+
+- [ ] Migration `bom_categorie`
+- [ ] Migration `bom_detail`
+- [ ] Seeder dummy BOM
+- [ ] Model + Relation
+- [ ] CRUD BOM Category
+- [ ] CRUD Detail BOM
+- [ ] Dropdown Produk
+- [ ] Assign BOM ke Produk
+- [ ] Validasi:
+      - 1 Produk hanya memiliki 1 BOM aktif
+      - qty_per_pair > 0
+      - BOM yang dipakai produk tidak dapat dihapus
+- [ ] Service hitung kebutuhan bahan
+- [ ] React Page
+- [ ] Test:
+      - Assign BOM ke Produk
+      - Hitung kebutuhan bahan
+      - Validasi BOM
 
 ## 6. Master Data — Karyawan
 - [ ] Migration + Seeder

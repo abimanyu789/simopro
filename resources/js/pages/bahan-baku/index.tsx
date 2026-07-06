@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
+import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,7 +15,10 @@ import {
 import bahanBaku from '@/routes/bahan-baku';
 import type { BahanBakuIndexProps } from '@/types';
 
-export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexProps) {
+export default function BahanBakuIndex({
+    bahanBakus,
+    filters,
+}: BahanBakuIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
 
     const handleSearch = (e: React.FormEvent) => {
@@ -29,16 +33,11 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
         );
     };
 
-    const handleDelete = (id: number) => {
-        if (confirm('Apakah Anda yakin ingin menghapus bahan baku ini?')) {
-            router.delete(bahanBaku.destroy.url(id), {
-                preserveScroll: true,
-            });
-        }
-    };
-
     const formatNumber = (value: number | null) => {
-        if (value === null) return '-';
+        if (value === null) {
+            return '-';
+        }
+
         return new Intl.NumberFormat('id-ID', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -53,7 +52,9 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Data Master - Bahan Baku</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Data Master - Bahan Baku
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Kelola data bahan baku untuk produksi
                         </p>
@@ -68,9 +69,12 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
 
                 {/* Toolbar */}
                 <div className="flex items-center gap-4">
-                    <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
-                        <div className="relative flex-1 max-w-sm">
-                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <form
+                        onSubmit={handleSearch}
+                        className="flex flex-1 items-center gap-2"
+                    >
+                        <div className="relative max-w-sm flex-1">
+                            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="text"
                                 placeholder="Cari kode, nama, atau satuan..."
@@ -94,15 +98,24 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                 <TableHead>Kode Bahan</TableHead>
                                 <TableHead>Nama Bahan</TableHead>
                                 <TableHead>Satuan</TableHead>
-                                <TableHead className="text-right">Stok</TableHead>
-                                <TableHead className="text-right">Min. Stok</TableHead>
-                                <TableHead className="w-32 text-center">Aksi</TableHead>
+                                <TableHead className="text-right">
+                                    Stok
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    Min. Stok
+                                </TableHead>
+                                <TableHead className="w-32 text-center">
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {bahanBakus.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-24 text-center">
+                                    <TableCell
+                                        colSpan={7}
+                                        className="h-24 text-center"
+                                    >
                                         {filters.search
                                             ? 'Tidak ada data yang ditemukan.'
                                             : 'Belum ada data bahan baku.'}
@@ -131,7 +144,11 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center justify-center gap-2">
-                                                <Link href={bahanBaku.show(item.id)}>
+                                                <Link
+                                                    href={bahanBaku.show(
+                                                        item.id,
+                                                    )}
+                                                >
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -140,7 +157,11 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                                         <Eye className="size-4" />
                                                     </Button>
                                                 </Link>
-                                                <Link href={bahanBaku.edit(item.id)}>
+                                                <Link
+                                                    href={bahanBaku.edit(
+                                                        item.id,
+                                                    )}
+                                                >
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -149,16 +170,9 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                                         <Pencil className="size-4" />
                                                     </Button>
                                                 </Link>
-                                               <Link href={bahanBaku.destroy(item.id)}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="size-8 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
-                                                        onClick={() => handleDelete(item.id)}
-                                                    >
-                                                        <Trash2 className="size-4" />
-                                                    </Button>
-                                                </Link>
+                                                <BahanBakuDeleteDialog
+                                                    bahanBaku={item}
+                                                />
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -179,7 +193,9 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                             {bahanBakus.links.map((link, index) => (
                                 <Button
                                     key={index}
-                                    variant={link.active ? 'default' : 'outline'}
+                                    variant={
+                                        link.active ? 'default' : 'outline'
+                                    }
                                     size="sm"
                                     disabled={link.url === null}
                                     onClick={() => {
@@ -190,7 +206,9 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                             });
                                         }
                                     }}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: link.label,
+                                    }}
                                 />
                             ))}
                         </div>

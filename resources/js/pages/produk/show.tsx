@@ -1,23 +1,21 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
-import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete-dialog';
+import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
 import { Button } from '@/components/ui/button';
-import bahanBaku from '@/routes/bahan-baku';
-import type { BahanBaku } from '@/types';
+import produk from '@/routes/produk';
+import type { ProdukShowProps } from '@/types';
 
-interface BahanBakuShowProps {
-    bahanBaku: BahanBaku;
-}
-
-export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
-    const formatNumber = (value: number | null) => {
+export default function ProdukShow({ produk: item }: ProdukShowProps) {
+    const formatHarga = (value: number | null) => {
         if (value === null) {
             return '-';
         }
 
         return new Intl.NumberFormat('id-ID', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
         }).format(value);
     };
 
@@ -34,38 +32,40 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
     const isLowStock =
         item.minimum_stok !== null && item.stok <= item.minimum_stok;
 
+    const deleteRedirectHref = produk.index.url();
+
     return (
         <>
-            <Head title={`Detail Bahan Baku - ${item.nama_bahan}`} />
+            <Head title={`Detail Produk - ${item.nama_produk}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href={bahanBaku.index()}>
+                        <Link href={produk.index()}>
                             <Button variant="outline" size="icon">
                                 <ArrowLeft className="size-4" />
                             </Button>
                         </Link>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">
-                                Detail Bahan Baku
+                                Detail Produk
                             </h1>
                             <p className="text-sm text-muted-foreground">
-                                {item.nama_bahan}
+                                {item.nama_produk}
                             </p>
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <Link href={bahanBaku.edit(item.id)}>
+                        <Link href={produk.edit(item.id)}>
                             <Button variant="outline">
                                 <Pencil className="mr-2 size-4" />
                                 Edit
                             </Button>
                         </Link>
-                        <BahanBakuDeleteDialog
-                            bahanBaku={item}
-                            redirectTo={bahanBaku.index.url()}
+                        <ProdukDeleteDialog
+                            produk={item}
+                            redirectTo={deleteRedirectHref}
                             trigger={
                                 <Button variant="destructive">Hapus</Button>
                             }
@@ -75,40 +75,70 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
 
                 {/* Content */}
                 <div className="mx-auto w-full max-w-3xl space-y-6">
-                    {/* Basic Info */}
+                    {/* Informasi Produk */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
-                            Informasi Bahan Baku
+                            Informasi Produk
                         </h2>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    Kode Bahan
+                                    Kode Produk
                                 </p>
                                 <p className="mt-1 font-mono text-sm">
-                                    {item.kode_bahan}
+                                    {item.kode_produk}
                                 </p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    Nama Bahan
+                                    Nama Produk
                                 </p>
-                                <p className="mt-1">{item.nama_bahan}</p>
+                                <p className="mt-1">{item.nama_produk}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">
-                                    Satuan
+                                    Ukuran
                                 </p>
                                 <p className="mt-1">
-                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-0.5 text-sm font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-400">
-                                        {item.satuan}
-                                    </span>
+                                    {item.ukuran ? (
+                                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 text-sm font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            {item.ukuran}
+                                        </span>
+                                    ) : (
+                                        <span className="text-muted-foreground">
+                                            -
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Warna
+                                </p>
+                                <p className="mt-1">
+                                    {item.warna ? (
+                                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-0.5 text-sm font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-400">
+                                            {item.warna}
+                                        </span>
+                                    ) : (
+                                        <span className="text-muted-foreground">
+                                            -
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Harga Jual
+                                </p>
+                                <p className="mt-1 text-lg font-semibold">
+                                    {formatHarga(item.harga_jual)}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Stock Info */}
+                    {/* Informasi Stok */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
                             Informasi Stok
@@ -119,11 +149,17 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
                                     Stok Saat Ini
                                 </p>
                                 <div className="mt-1 flex items-center gap-2">
-                                    <p className="text-2xl font-bold">
-                                        {formatNumber(item.stok)}
+                                    <p
+                                        className={`text-2xl font-bold ${
+                                            isLowStock
+                                                ? 'text-orange-600 dark:text-orange-400'
+                                                : ''
+                                        }`}
+                                    >
+                                        {item.stok}
                                     </p>
                                     <span className="text-sm text-muted-foreground">
-                                        {item.satuan}
+                                        pasang
                                     </span>
                                 </div>
                                 {isLowStock && (
@@ -138,30 +174,45 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
                                 </p>
                                 <div className="mt-1 flex items-center gap-2">
                                     <p className="text-2xl font-bold">
-                                        {formatNumber(item.minimum_stok)}
+                                        {item.minimum_stok ?? '-'}
                                     </p>
-                                    <span className="text-sm text-muted-foreground">
-                                        {item.satuan}
-                                    </span>
+                                    {item.minimum_stok !== null && (
+                                        <span className="text-sm text-muted-foreground">
+                                            pasang
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* History Info */}
+                    {/* Informasi BOM */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
-                            Riwayat Stok
+                            Bill of Materials (BOM)
                         </h2>
-                        <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                        <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted">
                             <p className="text-sm text-muted-foreground">
-                                Riwayat perubahan stok akan tersedia setelah
-                                Modul 9 (Stok Bahan Baku) selesai
+                                Informasi BOM akan tersedia setelah Modul 5
+                                (Bill of Materials) selesai
                             </p>
                         </div>
                     </div>
 
-                    {/* Metadata */}
+                    {/* Riwayat Stok */}
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Riwayat Stok
+                        </h2>
+                        <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                            <p className="text-sm text-muted-foreground">
+                                Riwayat perubahan stok akan tersedia setelah
+                                Modul 10 (Stok Produk Jadi) selesai
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Informasi Sistem */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
                             Informasi Sistem
@@ -191,19 +242,10 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
     );
 }
 
-BahanBakuShow.layout = {
+ProdukShow.layout = {
     breadcrumbs: [
-        {
-            title: 'Data Master',
-            href: '#',
-        },
-        {
-            title: 'Bahan Baku',
-            href: bahanBaku.index(),
-        },
-        {
-            title: 'Detail',
-            href: '#',
-        },
+        { title: 'Data Master', href: '#' },
+        { title: 'Produk', href: produk.index() },
+        { title: 'Detail', href: '#' },
     ],
 };

@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
+import produk from '@/routes/produk';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -47,7 +48,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Produk',
-                href: '#',
+                href: produk.index(),
             },
             {
                 title: 'Karyawan',
