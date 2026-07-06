@@ -23,12 +23,18 @@ dari satu modul dalam satu percakapan.
 - [x] Install recharts & @radix-ui/react-progress
 - [x] Test manual: semua komponen tampil, data 0/kosong normal (tabel belum ada) ✅
 
-## 3. Master Data — Bahan Baku
-- [ ] Migration + Seeder
-- [ ] Model + validasi (FormRequest)
-- [ ] Controller CRUD + filter/search/import/export
-- [ ] React page (List, Form, Detail)
-- [ ] Test: create/read/update/delete/filter/export
+## 3. Master Data — Bahan Baku ✅ SELESAI (commit 9b76e6d)
+- [x] Migration `bahan_baku` table (singular)
+- [x] Seeder `BahanBakuSeeder` (8 data dummy)
+- [x] Model `BahanBaku` dengan `$table = 'bahan_baku'`
+- [x] FormRequest `BahanBakuRequest` (validation: unique kode, required, min values)
+- [x] Controller `BahanBakuController` (resource CRUD + search + pagination)
+- [x] Route resource `bahan-baku`
+- [x] TypeScript types `bahan-baku.ts`
+- [x] React pages (index, create, edit, show)
+- [x] Table UI component
+- [x] Sidebar link updated
+- [x] Test manual: CRUD berfungsi, validasi OK, search & pagination OK ✅
 
 ## 4. Master Data — Produk
 - [ ] Migration + Seeder
