@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
+import bomCategorie from '@/routes/bom-categorie';
 import produk from '@/routes/produk';
 import type { NavItem } from '@/types';
 
@@ -49,6 +50,10 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Produk',
                 href: produk.index(),
+            },
+            {
+                title: 'Bill of Materials',
+                href: bomCategorie.index(),
             },
             {
                 title: 'Karyawan',

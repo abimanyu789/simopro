@@ -1,63 +1,53 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { ProdukForm } from '@/components/produk/produk-form';
+import { BomCategorieForm } from '@/components/bom/bom-categorie-form';
 import { Button } from '@/components/ui/button';
-import produk from '@/routes/produk';
-import type { ProdukEditProps, ProdukFormData } from '@/types';
+import bomCategorie from '@/routes/bom-categorie';
+import type { BomCategorieEditProps, BomCategorieFormData } from '@/types';
 
-export default function ProdukEdit({
-    produk: item,
-    bomCategories,
-}: ProdukEditProps) {
-    const { data, setData, put, processing, errors } = useForm<ProdukFormData>({
-        kode_produk: item.kode_produk,
-        nama_produk: item.nama_produk,
-        ukuran: item.ukuran ?? '',
-        warna: item.warna ?? '',
-        harga_jual: item.harga_jual,
-        stok: item.stok,
-        minimum_stok: item.minimum_stok,
-        bom_category_id: item.bom_category_id,
+export default function BomCategorieEdit({ bomCategorie: item }: BomCategorieEditProps) {
+    const { data, setData, put, processing, errors } = useForm<BomCategorieFormData>({
+        nama_bom: item.nama_bom,
+        keterangan: item.keterangan ?? '',
+        details: [],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(produk.update.url(item.id));
+        put(bomCategorie.update.url(item.id));
     };
 
     return (
         <>
-            <Head title={`Edit Produk - ${item.nama_produk}`} />
+            <Head title={`Edit BOM - ${item.nama_bom}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Link href={produk.index()}>
+                    <Link href={bomCategorie.show(item.id)}>
                         <Button variant="outline" size="icon">
                             <ArrowLeft className="size-4" />
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">
-                            Edit Produk
-                        </h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Edit BOM</h1>
                         <p className="text-sm text-muted-foreground">
-                            Perbarui data produk: {item.nama_produk}
+                            Perbarui informasi BOM: {item.nama_bom}
                         </p>
                     </div>
                 </div>
 
                 {/* Form */}
-                <div className="mx-auto w-full max-w-2xl">
-                    <ProdukForm
+                <div className="mx-auto w-full max-w-3xl">
+                    <BomCategorieForm
                         data={data}
                         setData={setData}
                         errors={errors}
                         processing={processing}
                         onSubmit={handleSubmit}
-                        cancelHref={produk.index.url()}
+                        cancelHref={bomCategorie.show.url(item.id)}
+                        bahanBakus={[]}
                         mode="edit"
-                        bomCategories={bomCategories}
                     />
                 </div>
             </div>
@@ -65,10 +55,10 @@ export default function ProdukEdit({
     );
 }
 
-ProdukEdit.layout = {
+BomCategorieEdit.layout = {
     breadcrumbs: [
         { title: 'Data Master', href: '#' },
-        { title: 'Produk', href: produk.index() },
+        { title: 'Bill of Materials', href: bomCategorie.index() },
         { title: 'Edit', href: '#' },
     ],
 };

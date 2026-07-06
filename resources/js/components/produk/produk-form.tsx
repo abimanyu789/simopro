@@ -2,7 +2,14 @@ import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ProdukFormData } from '@/types';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import type { BomCategoryOption, ProdukFormData } from '@/types';
 
 interface ProdukFormProps {
     data: ProdukFormData;
@@ -13,6 +20,7 @@ interface ProdukFormProps {
     cancelHref: string;
     submitLabel?: string;
     mode: 'create' | 'edit';
+    bomCategories?: BomCategoryOption[];
 }
 
 export function ProdukForm({
@@ -24,8 +32,10 @@ export function ProdukForm({
     cancelHref,
     submitLabel,
     mode,
+    bomCategories = [],
 }: ProdukFormProps) {
-    const defaultSubmitLabel = mode === 'create' ? 'Simpan' : 'Simpan Perubahan';
+    const defaultSubmitLabel =
+        mode === 'create' ? 'Simpan' : 'Simpan Perubahan';
 
     return (
         <form
@@ -47,7 +57,9 @@ export function ProdukForm({
                         className={errors.kode_produk ? 'border-red-500' : ''}
                     />
                     {errors.kode_produk && (
-                        <p className="text-sm text-red-500">{errors.kode_produk}</p>
+                        <p className="text-sm text-red-500">
+                            {errors.kode_produk}
+                        </p>
                     )}
                 </div>
 
@@ -65,7 +77,9 @@ export function ProdukForm({
                         className={errors.nama_produk ? 'border-red-500' : ''}
                     />
                     {errors.nama_produk && (
-                        <p className="text-sm text-red-500">{errors.nama_produk}</p>
+                        <p className="text-sm text-red-500">
+                            {errors.nama_produk}
+                        </p>
                     )}
                 </div>
 
@@ -83,7 +97,9 @@ export function ProdukForm({
                             className={errors.ukuran ? 'border-red-500' : ''}
                         />
                         {errors.ukuran && (
-                            <p className="text-sm text-red-500">{errors.ukuran}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.ukuran}
+                            </p>
                         )}
                     </div>
 
@@ -99,7 +115,9 @@ export function ProdukForm({
                             className={errors.warna ? 'border-red-500' : ''}
                         />
                         {errors.warna && (
-                            <p className="text-sm text-red-500">{errors.warna}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.warna}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -108,7 +126,7 @@ export function ProdukForm({
                 <div className="space-y-2">
                     <Label htmlFor="harga_jual">Harga Jual</Label>
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
                             Rp
                         </span>
                         <Input
@@ -120,7 +138,9 @@ export function ProdukForm({
                             onChange={(e) =>
                                 setData(
                                     'harga_jual',
-                                    e.target.value ? parseFloat(e.target.value) : null,
+                                    e.target.value
+                                        ? parseFloat(e.target.value)
+                                        : null,
                                 )
                             }
                             placeholder="0"
@@ -128,7 +148,9 @@ export function ProdukForm({
                         />
                     </div>
                     {errors.harga_jual && (
-                        <p className="text-sm text-red-500">{errors.harga_jual}</p>
+                        <p className="text-sm text-red-500">
+                            {errors.harga_jual}
+                        </p>
                     )}
                 </div>
 
@@ -137,7 +159,10 @@ export function ProdukForm({
                     {/* Stok */}
                     <div className="space-y-2">
                         <Label htmlFor="stok">
-                            Stok {mode === 'create' && <span className="text-red-500">*</span>}
+                            Stok{' '}
+                            {mode === 'create' && (
+                                <span className="text-red-500">*</span>
+                            )}
                         </Label>
                         <Input
                             id="stok"
@@ -146,16 +171,22 @@ export function ProdukForm({
                             min="0"
                             value={data.stok}
                             onChange={(e) =>
-                                setData('stok', parseInt(e.target.value, 10) || 0)
+                                setData(
+                                    'stok',
+                                    parseInt(e.target.value, 10) || 0,
+                                )
                             }
                             className={errors.stok ? 'border-red-500' : ''}
                         />
                         {errors.stok && (
-                            <p className="text-sm text-red-500">{errors.stok}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.stok}
+                            </p>
                         )}
                         {mode === 'edit' && (
                             <p className="text-xs text-muted-foreground">
-                                Edit manual hanya untuk koreksi. Stok akan otomatis berubah melalui modul Produksi.
+                                Edit manual hanya untuk koreksi. Stok akan
+                                otomatis berubah melalui modul Produksi.
                             </p>
                         )}
                     </div>
@@ -172,20 +203,76 @@ export function ProdukForm({
                             onChange={(e) =>
                                 setData(
                                     'minimum_stok',
-                                    e.target.value ? parseInt(e.target.value, 10) : null,
+                                    e.target.value
+                                        ? parseInt(e.target.value, 10)
+                                        : null,
                                 )
                             }
                             placeholder="Opsional"
-                            className={errors.minimum_stok ? 'border-red-500' : ''}
+                            className={
+                                errors.minimum_stok ? 'border-red-500' : ''
+                            }
                         />
                         {errors.minimum_stok && (
-                            <p className="text-sm text-red-500">{errors.minimum_stok}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.minimum_stok}
+                            </p>
                         )}
                         <p className="text-xs text-muted-foreground">
                             Batas minimum stok untuk peringatan
                         </p>
                     </div>
                 </div>
+
+                {/* BOM */}
+                {bomCategories.length > 0 && (
+                    <div className="space-y-2">
+                        <Label htmlFor="bom_category_id">
+                            Bill of Materials (BOM)
+                        </Label>
+                        <Select
+                            value={data.bom_category_id?.toString() ?? ''}
+                            onValueChange={(val) =>
+                                setData(
+                                    'bom_category_id',
+                                    val ? parseInt(val, 10) : null,
+                                )
+                            }
+                        >
+                            <SelectTrigger
+                                className={
+                                    errors.bom_category_id
+                                        ? 'border-red-500'
+                                        : ''
+                                }
+                            >
+                                <SelectValue placeholder="Pilih BOM (opsional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="0">
+                                    -- Tidak menggunakan BOM --
+                                </SelectItem>
+                                {bomCategories.map((bom) => (
+                                    <SelectItem
+                                        key={bom.id}
+                                        value={bom.id.toString()}
+                                    >
+                                        {bom.nama_bom}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.bom_category_id && (
+                            <p className="text-sm text-red-500">
+                                {errors.bom_category_id}
+                            </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                            BOM menentukan komposisi bahan baku yang dibutuhkan
+                            saat produksi
+                        </p>
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-4">
@@ -195,7 +282,9 @@ export function ProdukForm({
                         </Button>
                     </Link>
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Menyimpan...' : (submitLabel ?? defaultSubmitLabel)}
+                        {processing
+                            ? 'Menyimpan...'
+                            : (submitLabel ?? defaultSubmitLabel)}
                     </Button>
                 </div>
             </div>

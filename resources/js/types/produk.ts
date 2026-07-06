@@ -20,6 +20,7 @@ export interface ProdukFormData {
     harga_jual: number | null;
     stok: number;
     minimum_stok: number | null;
+    bom_category_id: number | null;
 }
 
 export interface ProdukPagination {
@@ -46,10 +47,12 @@ export interface ProdukIndexProps {
 
 export interface ProdukCreateProps {
     produk?: never;
+    bomCategories: import('./bom').BomCategoryOption[];
 }
 
 export interface ProdukEditProps {
     produk: Produk;
+    bomCategories: import('./bom').BomCategoryOption[];
 }
 
 export interface ProdukShowProps {

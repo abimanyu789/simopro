@@ -37,7 +37,7 @@ class ProdukRequest extends FormRequest
             'harga_jual' => ['nullable', 'numeric', 'min:0'],
             'stok' => ['required', 'integer', 'min:0'],
             'minimum_stok' => ['nullable', 'integer', 'min:0'],
-            // bom_category_id tidak divalidasi di sini — ditangani pada Modul 5 (BOM).
+            'bom_category_id' => ['nullable', 'integer', 'exists:bom_categorie,id'],
         ];
     }
 
@@ -56,6 +56,7 @@ class ProdukRequest extends FormRequest
             'harga_jual' => 'harga jual',
             'stok' => 'stok',
             'minimum_stok' => 'minimum stok',
+            'bom_category_id' => 'BOM',
         ];
     }
 

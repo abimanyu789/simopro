@@ -3,9 +3,9 @@ import { ArrowLeft } from 'lucide-react';
 import { ProdukForm } from '@/components/produk/produk-form';
 import { Button } from '@/components/ui/button';
 import produk from '@/routes/produk';
-import type { ProdukFormData } from '@/types';
+import type { ProdukCreateProps, ProdukFormData } from '@/types';
 
-export default function ProdukCreate() {
+export default function ProdukCreate({ bomCategories }: ProdukCreateProps) {
     const { data, setData, post, processing, errors } = useForm<ProdukFormData>(
         {
             kode_produk: '',
@@ -15,6 +15,7 @@ export default function ProdukCreate() {
             harga_jual: null,
             stok: 0,
             minimum_stok: null,
+            bom_category_id: null,
         },
     );
 
@@ -55,6 +56,7 @@ export default function ProdukCreate() {
                         onSubmit={handleSubmit}
                         cancelHref={produk.index.url()}
                         mode="create"
+                        bomCategories={bomCategories}
                     />
                 </div>
             </div>

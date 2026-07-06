@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\BomCategorieRequest;
+use App\Models\BahanBaku;
+use App\Models\BomCategorie;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+
+class BomCategorieController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+
+        $bomCategories = BomCategorie::query()
+            ->withCount(['bomDetails', 'produk'])
+            ->when($search, function ($query, $search) {
+                $query->where('nama_bom', 'like', "%{$search}%")
+                    ->orWhere('keterangan', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('bom-categorie/index', [
+            'bomCategories' => $bomCategories,
+            'filters'       => ['search' => $search],
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $bahanBakus = BahanBaku::select('id', 'kode_bahan', 'nama_bahan', 'satuan')
+            ->orderBy('nama_bahan')
+            ->get();
+
+        return Inertia::render('bom-categorie/create', [
+            'bahanBakus' => $bahanBakus,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(BomCategorieRequest $request)
+    {
+        DB::transaction(function () use ($request) {
+            $bom = BomCategorie::create([
+                'nama_bom'   => $request->nama_bom,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            foreach ($request->details as $detail) {
+                $bom->bomDetails()->create([
+                    'bahan_baku_id' => $detail['bahan_baku_id'],
+                    'qty_per_pair'  => $detail['qty_per_pair'],
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('bom-categorie.index')
+            ->with('success', 'BOM berhasil ditambahkan.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(BomCategorie $bomCategorie)
+    {
+        $bomCategorie->load(['bomDetails.bahanBaku']);
+
+        $bahanBakus = BahanBaku::select('id', 'kode_bahan', 'nama_bahan', 'satuan')
+            ->orderBy('nama_bahan')
+            ->get();
+
+        return Inertia::render('bom-categorie/show', [
+            'bomCategorie' => $bomCategorie,
+            'bahanBakus'   => $bahanBakus,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(BomCategorie $bomCategorie)
+    {
+        return Inertia::render('bom-categorie/edit', [
+            'bomCategorie' => $bomCategorie,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(BomCategorieRequest $request, BomCategorie $bomCategorie)
+    {
+        $bomCategorie->update($request->validated());
+
+        return redirect()
+            ->route('bom-categorie.index')
+            ->with('success', 'BOM berhasil diperbarui.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(BomCategorie $bomCategorie)
+    {
+        // Cek apakah BOM masih digunakan oleh produk
+        $produkCount = $bomCategorie->produk()->count();
+
+        if ($produkCount > 0) {
+            return redirect()
+                ->back()
+                ->with('error', "BOM tidak dapat dihapus karena masih digunakan oleh {$produkCount} produk.");
+        }
+
+        try {
+            DB::transaction(function () use ($bomCategorie) {
+                // Hapus semua detail BOM dahulu (FK restrict ke bom_categorie)
+                $bomCategorie->bomDetails()->delete();
+                $bomCategorie->delete();
+            });
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'BOM tidak dapat dihapus. Pastikan tidak ada data terkait yang masih aktif.');
+        }
+
+        return redirect()
+            ->route('bom-categorie.index')
+            ->with('success', 'BOM berhasil dihapus.');
+    }
+}

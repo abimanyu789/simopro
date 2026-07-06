@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Search } from 'lucide-react';
+import { ClipboardList, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import bomCategorie from '@/routes/bom-categorie';
 import produk from '@/routes/produk';
 import type { ProdukIndexProps } from '@/types';
 
@@ -55,12 +56,20 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                             Kelola data produk sepatu Provillo
                         </p>
                     </div>
-                    <Link href={produk.create()}>
-                        <Button>
-                            <Plus className="mr-2 size-4" />
-                            Tambah Produk
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link href={bomCategorie.index()}>
+                            <Button variant="outline">
+                                <ClipboardList className="mr-2 size-4" />
+                                BOM
+                            </Button>
+                        </Link>
+                        <Link href={produk.create()}>
+                            <Button>
+                                <Plus className="mr-2 size-4" />
+                                Tambah Produk
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Toolbar */}

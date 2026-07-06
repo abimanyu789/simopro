@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProdukRequest;
+use App\Models\BomCategorie;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,7 +40,13 @@ class ProdukController extends Controller
      */
     public function create()
     {
-        return Inertia::render('produk/create');
+        $bomCategories = BomCategorie::select('id', 'nama_bom')
+            ->orderBy('nama_bom')
+            ->get();
+
+        return Inertia::render('produk/create', [
+            'bomCategories' => $bomCategories,
+        ]);
     }
 
     /**
@@ -69,8 +76,13 @@ class ProdukController extends Controller
      */
     public function edit(Produk $produk)
     {
+        $bomCategories = BomCategorie::select('id', 'nama_bom')
+            ->orderBy('nama_bom')
+            ->get();
+
         return Inertia::render('produk/edit', [
-            'produk' => $produk,
+            'produk'        => $produk,
+            'bomCategories' => $bomCategories,
         ]);
     }
 
