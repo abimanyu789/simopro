@@ -26,7 +26,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, bahanBaku } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -46,7 +46,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Bahan Baku',
-                href: '#',
+                href: bahanBaku.index(),
             },
             {
                 title: 'Karyawan',
