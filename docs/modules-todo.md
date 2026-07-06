@@ -11,11 +11,17 @@ dari satu modul dalam satu percakapan.
 - [x] React Login page (Inertia, split layout, branding Provillo, UI bahasa Indonesia)
 - [x] Test: login sukses (admin@provillo.com/password → redirect /dashboard ✅)
 
-## 2. Dashboard
-- [ ] Query ringkasan (pesanan aktif, produksi, stok, arus kas)
-- [ ] Controller + route
-- [ ] React Dashboard page + chart
-- [ ] Test manual dengan data seed
+## 2. Dashboard ✅ SELESAI (commit efb9b2d)
+- [x] DashboardController dengan query defensive (Schema::hasTable checks)
+- [x] Query ringkasan: stat cards, financial chart, best sellers, active orders, top employees
+- [x] Dashboard types (TypeScript)
+- [x] StatCard, FinancialChart, BestSellersChart components
+- [x] Progress UI component (Radix UI)
+- [x] Sidebar update dengan menu Provillo lengkap + collapsible support
+- [x] NavMain update untuk nested navigation
+- [x] Full dashboard layout dengan responsive design
+- [x] Install recharts & @radix-ui/react-progress
+- [x] Test manual: semua komponen tampil, data 0/kosong normal (tabel belum ada) ✅
 
 ## 3. Master Data — Bahan Baku
 - [ ] Migration + Seeder
