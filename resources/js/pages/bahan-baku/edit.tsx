@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { bahanBaku } from '@/routes';
+import { bahanBaku } from '@/routes/bahan-baku';
 import type { BahanBakuCreateEditProps, BahanBakuFormData } from '@/types';
 
 export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanBakuCreateEditProps) {

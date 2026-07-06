@@ -31,6 +31,7 @@ class BahanBakuController extends Controller
             'filters' => [
                 'search' => $search,
             ],
+            'satuanOptions' => $this->getSatuanOptions(),
         ]);
     }
 

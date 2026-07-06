@@ -11,12 +11,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { bahanBaku } from '@/routes';
-import type { BahanBaku, BahanBakuIndexProps } from '@/types';
+import { bahanBaku } from '@/routes/bahan-baku';
+import type { BahanBakuIndexProps } from '@/types';
 
 export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
-    const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
