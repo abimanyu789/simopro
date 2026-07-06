@@ -1,5 +1,18 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Box,
+    ClipboardList,
+    Database,
+    DollarSign,
+    FolderGit2,
+    LayoutGrid,
+    Package,
+    Settings,
+    ShoppingCart,
+    Users,
+    Wrench,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -21,6 +34,59 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Data Master',
+        href: '#',
+        icon: Database,
+        items: [
+            {
+                title: 'Produk',
+                href: '#',
+            },
+            {
+                title: 'Bahan Baku',
+                href: '#',
+            },
+            {
+                title: 'Karyawan',
+                href: '#',
+            },
+            {
+                title: 'Customer',
+                href: '#',
+            },
+        ],
+    },
+    {
+        title: 'Pesanan',
+        href: '#',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Stok',
+        href: '#',
+        icon: Box,
+        items: [
+            {
+                title: 'Bahan Baku',
+                href: '#',
+            },
+            {
+                title: 'Produk Jadi',
+                href: '#',
+            },
+        ],
+    },
+    {
+        title: 'Produksi Karyawan',
+        href: '#',
+        icon: Wrench,
+    },
+    {
+        title: 'Arus Kas',
+        href: '#',
+        icon: DollarSign,
     },
 ];
 

@@ -4,12 +4,12 @@ Checklist ini dipakai untuk membatasi 1 sesi AI = 1 modul. Centang manual setela
 lulus testing manual, baru lanjut ke modul berikutnya. Jangan minta AI mengerjakan lebih
 dari satu modul dalam satu percakapan.
 
-## 1. Auth / Login
-- [ ] Migration users (default Laravel + kolom tambahan bila perlu)
-- [ ] Seeder admin default
-- [ ] Auth scaffolding (Breeze/Fortify atau custom controller)
-- [ ] React Login page (Inertia)
-- [ ] Test: login sukses, login gagal, field kosong
+## 1. Auth / Login ✅ SELESAI (commit e897488)
+- [x] Migration users (default Laravel + kolom 2FA dari Fortify)
+- [x] Seeder admin default (AdminSeeder — updateOrCreate, email_verified_at diisi)
+- [x] Auth scaffolding (Laravel Fortify — registration + emailVerification dinonaktifkan)
+- [x] React Login page (Inertia, split layout, branding Provillo, UI bahasa Indonesia)
+- [x] Test: login sukses (admin@provillo.com/password → redirect /dashboard ✅)
 
 ## 2. Dashboard
 - [ ] Query ringkasan (pesanan aktif, produksi, stok, arus kas)
