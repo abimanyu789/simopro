@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { bahanBaku } from '@/routes/bahan-baku';
+import bahanBaku from '@/routes/bahan-baku';
 import type { BahanBakuCreateEditProps, BahanBakuFormData } from '@/types';
 
 export default function BahanBakuCreate({ satuanOptions }: BahanBakuCreateEditProps) {
@@ -24,7 +24,7 @@ export default function BahanBakuCreate({ satuanOptions }: BahanBakuCreateEditPr
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(bahanBaku.store());
+        post(bahanBaku.store.url());
     };
 
     return (

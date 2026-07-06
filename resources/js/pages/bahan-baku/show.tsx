@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { bahanBaku } from '@/routes';
+import bahanBaku from '@/routes/bahan-baku';
 import type { BahanBaku } from '@/types';
 
 interface BahanBakuShowProps {
@@ -11,7 +11,7 @@ interface BahanBakuShowProps {
 export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
     const handleDelete = () => {
         if (confirm('Apakah Anda yakin ingin menghapus bahan baku ini?')) {
-            router.delete(bahanBaku.destroy(item.id));
+            router.delete(bahanBaku.destroy.url(item.id));
         }
     };
 

@@ -26,7 +26,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, bahanBaku } from '@/routes';
+import { dashboard } from '@/routes';
+import bahanBaku from '@/routes/bahan-baku';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -41,12 +42,12 @@ const mainNavItems: NavItem[] = [
         icon: Database,
         items: [
             {
-                title: 'Produk',
-                href: '#',
-            },
-            {
                 title: 'Bahan Baku',
                 href: bahanBaku.index(),
+            },
+            {
+                title: 'Produk',
+                href: '#',
             },
             {
                 title: 'Karyawan',

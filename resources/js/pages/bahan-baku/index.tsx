@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { bahanBaku } from '@/routes/bahan-baku';
+import bahanBaku from '@/routes/bahan-baku';
 import type { BahanBakuIndexProps } from '@/types';
 
 export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexProps) {
@@ -20,7 +20,7 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(
-            bahanBaku.index(),
+            bahanBaku.index.url(),
             { search },
             {
                 preserveState: true,
@@ -31,7 +31,7 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
 
     const handleDelete = (id: number) => {
         if (confirm('Apakah Anda yakin ingin menghapus bahan baku ini?')) {
-            router.delete(bahanBaku.destroy(id), {
+            router.delete(bahanBaku.destroy.url(id), {
                 preserveScroll: true,
             });
         }
@@ -149,14 +149,16 @@ export default function BahanBakuIndex({ bahanBakus, filters }: BahanBakuIndexPr
                                                         <Pencil className="size-4" />
                                                     </Button>
                                                 </Link>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="size-8 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
-                                                    onClick={() => handleDelete(item.id)}
-                                                >
-                                                    <Trash2 className="size-4" />
-                                                </Button>
+                                               <Link href={bahanBaku.destroy(item.id)}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+                                                        onClick={() => handleDelete(item.id)}
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </Link>
                                             </div>
                                         </TableCell>
                                     </TableRow>
