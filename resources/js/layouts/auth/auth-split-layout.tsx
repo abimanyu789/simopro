@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
@@ -8,34 +8,76 @@ export default function AuthSplitLayout({
     title,
     description,
 }: AuthLayoutProps) {
-    const { name } = usePage().props;
-
     return (
         <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-                <div className="absolute inset-0 bg-zinc-900" />
+            {/* Panel kiri — branding Provillo */}
+            <div className="relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+
+                {/* Pola dekoratif */}
+                <div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                        backgroundImage: `radial-gradient(circle at 25% 25%, #6366f1 0%, transparent 50%),
+                                         radial-gradient(circle at 75% 75%, #0ea5e9 0%, transparent 50%)`,
+                    }}
+                />
+
+                {/* Logo & nama aplikasi */}
                 <Link
                     href={home()}
-                    className="relative z-20 flex items-center text-lg font-medium"
+                    className="relative z-20 flex items-center gap-3 text-lg font-semibold tracking-tight"
                 >
-                    <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
-                    {name}
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur-sm">
+                        <AppLogoIcon className="size-5 fill-current text-white" />
+                    </div>
+                    <span>Provillo</span>
                 </Link>
+
+                {/* Konten tengah panel */}
+                <div className="relative z-20 mt-auto">
+                    <div className="mb-8 space-y-1">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80 ring-1 ring-white/20">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                            Sistem Manajemen Operasional
+                        </div>
+                    </div>
+
+                    <blockquote className="space-y-3">
+                        <p className="text-2xl font-semibold leading-snug text-white">
+                            Kelola produksi, pesanan, dan keuangan{' '}
+                            <span className="text-sky-300">UMKM sepatu</span>{' '}
+                            dalam satu platform terpadu.
+                        </p>
+                        <footer className="text-sm text-white/50">
+                            Provillo — Mojokerto
+                        </footer>
+                    </blockquote>
+                </div>
             </div>
+
+            {/* Panel kanan — form login */}
             <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[360px]">
+                    {/* Logo mobile (tampil hanya di layar kecil) */}
                     <Link
                         href={home()}
-                        className="relative z-20 flex items-center justify-center lg:hidden"
+                        className="relative z-20 flex items-center justify-center gap-2 lg:hidden"
                     >
-                        <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground">
+                            <AppLogoIcon className="size-5 fill-current text-background" />
+                        </div>
+                        <span className="text-base font-semibold">Provillo</span>
                     </Link>
+
                     <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-                        <h1 className="text-xl font-medium">{title}</h1>
+                        <h1 className="text-xl font-semibold">{title}</h1>
                         <p className="text-sm text-balance text-muted-foreground">
                             {description}
                         </p>
                     </div>
+
                     {children}
                 </div>
             </div>

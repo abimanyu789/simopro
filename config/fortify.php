@@ -161,9 +161,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration() — dinonaktifkan: sistem 1 admin, tanpa registrasi publik.
         Features::resetPasswords(),
-        Features::emailVerification(),
+        // Features::emailVerification() — dinonaktifkan: sistem internal, tidak perlu verifikasi email.
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,

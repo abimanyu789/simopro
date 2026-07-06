@@ -32,7 +32,7 @@ dari satu modul dalam satu percakapan.
 - [ ] Test CRUD + validasi "produk harus punya BOM" (setelah modul BOM selesai)
 
 ## 5. Bill of Materials (BOM)
-- [ ] Migration boms + bom_details
+- [ ] Migration `bom_categorie` + `bom_detail` (singular, sesuai database-schema.md — bukan `boms`/`bom_details`)
 - [ ] Model + relasi ke Produk & BahanBaku
 - [ ] Service: hitung total kebutuhan bahan
 - [ ] Controller + React page (form tambah/edit komposisi)
@@ -47,13 +47,13 @@ dari satu modul dalam satu percakapan.
 
 ## 7. Master Data — Customer
 - [ ] Migration + Seeder
-- [ ] Model + FormRequest (no_telp unik)
+- [ ] Model + FormRequest (`no_hp` unik — sesuai database-schema.md, bukan `no_telp`)
 - [ ] Controller CRUD
 - [ ] React page
 - [ ] Test CRUD
 
 ## 8. Pesanan + Invoice
-- [ ] Migration pesanans + detail_pesanans
+- [ ] Migration `pesanan` + `detail_pesanan` (singular, sesuai database-schema.md — bukan `pesanans`)
 - [ ] Model + relasi Customer, Produk
 - [ ] Service: hitung subtotal & total otomatis
 - [ ] Controller (create multi-item, update status, cetak invoice PDF)
@@ -61,19 +61,19 @@ dari satu modul dalam satu percakapan.
 - [ ] Test: multi produk per pesanan, status flow, invoice PDF
 
 ## 9. Stok Bahan Baku
-- [ ] Migration stok_bahan_bakus (log)
+- [ ] Migration `stok_bahan_baku` (log, singular — sesuai database-schema.md, bukan `stok_bahan_bakus`)
 - [ ] Service: restock manual + catat log
 - [ ] Controller + React page
 - [ ] Test: stok tidak boleh negatif, log tercatat
 
 ## 10. Stok Produk Jadi
-- [ ] Migration stok_produk_jadis (log)
+- [ ] Migration `stok_produk_jadi` (log, singular — sesuai database-schema.md, bukan `stok_produk_jadis`)
 - [ ] Service: catat pengiriman + log
 - [ ] Controller + React page
 - [ ] Test: stok tidak boleh negatif, log tercatat
 
 ## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
-- [ ] Migration produksis + detail_produksis
+- [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
 - [ ] Service: hitung kebutuhan bahan dari BOM, cek stok, potong stok bahan (DB::transaction)
 - [ ] Service: update progres → tambah stok produk jadi (DB::transaction)
 - [ ] Service: cancel produksi → kembalikan stok bahan (DB::transaction)

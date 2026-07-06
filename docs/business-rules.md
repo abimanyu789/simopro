@@ -94,3 +94,13 @@ instruksi eksplisit dari pemilik project.
 ## Cross-cutting
 - KF-19 Filter & pencarian tersedia di semua modul utama.
 - KF-20 Export PDF/Excel tersedia di semua modul utama.
+
+## Catatan implementasi (sinkron dengan database-schema.md — FINAL)
+- BR-05 di modul Stok Bahan Baku & Stok Produk Jadi: kolom `stok` di tabel `bahan_baku`/
+  `produk` (sumber utama jumlah stok saat ini) dan tabel log (`stok_bahan_baku`/
+  `stok_produk_jadi`) wajib diupdate bersamaan dalam satu `DB::transaction()`, supaya
+  keduanya tidak pernah out-of-sync.
+- Rule larangan hapus (Karyawan BR-03, Produk BR-03, BOM BR-04) sudah dijaga juga di level
+  database lewat FK `onDelete('restrict')`. Validasi eksplisit tetap wajib ada di
+  Service/FormRequest — tujuannya supaya user dapat pesan error yang jelas, bukan cuma
+  error SQL constraint yang mentah.

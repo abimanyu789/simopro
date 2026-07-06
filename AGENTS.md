@@ -4,10 +4,12 @@ Sistem Informasi Manajemen Operasional Provillo (UMKM sepatu, Mojokerto).
 Baca file ini dulu sebelum ngoding apapun. Detail lengkap ada di folder `docs/`.
 
 ## Stack
-- Laravel 12, PHP 8.3
-- Inertia.js + React (frontend)
-- Tailwind CSS
-- MySQL
+- Laravel 13, PHP 8.3
+- Inertia.js v3 + React 19 + TypeScript (frontend)
+- Tailwind CSS v4
+- MySQL (production) / SQLite (development — jangan diubah otomatis, migrasi manual saat deploy)
+- Laravel Fortify (auth backend — bukan WorkOS, bukan Breeze)
+- Laravel Wayfinder (typed route functions)
 
 ## Aktor
 Hanya 1 role: **Admin** (owner/staf operasional). Tidak ada multi-role/permission matrix.
@@ -30,13 +32,21 @@ Hanya 1 role: **Admin** (owner/staf operasional). Tidak ada multi-role/permissio
 Detail task per modul ada di `docs/modules-todo.md`.
 
 ## Entitas utama (ERD)
-User, Customer, Produk, BahanBaku, BOM + DetailBOM, Karyawan, Pesanan + DetailPesanan,
-Produksi + DetailProduksi, Pembayaran, ArusKas, StokBahanBaku (log), StokProdukJadi (log).
+User, Customer, Produk, BahanBaku, BOM (`bom_categorie` + `bom_detail`), Karyawan,
+Pesanan + DetailPesanan, Produksi + DetailProduksi, Pembayaran, ArusKas,
+StokBahanBaku (log), StokProdukJadi (log).
 
-Skema lengkap (kolom & relasi usulan) ada di `docs/database-schema.md`.
-⚠️ Skema di file itu adalah hasil inferensi dari deskripsi teks Bab IV — **cek ulang
-terhadap gambar ERD/Database Schema asli (Gambar 4.16 & 4.17) di folder `diagram/` sebelum
-bikin migration.**
+Skema lengkap (kolom & relasi) ada di `docs/database-schema.md` — **status: FINAL**, sudah
+dicocokkan dengan Gambar 4.16 & 4.17. Tidak perlu cek ulang ke folder `diagram/` lagi
+sebelum bikin migration.
+
+⚠️ Perhatikan penamaan tabel saat bikin migration & model (sering salah tebak kalau ikut
+konvensi default Laravel):
+- Semua tabel **singular**, kecuali `users` (plural, khusus auth, ikut default Laravel).
+- Tabel BOM: header-nya bernama `bom_categorie` (bukan `bom_category`/`boms`) dan
+  detailnya `bom_detail`. Ejaan `categorie` memang disengaja — jangan "dikoreksi".
+- Karena hampir semua model pakai tabel singular (beda dari tebakan default Eloquent),
+  setiap Model selain `User` **wajib** deklarasi eksplisit `protected $table = 'nama_tabel';`.
 
 ## Business rules kritis (ringkas — lengkap di docs/business-rules.md)
 - Produk wajib punya 1 BOM aktif sebelum bisa diproduksi.
