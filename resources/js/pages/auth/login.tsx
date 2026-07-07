@@ -47,7 +47,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="admin@provillo.com"
+                                    placeholder="masukkan email Anda"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -71,7 +71,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="masukkan password Anda"
                                 />
                                 <InputError message={errors.password} />
                             </div>

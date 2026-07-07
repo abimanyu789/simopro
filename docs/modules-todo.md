@@ -36,8 +36,8 @@ dari satu modul dalam satu percakapan.
 - [x] Sidebar link updated
 - [x] Test manual: CRUD berfungsi, validasi OK, search & pagination OK ✅
 
-## 4. Master Data — Produk ✅ SELESAI (pending commit)
-- [x] Migration `produk` table (singular, `bom_category_id` nullable tanpa FK — FK ditambahkan di Modul 5)
+## 4. Master Data — Produk ✅ SELESAI (commit c3555bf)
+- [x] Migration `produk` table (singular, `bom_category_id` nullable, FK ke `bom_categorie` ditambahkan di migration terpisah)
 - [x] Seeder `ProdukSeeder` (20 data dummy produk sepatu, PRD-001 s/d PRD-020)
 - [x] Model `Produk` dengan `$table = 'produk'`, fillable, casts
 - [x] FormRequest `ProdukRequest` (kode unik, required, min values, bahasa Indonesia)
@@ -49,32 +49,28 @@ dari satu modul dalam satu percakapan.
 - [x] React Pages: Index (table + search + pagination + low-stock indicator), Create, Edit, Show
 - [x] Sidebar update (Produk → `produk.index()`)
 - [x] Wayfinder route di-generate (`resources/js/routes/produk/index.ts`)
-- [ ] Test manual:
-      - CRUD berhasil
-      - Search & Pagination berhasil
-      - `bom_category_id` masih nullable
-      - Produk dapat dibuat tanpa BOM
+- [x] Test manual: CRUD berhasil, search & pagination OK, produk bisa dibuat tanpa BOM ✅
 
-## 5. Bill of Materials (BOM)
-
-- [ ] Migration `bom_categorie`
-- [ ] Migration `bom_detail`
-- [ ] Seeder dummy BOM
-- [ ] Model + Relation
-- [ ] CRUD BOM Category
-- [ ] CRUD Detail BOM
-- [ ] Dropdown Produk
-- [ ] Assign BOM ke Produk
-- [ ] Validasi:
-      - 1 Produk hanya memiliki 1 BOM aktif
-      - qty_per_pair > 0
-      - BOM yang dipakai produk tidak dapat dihapus
-- [ ] Service hitung kebutuhan bahan
-- [ ] React Page
-- [ ] Test:
-      - Assign BOM ke Produk
-      - Hitung kebutuhan bahan
-      - Validasi BOM
+## 5. Bill of Materials (BOM) ✅ SELESAI (commit aa89da1)
+- [x] Migration `bom_categorie` table (singular, `bom_categorie`)
+- [x] Migration `bom_detail` table (singular, `bom_detail`)
+- [x] Migration tambahan: FK `bom_category_id` ke tabel `produk`
+- [x] Seeder `BomCategorieSeeder` (10 BOM dummy, 33 detail bahan)
+- [x] Model `BomCategorie` dengan `$table = 'bom_categorie'` + relasi ke Produk & BomDetail
+- [x] Model `BomDetail` dengan `$table = 'bom_detail'` + relasi ke BahanBaku
+- [x] FormRequest `BomCategorieRequest` + `BomDetailRequest`
+- [x] Controller `BomCategorieController` (resource CRUD full)
+- [x] Controller `BomDetailController` (store/update/destroy — inline, tanpa halaman terpisah)
+- [x] Route resource `bom-categorie` + custom routes `bom-detail.store/update/destroy`
+- [x] Wayfinder routes di-generate (`routes/bom-categorie/`, `routes/bom-detail/`)
+- [x] React Pages: Index, Create, Edit, Show (dengan inline CRUD detail bahan)
+- [x] Sidebar link updated (Bill of Materials → `bomCategorie.index()`)
+- [x] Test manual:
+      - CRUD BOM Category berhasil
+      - Tambah/edit/hapus detail bahan inline berhasil
+      - Assign BOM ke Produk berhasil
+      - Validasi qty_per_pair > 0
+      - BOM yang terhubung produk tidak bisa dihapus
 
 ## 6. Master Data — Karyawan
 - [ ] Migration + Seeder
