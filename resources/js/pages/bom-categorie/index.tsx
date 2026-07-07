@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { BomCategorieDeleteDialog } from '@/components/bom/bom-categorie-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -18,13 +18,48 @@ import type { BomCategorieIndexProps } from '@/types';
 export default function BomCategorieIndex({ bomCategories, filters }: BomCategorieIndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+    const sortBy  = filters.sort_by  || 'created_at';
+    const sortDir = filters.sort_dir || 'desc';
+
+    type SortableColumn = 'nama_bom' | 'keterangan' | 'bom_details_count' | 'produk_count' | 'created_at';
+
+    const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             bomCategorie.index.url(),
-            { search },
+            {
+                search: search || undefined,
+                sort_by: sortBy,
+                sort_dir: sortDir,
+                ...overrides,
+            },
             { preserveState: true, preserveScroll: true },
         );
+    };
+
+    const handleSort = (column: SortableColumn) => {
+        const newDir = sortBy === column && sortDir === 'asc' ? 'desc' : 'asc';
+        navigate({ sort_by: column, sort_dir: newDir });
+    };
+
+    const SortIcon = ({ column }: { column: SortableColumn }) => {
+        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
+        return sortDir === 'asc'
+            ? <ChevronUp className="ml-1 inline size-3.5" />
+            : <ChevronDown className="ml-1 inline size-3.5" />;
+    };
+
+    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+        <TableHead
+            className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
+            onClick={() => handleSort(column)}
+        >
+            {label}<SortIcon column={column} />
+        </TableHead>
+    );
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        navigate({ search: search || undefined });
     };
 
     return (
@@ -75,10 +110,10 @@ export default function BomCategorieIndex({ bomCategories, filters }: BomCategor
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-16">No</TableHead>
-                                <TableHead>Nama BOM</TableHead>
-                                <TableHead>Keterangan</TableHead>
-                                <TableHead className="text-center">Jml Bahan</TableHead>
-                                <TableHead className="text-center">Dipakai Produk</TableHead>
+                                {sortableHead('nama_bom', 'Nama BOM')}
+                                {sortableHead('keterangan', 'Keterangan')}
+                                {sortableHead('bom_details_count', 'Jml Bahan', 'text-center')}
+                                {sortableHead('produk_count', 'Dipakai Produk', 'text-center')}
                                 <TableHead className="w-32 text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>

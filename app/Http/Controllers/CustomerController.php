@@ -14,8 +14,17 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $jenis = $request->input('jenis');
+        $search  = $request->input('search');
+        $jenis   = $request->input('jenis');
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Whitelist kolom yang boleh di-sort
+        $allowedSorts = ['nama_customer', 'jenis_customer', 'no_hp', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
 
         $customers = Customer::query()
             ->when($search, function ($query, $search) {
@@ -27,15 +36,17 @@ class CustomerController extends Controller
             ->when($jenis && in_array($jenis, ['b2b', 'b2c']), function ($query) use ($jenis) {
                 $query->where('jenis_customer', $jenis);
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('customer/index', [
             'customers' => $customers,
-            'filters' => [
-                'search' => $search,
-                'jenis' => $jenis,
+            'filters'   => [
+                'search'   => $search,
+                'jenis'    => $jenis,
+                'sort_by'  => $sortBy,
+                'sort_dir' => $sortDir,
             ],
         ]);
     }

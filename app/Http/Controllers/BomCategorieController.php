@@ -16,7 +16,16 @@ class BomCategorieController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search  = $request->input('search');
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Whitelist kolom yang boleh di-sort
+        $allowedSorts = ['nama_bom', 'keterangan', 'bom_details_count', 'produk_count', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
 
         $bomCategories = BomCategorie::query()
             ->withCount(['bomDetails', 'produk'])
@@ -24,13 +33,17 @@ class BomCategorieController extends Controller
                 $query->where('nama_bom', 'like', "%{$search}%")
                     ->orWhere('keterangan', 'like', "%{$search}%");
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('bom-categorie/index', [
             'bomCategories' => $bomCategories,
-            'filters'       => ['search' => $search],
+            'filters'       => [
+                'search'   => $search,
+                'sort_by'  => $sortBy,
+                'sort_dir' => $sortDir,
+            ],
         ]);
     }
 

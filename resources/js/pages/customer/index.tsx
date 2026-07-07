@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { CustomerBadge } from '@/components/customer/customer-badge';
 import { CustomerDeleteDialog } from '@/components/customer/customer-delete-dialog';
@@ -27,29 +27,55 @@ export default function CustomerIndex({ customers, filters }: CustomerIndexProps
     const [search, setSearch] = useState(filters.search || '');
     const [jenis, setJenis] = useState(filters.jenis || '');
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+    const sortBy  = filters.sort_by  || 'created_at';
+    const sortDir = filters.sort_dir || 'desc';
+
+    type SortableColumn = 'nama_customer' | 'jenis_customer' | 'no_hp' | 'created_at';
+
+    const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             customer.index.url(),
-            { search, jenis: jenis || undefined },
             {
-                preserveState: true,
-                preserveScroll: true,
+                search: search || undefined,
+                jenis:  jenis  || undefined,
+                sort_by: sortBy,
+                sort_dir: sortDir,
+                ...overrides,
             },
+            { preserveState: true, preserveScroll: true },
         );
+    };
+
+    const handleSort = (column: SortableColumn) => {
+        const newDir = sortBy === column && sortDir === 'asc' ? 'desc' : 'asc';
+        navigate({ sort_by: column, sort_dir: newDir });
+    };
+
+    const SortIcon = ({ column }: { column: SortableColumn }) => {
+        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
+        return sortDir === 'asc'
+            ? <ChevronUp className="ml-1 inline size-3.5" />
+            : <ChevronDown className="ml-1 inline size-3.5" />;
+    };
+
+    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+        <TableHead
+            className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
+            onClick={() => handleSort(column)}
+        >
+            {label}<SortIcon column={column} />
+        </TableHead>
+    );
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        navigate({ search: search || undefined });
     };
 
     const handleJenisFilter = (value: string) => {
         const newJenis = value === 'semua' ? '' : value;
         setJenis(newJenis);
-        router.get(
-            customer.index.url(),
-            { search, jenis: newJenis || undefined },
-            {
-                preserveState: true,
-                preserveScroll: true,
-            },
-        );
+        navigate({ jenis: newJenis || undefined });
     };
 
     return (
@@ -118,13 +144,11 @@ export default function CustomerIndex({ customers, filters }: CustomerIndexProps
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-16">No</TableHead>
-                                <TableHead>Nama Customer</TableHead>
-                                <TableHead>Jenis</TableHead>
-                                <TableHead>No. HP</TableHead>
+                                {sortableHead('nama_customer', 'Nama Customer')}
+                                {sortableHead('jenis_customer', 'Jenis')}
+                                {sortableHead('no_hp', 'No. HP')}
                                 <TableHead>Alamat</TableHead>
-                                <TableHead className="w-32 text-center">
-                                    Aksi
-                                </TableHead>
+                                <TableHead className="w-32 text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

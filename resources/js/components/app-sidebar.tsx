@@ -1,16 +1,10 @@
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
     Box,
-    ClipboardList,
     Database,
     DollarSign,
-    FolderGit2,
     LayoutGrid,
-    Package,
-    Settings,
     ShoppingCart,
-    Users,
     Wrench,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -30,6 +24,7 @@ import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
+import karyawan from '@/routes/karyawan';
 import produk from '@/routes/produk';
 import type { NavItem } from '@/types';
 
@@ -58,7 +53,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Karyawan',
-                href: '#',
+                href: karyawan.index(),
             },
             {
                 title: 'Customer',
@@ -98,19 +93,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -131,7 +113,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

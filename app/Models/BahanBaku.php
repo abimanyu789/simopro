@@ -32,7 +32,9 @@ class BahanBaku extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'stok' => 'decimal:2',
-        'minimum_stok' => 'decimal:2',
+        // 'float' mengirim number ke JSON (bukan string seperti 'decimal:2')
+        // agar perbandingan JavaScript tidak bersifat leksikografis
+        'stok'         => 'float',
+        'minimum_stok' => 'float',
     ];
 }

@@ -67,6 +67,8 @@ export interface BomCategorieIndexProps {
     };
     filters: {
         search?: string;
+        sort_by?: string;
+        sort_dir?: string;
     };
 }
 

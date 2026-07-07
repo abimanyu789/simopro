@@ -41,6 +41,8 @@ export interface BahanBakuIndexProps {
         search?: string;
         satuan?: string;
         stok_rendah?: boolean;
+        sort_by?: string;
+        sort_dir?: string;
     };
     satuanOptions: SatuanOption[];
 }

@@ -17,6 +17,15 @@ class BahanBakuController extends Controller
         $search     = $request->input('search');
         $satuan     = $request->input('satuan');
         $stokRendah = $request->boolean('stok_rendah');
+        $sortBy     = $request->input('sort_by', 'created_at');
+        $sortDir    = $request->input('sort_dir', 'desc');
+
+        // Whitelist kolom yang boleh di-sort
+        $allowedSorts = ['kode_bahan', 'nama_bahan', 'satuan', 'stok', 'minimum_stok', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
 
         $bahanBakus = BahanBaku::query()
             ->when($search, function ($query, $search) {
@@ -31,16 +40,18 @@ class BahanBakuController extends Controller
                 $query->whereNotNull('minimum_stok')
                     ->whereColumn('stok', '<=', 'minimum_stok');
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('bahan-baku/index', [
-            'bahanBakus'   => $bahanBakus,
-            'filters'      => [
-                'search'     => $search,
-                'satuan'     => $satuan,
+            'bahanBakus'    => $bahanBakus,
+            'filters'       => [
+                'search'      => $search,
+                'satuan'      => $satuan,
                 'stok_rendah' => $stokRendah,
+                'sort_by'     => $sortBy,
+                'sort_dir'    => $sortDir,
             ],
             'satuanOptions' => $this->getSatuanOptions(),
         ]);

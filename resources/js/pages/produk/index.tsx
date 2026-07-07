@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ClipboardList, Eye, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, ClipboardList, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,11 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
     const [stokRendah, setStokRendah] = useState(filters.stok_rendah ?? false);
     const [bom, setBom] = useState(filters.bom ?? '');
 
+    const sortBy  = filters.sort_by  || 'created_at';
+    const sortDir = filters.sort_dir || 'desc';
+
+    type SortableColumn = 'kode_produk' | 'nama_produk' | 'ukuran' | 'warna' | 'harga_jual' | 'stok' | 'created_at';
+
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             produk.index.url(),
@@ -35,11 +40,34 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                 search,
                 stok_rendah: stokRendah || undefined,
                 bom: bom || undefined,
+                sort_by: sortBy,
+                sort_dir: sortDir,
                 ...overrides,
             },
             { preserveState: true, preserveScroll: true },
         );
     };
+
+    const handleSort = (column: SortableColumn) => {
+        const newDir = sortBy === column && sortDir === 'asc' ? 'desc' : 'asc';
+        navigate({ sort_by: column, sort_dir: newDir });
+    };
+
+    const SortIcon = ({ column }: { column: SortableColumn }) => {
+        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
+        return sortDir === 'asc'
+            ? <ChevronUp className="ml-1 inline size-3.5" />
+            : <ChevronDown className="ml-1 inline size-3.5" />;
+    };
+
+    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+        <TableHead
+            className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
+            onClick={() => handleSort(column)}
+        >
+            {label}<SortIcon column={column} />
+        </TableHead>
+    );
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -181,22 +209,14 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-16">No</TableHead>
-                                <TableHead>Kode Produk</TableHead>
-                                <TableHead>Nama Produk</TableHead>
-                                <TableHead>Ukuran</TableHead>
-                                <TableHead>Warna</TableHead>
-                                <TableHead className="text-right">
-                                    Harga Jual
-                                </TableHead>
-                                <TableHead className="text-right">
-                                    Stok
-                                </TableHead>
-                                <TableHead className="w-8 text-center">
-                                    BOM
-                                </TableHead>
-                                <TableHead className="w-32 text-center">
-                                    Aksi
-                                </TableHead>
+                                {sortableHead('kode_produk', 'Kode Produk')}
+                                {sortableHead('nama_produk', 'Nama Produk')}
+                                {sortableHead('ukuran', 'Ukuran')}
+                                {sortableHead('warna', 'Warna')}
+                                {sortableHead('harga_jual', 'Harga Jual', 'text-right')}
+                                {sortableHead('stok', 'Stok', 'text-right')}
+                                <TableHead className="w-8 text-center">BOM</TableHead>
+                                <TableHead className="w-32 text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -217,7 +237,7 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                 produks.data.map((item, index) => {
                                     const isLowStock =
                                         item.minimum_stok !== null &&
-                                        item.stok <= item.minimum_stok;
+                                        Number(item.stok) <= Number(item.minimum_stok);
                                     const hasBom =
                                         item.bom_category_id !== null;
 

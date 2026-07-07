@@ -32,7 +32,7 @@ export default function BahanBakuShow({ bahanBaku: item }: BahanBakuShowProps) {
     };
 
     const isLowStock =
-        item.minimum_stok !== null && item.stok <= item.minimum_stok;
+        item.minimum_stok !== null && Number(item.stok) <= Number(item.minimum_stok);
 
     return (
         <>

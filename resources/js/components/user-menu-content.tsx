@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Moon, Settings } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -7,6 +8,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
+import { useAppearance } from '@/hooks/use-appearance';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
@@ -18,6 +20,13 @@ type Props = {
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
+    const { appearance, updateAppearance } = useAppearance();
+
+    const isDark = appearance === 'dark';
+
+    const handleDarkModeToggle = (checked: boolean) => {
+        updateAppearance(checked ? 'dark' : 'light');
+    };
 
     const handleLogout = () => {
         cleanup();
@@ -43,6 +52,21 @@ export function UserMenuContent({ user }: Props) {
                         <Settings className="mr-2" />
                         Settings
                     </Link>
+                </DropdownMenuItem>
+                {/* Dark Mode Toggle */}
+                <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="flex items-center justify-between"
+                >
+                    <div className="flex items-center gap-2">
+                        <Moon className="size-4" />
+                        <span>Dark Mode</span>
+                    </div>
+                    <Switch
+                        checked={isDark}
+                        onCheckedChange={handleDarkModeToggle}
+                        aria-label="Toggle dark mode"
+                    />
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

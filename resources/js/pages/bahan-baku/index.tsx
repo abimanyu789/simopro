@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,11 @@ export default function BahanBakuIndex({
     const [satuan, setSatuan] = useState(filters.satuan || '');
     const [stokRendah, setStokRendah] = useState(filters.stok_rendah || false);
 
+    const sortBy  = filters.sort_by  || 'created_at';
+    const sortDir = filters.sort_dir || 'desc';
+
+    type SortableColumn = 'kode_bahan' | 'nama_bahan' | 'satuan' | 'stok' | 'minimum_stok' | 'created_at';
+
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             bahanBaku.index.url(),
@@ -38,11 +43,34 @@ export default function BahanBakuIndex({
                 search,
                 satuan: satuan || undefined,
                 stok_rendah: stokRendah || undefined,
+                sort_by: sortBy,
+                sort_dir: sortDir,
                 ...overrides,
             },
             { preserveState: true, preserveScroll: true },
         );
     };
+
+    const handleSort = (column: SortableColumn) => {
+        const newDir = sortBy === column && sortDir === 'asc' ? 'desc' : 'asc';
+        navigate({ sort_by: column, sort_dir: newDir });
+    };
+
+    const SortIcon = ({ column }: { column: SortableColumn }) => {
+        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
+        return sortDir === 'asc'
+            ? <ChevronUp className="ml-1 inline size-3.5" />
+            : <ChevronDown className="ml-1 inline size-3.5" />;
+    };
+
+    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+        <TableHead
+            className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
+            onClick={() => handleSort(column)}
+        >
+            {label}<SortIcon column={column} />
+        </TableHead>
+    );
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -179,18 +207,12 @@ export default function BahanBakuIndex({
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-16">No</TableHead>
-                                <TableHead>Kode Bahan</TableHead>
-                                <TableHead>Nama Bahan</TableHead>
-                                <TableHead>Satuan</TableHead>
-                                <TableHead className="text-right">
-                                    Stok
-                                </TableHead>
-                                <TableHead className="text-right">
-                                    Min. Stok
-                                </TableHead>
-                                <TableHead className="w-32 text-center">
-                                    Aksi
-                                </TableHead>
+                                {sortableHead('kode_bahan', 'Kode Bahan')}
+                                {sortableHead('nama_bahan', 'Nama Bahan')}
+                                {sortableHead('satuan', 'Satuan')}
+                                {sortableHead('stok', 'Stok', 'text-right')}
+                                {sortableHead('minimum_stok', 'Min. Stok', 'text-right')}
+                                <TableHead className="w-32 text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -211,7 +233,7 @@ export default function BahanBakuIndex({
                                 bahanBakus.data.map((item, index) => {
                                     const isLowStock =
                                         item.minimum_stok !== null &&
-                                        item.stok <= item.minimum_stok;
+                                        Number(item.stok) <= Number(item.minimum_stok);
 
                                     return (
                                         <TableRow key={item.id}>

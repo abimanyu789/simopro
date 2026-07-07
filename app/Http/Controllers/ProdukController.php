@@ -18,6 +18,15 @@ class ProdukController extends Controller
         $search     = $request->input('search');
         $stokRendah = $request->boolean('stok_rendah');
         $bom        = $request->input('bom'); // 'ada' | 'tidak'
+        $sortBy     = $request->input('sort_by', 'created_at');
+        $sortDir    = $request->input('sort_dir', 'desc');
+
+        // Whitelist kolom yang boleh di-sort
+        $allowedSorts = ['kode_produk', 'nama_produk', 'ukuran', 'warna', 'harga_jual', 'stok', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
 
         $produks = Produk::query()
             ->when($search, function ($query, $search) {
@@ -35,16 +44,18 @@ class ProdukController extends Controller
             ->when($bom === 'tidak', function ($query) {
                 $query->whereNull('bom_category_id');
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('produk/index', [
             'produks' => $produks,
             'filters' => [
-                'search'     => $search,
+                'search'      => $search,
                 'stok_rendah' => $stokRendah,
-                'bom'        => $bom,
+                'bom'         => $bom,
+                'sort_by'     => $sortBy,
+                'sort_dir'    => $sortDir,
             ],
         ]);
     }

@@ -35,6 +35,8 @@ export interface CustomerIndexProps {
     filters: {
         search?: string;
         jenis?: string;
+        sort_by?: string;
+        sort_dir?: string;
     };
 }
 
