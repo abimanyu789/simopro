@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
+import stokBahanBaku from '@/routes/stok-bahan-baku';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
 import karyawan from '@/routes/karyawan';
@@ -73,7 +74,7 @@ const mainNavItems: NavItem[] = [
         items: [
             {
                 title: 'Bahan Baku',
-                href: '#',
+                href: stokBahanBaku.index.url(),
             },
             {
                 title: 'Produk Jadi',

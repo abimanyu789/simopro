@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\StokBahanBakuController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -44,6 +45,10 @@ Route::middleware(['auth'])->group(function () {
         'bom-detail/{bom_detail}',
         [BomDetailController::class, 'destroy']
     )->name('bom-detail.destroy');
+
+    // Inventory - Stok Bahan Baku
+    Route::resource('stok-bahan-baku', StokBahanBakuController::class)
+        ->only(['index', 'create', 'store', 'show']);
 });
 
 require __DIR__.'/settings.php';

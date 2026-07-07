@@ -129,10 +129,19 @@ dari satu modul dalam satu percakapan.
 - [ ] Test: multi produk per pesanan, status flow, invoice PDF
 
 ## 9. Stok Bahan Baku
-- [ ] Migration `stok_bahan_baku` (log, singular — sesuai database-schema.md, bukan `stok_bahan_bakus`)
-- [ ] Service: restock manual + catat log
-- [ ] Controller + React page
-- [ ] Test: stok tidak boleh negatif, log tercatat
+- [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi, qty, stok_sebelum, stok_sesudah, keterangan)
+- [x] Model `StokBahanBaku` ($table singular, $fillable, $casts float, relasi belongsTo BahanBaku)
+- [x] Relasi `hasMany(StokBahanBaku)` ditambahkan ke model `BahanBaku`
+- [x] Service `app/Services/Inventory/StockBahanBakuService.php` — addStock() + reduceStock() + DB::transaction()
+- [x] FormRequest `RestockBahanBakuRequest` (qty > 0, bahan_baku_id exists, keterangan nullable)
+- [x] Controller `StokBahanBakuController` (index, create, store, show — thin controller)
+- [x] Route resource `stok-bahan-baku` (only: index, create, store, show)
+- [x] Wayfinder generate — route typed functions tersedia di `@/routes/stok-bahan-baku`
+- [x] TypeScript types `stok-bahan-baku.ts` (StokBahanBaku, JenisTransaksiStok, props interfaces)
+- [x] React pages: index (riwayat + search + filter bahan + filter tanggal + pagination), create (form restock), show (detail transaksi)
+- [x] Sidebar "Stok > Bahan Baku" diupdate dari `#` ke route aktif
+- [x] Build berhasil tanpa error
+- [ ] Test manual: restock berhasil, stok bahan_baku bertambah, log tercatat, search & filter OK
 
 ## 10. Stok Produk Jadi
 - [ ] Migration `stok_produk_jadi` (log, singular — sesuai database-schema.md, bukan `stok_produk_jadis`)

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BahanBaku extends Model
 {
@@ -37,4 +38,12 @@ class BahanBaku extends Model
         'stok'         => 'float',
         'minimum_stok' => 'float',
     ];
+
+    /**
+     * Get the stock history records for this bahan baku.
+     */
+    public function stokHistory(): HasMany
+    {
+        return $this->hasMany(StokBahanBaku::class, 'bahan_baku_id');
+    }
 }
