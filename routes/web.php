@@ -5,6 +5,7 @@ use App\Http\Controllers\BomCategorieController;
 use App\Http\Controllers\BomDetailController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProdukController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Master Data - Produk
     Route::resource('produk', ProdukController::class);
+
+    // Master Data - Karyawan
+    Route::resource('karyawan', KaryawanController::class);
 
     // Master Data - Customer
     Route::resource('customer', CustomerController::class);
