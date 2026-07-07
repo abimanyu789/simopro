@@ -42,6 +42,8 @@ export interface ProdukIndexProps {
     produks: ProdukPagination;
     filters: {
         search?: string;
+        stok_rendah?: boolean;
+        bom?: string;
     };
 }
 

@@ -5,6 +5,13 @@ import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -18,21 +25,41 @@ import type { ProdukIndexProps } from '@/types';
 
 export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [stokRendah, setStokRendah] = useState(filters.stok_rendah ?? false);
+    const [bom, setBom] = useState(filters.bom ?? '');
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+    const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             produk.index.url(),
-            { search },
+            {
+                search,
+                stok_rendah: stokRendah || undefined,
+                bom: bom || undefined,
+                ...overrides,
+            },
             { preserveState: true, preserveScroll: true },
         );
     };
 
-    const formatHarga = (value: number | null) => {
-        if (value === null) {
-            return '-';
-        }
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        navigate();
+    };
 
+    const handleStokRendahFilter = (value: string) => {
+        const newVal = value === 'stok_rendah';
+        setStokRendah(newVal);
+        navigate({ stok_rendah: newVal || undefined });
+    };
+
+    const handleBomFilter = (value: string) => {
+        const newBom = value === 'semua' ? '' : value;
+        setBom(newBom);
+        navigate({ bom: newBom || undefined });
+    };
+
+    const formatHarga = (value: number | null) => {
+        if (value === null) return '-';
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
@@ -40,6 +67,8 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
             maximumFractionDigits: 0,
         }).format(value);
     };
+
+    const activeFilterCount = [stokRendah, bom].filter(Boolean).length;
 
     return (
         <>
@@ -72,8 +101,8 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                     </div>
                 </div>
 
-                {/* Toolbar */}
-                <div className="flex items-center gap-4">
+                {/* Toolbar: Search + Filter */}
+                <div className="flex flex-wrap items-center gap-3">
                     <form
                         onSubmit={handleSearch}
                         className="flex flex-1 items-center gap-2"
@@ -92,6 +121,58 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                             Cari
                         </Button>
                     </form>
+
+                    {/* Filter Stok */}
+                    <Select
+                        value={stokRendah ? 'stok_rendah' : 'semua'}
+                        onValueChange={handleStokRendahFilter}
+                    >
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Semua Stok" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="semua">Semua Stok</SelectItem>
+                            <SelectItem value="stok_rendah">
+                                ⚠ Stok Rendah
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Filter BOM */}
+                    <Select
+                        value={bom || 'semua'}
+                        onValueChange={handleBomFilter}
+                    >
+                        <SelectTrigger className="w-44">
+                            <SelectValue placeholder="Semua BOM" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="semua">Semua BOM</SelectItem>
+                            <SelectItem value="ada">✓ Sudah Ada BOM</SelectItem>
+                            <SelectItem value="tidak">
+                                ✗ Belum Ada BOM
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Reset filter */}
+                    {activeFilterCount > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={() => {
+                                setStokRendah(false);
+                                setBom('');
+                                navigate({
+                                    stok_rendah: undefined,
+                                    bom: undefined,
+                                });
+                            }}
+                        >
+                            Reset filter ({activeFilterCount})
+                        </Button>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -110,6 +191,9 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                 <TableHead className="text-right">
                                     Stok
                                 </TableHead>
+                                <TableHead className="w-8 text-center">
+                                    BOM
+                                </TableHead>
                                 <TableHead className="w-32 text-center">
                                     Aksi
                                 </TableHead>
@@ -119,10 +203,12 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                             {produks.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={8}
+                                        colSpan={9}
                                         className="h-24 text-center"
                                     >
-                                        {filters.search
+                                        {filters.search ||
+                                        filters.stok_rendah ||
+                                        filters.bom
                                             ? 'Tidak ada data yang ditemukan.'
                                             : 'Belum ada data produk.'}
                                     </TableCell>
@@ -132,6 +218,8 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                     const isLowStock =
                                         item.minimum_stok !== null &&
                                         item.stok <= item.minimum_stok;
+                                    const hasBom =
+                                        item.bom_category_id !== null;
 
                                     return (
                                         <TableRow key={item.id}>
@@ -172,21 +260,33 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                             <TableCell className="text-right">
                                                 <div className="flex flex-col items-end">
                                                     <span
-                                                        className={`font-mono text-sm font-medium ${
-                                                            isLowStock
-                                                                ? 'text-orange-600 dark:text-orange-400'
-                                                                : ''
-                                                        }`}
+                                                        className={`font-mono text-sm font-medium ${isLowStock ? 'text-orange-600 dark:text-orange-400' : ''}`}
                                                     >
                                                         {item.stok}
                                                     </span>
                                                     {isLowStock && (
                                                         <span className="text-xs text-orange-500">
-                                                            ⚠ min{' '}
-                                                            {item.minimum_stok}
+                                                            ⚠ stok rendah
                                                         </span>
                                                     )}
                                                 </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {hasBom ? (
+                                                    <span
+                                                        className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400"
+                                                        title="Sudah ada BOM"
+                                                    >
+                                                        ✓
+                                                    </span>
+                                                ) : (
+                                                    <span
+                                                        className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-950 dark:text-red-400"
+                                                        title="Belum ada BOM"
+                                                    >
+                                                        ✗
+                                                    </span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center justify-center gap-1">

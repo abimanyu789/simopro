@@ -29,6 +29,7 @@ import {
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
 import bomCategorie from '@/routes/bom-categorie';
+import customer from '@/routes/customer';
 import produk from '@/routes/produk';
 import type { NavItem } from '@/types';
 
@@ -48,12 +49,12 @@ const mainNavItems: NavItem[] = [
                 href: bahanBaku.index(),
             },
             {
-                title: 'Produk',
-                href: produk.index(),
-            },
-            {
                 title: 'Bill of Materials',
                 href: bomCategorie.index(),
+            },
+            {
+                title: 'Produk',
+                href: produk.index(),
             },
             {
                 title: 'Karyawan',
@@ -61,7 +62,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Customer',
-                href: '#',
+                href: customer.index(),
             },
         ],
     },

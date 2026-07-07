@@ -15,13 +15,25 @@ class ProdukController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search     = $request->input('search');
+        $stokRendah = $request->boolean('stok_rendah');
+        $bom        = $request->input('bom'); // 'ada' | 'tidak'
 
         $produks = Produk::query()
             ->when($search, function ($query, $search) {
                 $query->where('kode_produk', 'like', "%{$search}%")
                     ->orWhere('nama_produk', 'like', "%{$search}%")
                     ->orWhere('warna', 'like', "%{$search}%");
+            })
+            ->when($stokRendah, function ($query) {
+                $query->whereNotNull('minimum_stok')
+                    ->whereColumn('stok', '<=', 'minimum_stok');
+            })
+            ->when($bom === 'ada', function ($query) {
+                $query->whereNotNull('bom_category_id');
+            })
+            ->when($bom === 'tidak', function ($query) {
+                $query->whereNull('bom_category_id');
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15)
@@ -30,7 +42,9 @@ class ProdukController extends Controller
         return Inertia::render('produk/index', [
             'produks' => $produks,
             'filters' => [
-                'search' => $search,
+                'search'     => $search,
+                'stok_rendah' => $stokRendah,
+                'bom'        => $bom,
             ],
         ]);
     }

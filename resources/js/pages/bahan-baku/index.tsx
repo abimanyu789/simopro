@@ -5,6 +5,13 @@ import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -18,31 +25,55 @@ import type { BahanBakuIndexProps } from '@/types';
 export default function BahanBakuIndex({
     bahanBakus,
     filters,
+    satuanOptions,
 }: BahanBakuIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
+    const [satuan, setSatuan] = useState(filters.satuan || '');
+    const [stokRendah, setStokRendah] = useState(filters.stok_rendah || false);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+    const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             bahanBaku.index.url(),
-            { search },
             {
-                preserveState: true,
-                preserveScroll: true,
+                search,
+                satuan: satuan || undefined,
+                stok_rendah: stokRendah || undefined,
+                ...overrides,
             },
+            { preserveState: true, preserveScroll: true },
         );
     };
 
-    const formatNumber = (value: number | null) => {
-        if (value === null) {
-            return '-';
-        }
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        navigate();
+    };
 
+    const handleSatuanFilter = (value: string) => {
+        const newSatuan = value === 'semua' ? '' : value;
+        setSatuan(newSatuan);
+        navigate({ satuan: newSatuan || undefined });
+    };
+
+    const handleStokRendahFilter = (value: string) => {
+        const newVal = value === 'stok_rendah';
+        setStokRendah(newVal);
+        navigate({ stok_rendah: newVal || undefined });
+    };
+
+    const formatNumber = (value: number | null) => {
+        if (value === null) return '-';
         return new Intl.NumberFormat('id-ID', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         }).format(value);
     };
+
+    // Hitung filter aktif untuk badge
+    const activeFilterCount = [
+        satuan,
+        stokRendah,
+    ].filter(Boolean).length;
 
     return (
         <>
@@ -67,8 +98,8 @@ export default function BahanBakuIndex({
                     </Link>
                 </div>
 
-                {/* Toolbar */}
-                <div className="flex items-center gap-4">
+                {/* Toolbar: Search + Filter */}
+                <div className="flex flex-wrap items-center gap-3">
                     <form
                         onSubmit={handleSearch}
                         className="flex flex-1 items-center gap-2"
@@ -87,6 +118,59 @@ export default function BahanBakuIndex({
                             Cari
                         </Button>
                     </form>
+
+                    {/* Filter Satuan */}
+                    <Select
+                        value={satuan || 'semua'}
+                        onValueChange={handleSatuanFilter}
+                    >
+                        <SelectTrigger className="w-44">
+                            <SelectValue placeholder="Semua Satuan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="semua">Semua Satuan</SelectItem>
+                            {satuanOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    {/* Filter Stok */}
+                    <Select
+                        value={stokRendah ? 'stok_rendah' : 'semua'}
+                        onValueChange={handleStokRendahFilter}
+                    >
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Semua Stok" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="semua">Semua Stok</SelectItem>
+                            <SelectItem value="stok_rendah">
+                                ⚠ Stok Rendah
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Reset filter */}
+                    {activeFilterCount > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={() => {
+                                setSatuan('');
+                                setStokRendah(false);
+                                navigate({
+                                    satuan: undefined,
+                                    stok_rendah: undefined,
+                                });
+                            }}
+                        >
+                            Reset filter ({activeFilterCount})
+                        </Button>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -116,67 +200,92 @@ export default function BahanBakuIndex({
                                         colSpan={7}
                                         className="h-24 text-center"
                                     >
-                                        {filters.search
+                                        {filters.search ||
+                                        filters.satuan ||
+                                        filters.stok_rendah
                                             ? 'Tidak ada data yang ditemukan.'
                                             : 'Belum ada data bahan baku.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                bahanBakus.data.map((item, index) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell className="font-medium">
-                                            {bahanBakus.from + index}
-                                        </TableCell>
-                                        <TableCell className="font-mono text-sm">
-                                            {item.kode_bahan}
-                                        </TableCell>
-                                        <TableCell>{item.nama_bahan}</TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-400">
-                                                {item.satuan}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono">
-                                            {formatNumber(item.stok)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono">
-                                            {formatNumber(item.minimum_stok)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center justify-center gap-2">
-                                                <Link
-                                                    href={bahanBaku.show(
-                                                        item.id,
-                                                    )}
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="size-8"
+                                bahanBakus.data.map((item, index) => {
+                                    const isLowStock =
+                                        item.minimum_stok !== null &&
+                                        item.stok <= item.minimum_stok;
+
+                                    return (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="font-medium">
+                                                {bahanBakus.from + index}
+                                            </TableCell>
+                                            <TableCell className="font-mono text-sm">
+                                                {item.kode_bahan}
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.nama_bahan}
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-400">
+                                                    {item.satuan}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex flex-col items-end">
+                                                    <span
+                                                        className={`font-mono text-sm font-medium ${isLowStock ? 'text-orange-600 dark:text-orange-400' : ''}`}
                                                     >
-                                                        <Eye className="size-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Link
-                                                    href={bahanBaku.edit(
-                                                        item.id,
+                                                        {formatNumber(
+                                                            item.stok,
+                                                        )}
+                                                    </span>
+                                                    {isLowStock && (
+                                                        <span className="text-xs text-orange-500">
+                                                            ⚠ stok rendah
+                                                        </span>
                                                     )}
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="size-8"
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono text-sm text-muted-foreground">
+                                                {formatNumber(
+                                                    item.minimum_stok,
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Link
+                                                        href={bahanBaku.show(
+                                                            item.id,
+                                                        )}
                                                     >
-                                                        <Pencil className="size-4" />
-                                                    </Button>
-                                                </Link>
-                                                <BahanBakuDeleteDialog
-                                                    bahanBaku={item}
-                                                />
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8"
+                                                        >
+                                                            <Eye className="size-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Link
+                                                        href={bahanBaku.edit(
+                                                            item.id,
+                                                        )}
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8"
+                                                        >
+                                                            <Pencil className="size-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <BahanBakuDeleteDialog
+                                                        bahanBaku={item}
+                                                    />
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
@@ -186,8 +295,8 @@ export default function BahanBakuIndex({
                 {bahanBakus.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Menampilkan {bahanBakus.from} - {bahanBakus.to} dari{' '}
-                            {bahanBakus.total} data
+                            Menampilkan {bahanBakus.from} - {bahanBakus.to}{' '}
+                            dari {bahanBakus.total} data
                         </p>
                         <div className="flex gap-1">
                             {bahanBakus.links.map((link, index) => (

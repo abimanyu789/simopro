@@ -14,7 +14,9 @@ class BahanBakuController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search     = $request->input('search');
+        $satuan     = $request->input('satuan');
+        $stokRendah = $request->boolean('stok_rendah');
 
         $bahanBakus = BahanBaku::query()
             ->when($search, function ($query, $search) {
@@ -22,14 +24,23 @@ class BahanBakuController extends Controller
                     ->orWhere('nama_bahan', 'like', "%{$search}%")
                     ->orWhere('satuan', 'like', "%{$search}%");
             })
+            ->when($satuan, function ($query, $satuan) {
+                $query->where('satuan', $satuan);
+            })
+            ->when($stokRendah, function ($query) {
+                $query->whereNotNull('minimum_stok')
+                    ->whereColumn('stok', '<=', 'minimum_stok');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('bahan-baku/index', [
-            'bahanBakus' => $bahanBakus,
-            'filters' => [
-                'search' => $search,
+            'bahanBakus'   => $bahanBakus,
+            'filters'      => [
+                'search'     => $search,
+                'satuan'     => $satuan,
+                'stok_rendah' => $stokRendah,
             ],
             'satuanOptions' => $this->getSatuanOptions(),
         ]);

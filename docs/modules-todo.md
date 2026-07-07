@@ -79,12 +79,29 @@ dari satu modul dalam satu percakapan.
 - [ ] React page
 - [ ] Test CRUD + rule "tidak bisa dihapus jika masih ada produksi aktif"
 
-## 7. Master Data — Customer
-- [ ] Migration + Seeder
-- [ ] Model + FormRequest (`no_hp` unik — sesuai database-schema.md, bukan `no_telp`)
-- [ ] Controller CRUD
-- [ ] React page
-- [ ] Test CRUD
+## 7. Master Data — Customer ✅ SELESAI (pending commit)
+- [x] Migration `customer` table (singular, `no_hp` nullable + unique)
+- [x] Seeder `CustomerSeeder` (20 dummy: 10 B2B + 10 B2C, alamat Mojokerto/Jawa Timur)
+- [x] Model `Customer` dengan `$table = 'customer'`, fillable, relasi `pesanans()` (di-comment — aktif setelah Modul Pesanan)
+- [x] FormRequest `CustomerRequest` (unique no_hp ignore self, enum jenis_customer, pesan Indonesia)
+- [x] Controller `CustomerController` (CRUD, search: nama/no_hp/alamat/jenis, filter jenis, orderBy created_at DESC, paginate 15)
+- [x] Route resource `customer`
+- [x] TypeScript types `customer.ts` (`Customer`, `CustomerFormData`, `CustomerIndexProps`, `CustomerShowProps`, `CustomerCreateEditProps`) + export di `index.ts`
+- [x] Reusable component `CustomerBadge` (warna berbeda: biru=B2B, hijau=B2C)
+- [x] Reusable component `CustomerDeleteDialog` (shadcn Dialog, pola sama dengan `BahanBakuDeleteDialog`)
+- [x] Reusable component `CustomerForm` (shared create & edit, dengan Textarea untuk alamat)
+- [x] React Pages: Index (table + search + filter jenis + pagination), Create, Edit, Show
+- [x] Install shadcn `textarea` component
+- [x] Sidebar update (Customer → `customer.index()`)
+- [x] Wayfinder route di-generate (`resources/js/routes/customer/index.ts`)
+- [ ] Test manual:
+      - CRUD berhasil (tambah, lihat, edit, hapus)
+      - Validasi: nama required, jenis required (enum b2b/b2c), no_hp unik
+      - Search: nama, no_hp, alamat, jenis
+      - Filter: Semua / B2B / B2C
+      - Pagination berfungsi
+      - Badge warna: B2B biru, B2C hijau
+      - Hapus via dialog (index & show page)
 
 ## 8. Pesanan + Invoice
 - [ ] Migration `pesanan` + `detail_pesanan` (singular, sesuai database-schema.md — bukan `pesanans`)

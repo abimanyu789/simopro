@@ -39,7 +39,10 @@ export interface BahanBakuIndexProps {
     };
     filters: {
         search?: string;
+        satuan?: string;
+        stok_rendah?: boolean;
     };
+    satuanOptions: SatuanOption[];
 }
 
 export interface BahanBakuCreateEditProps {
