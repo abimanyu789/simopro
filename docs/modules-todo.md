@@ -72,14 +72,31 @@ dari satu modul dalam satu percakapan.
       - Validasi qty_per_pair > 0
       - BOM yang terhubung produk tidak bisa dihapus
 
-## 6. Master Data — Karyawan
-- [ ] Migration + Seeder
-- [ ] Model + FormRequest
-- [ ] Controller CRUD
-- [ ] React page
-- [ ] Test CRUD + rule "tidak bisa dihapus jika masih ada produksi aktif"
+## 6. Master Data — Karyawan ✅ SELESAI
+- [x] Migration `karyawan` table (singular, `status` enum aktif/nonaktif default `aktif`)
+- [x] Seeder `KaryawanSeeder` (20 dummy: Penjahit, Tukang Sol, Finishing, QC, Supervisor, Pola & Potong — mix aktif/nonaktif)
+- [x] Model `Karyawan` dengan `$table = 'karyawan'`, fillable, relasi `detailProduksis()` (di-comment — aktif setelah Modul Produksi)
+- [x] FormRequest `KaryawanRequest` (nama required, jabatan/no_hp nullable, status enum, pesan Indonesia)
+- [x] Controller `KaryawanController` (CRUD, search: nama/no_hp/jabatan, filter status, orderByDesc created_at, paginate 15)
+- [x] Route resource `karyawan`
+- [x] TypeScript types `karyawan.ts` (`StatusKaryawan`, `Karyawan`, `KaryawanFormData`, `KaryawanIndexProps`, `KaryawanShowProps`, `KaryawanCreateEditProps`) + export di `index.ts`
+- [x] Reusable component `KaryawanBadge` (hijau=Aktif, abu-abu=Nonaktif)
+- [x] Reusable component `KaryawanDeleteDialog` (shadcn Dialog, validasi produksi aktif di-comment — aktif setelah Modul Produksi)
+- [x] Reusable component `KaryawanForm` (shared create & edit, Select untuk status)
+- [x] React Pages: Index (table + search + filter status + pagination), Create, Edit, Show
+- [x] Wayfinder route di-generate (`resources/js/routes/karyawan/index.ts`)
+- [x] Sidebar update (Karyawan → `karyawan.index()`, dark mode toggle ditambah, tombol Repository & Documentation dihapus)
+- [ ] Test manual:
+      - CRUD berhasil (tambah, lihat, edit, hapus)
+      - Validasi: nama required, status required (enum aktif/nonaktif)
+      - Search: nama_karyawan, no_hp, jabatan
+      - Filter: Semua / Aktif / Nonaktif
+      - Pagination berfungsi
+      - Badge warna: Aktif hijau, Nonaktif abu-abu
+      - Hapus via dialog (index & show page)
+      - Default status saat create = aktif
 
-## 7. Master Data — Customer ✅ SELESAI (pending commit)
+## 7. Master Data — Customer ✅ SELESAI (commit 882865a)
 - [x] Migration `customer` table (singular, `no_hp` nullable + unique)
 - [x] Seeder `CustomerSeeder` (20 dummy: 10 B2B + 10 B2C, alamat Mojokerto/Jawa Timur)
 - [x] Model `Customer` dengan `$table = 'customer'`, fillable, relasi `pesanans()` (di-comment — aktif setelah Modul Pesanan)
@@ -94,7 +111,7 @@ dari satu modul dalam satu percakapan.
 - [x] Install shadcn `textarea` component
 - [x] Sidebar update (Customer → `customer.index()`)
 - [x] Wayfinder route di-generate (`resources/js/routes/customer/index.ts`)
-- [ ] Test manual:
+- [x] Test manual:
       - CRUD berhasil (tambah, lihat, edit, hapus)
       - Validasi: nama required, jenis required (enum b2b/b2c), no_hp unik
       - Search: nama, no_hp, alamat, jenis
