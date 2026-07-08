@@ -85,6 +85,11 @@ class ProdukController extends Controller
      */
     public function show(Produk $produk)
     {
+        $produk->load([
+            'bomCategorie.bomDetails.bahanBaku',
+            'stokHistory' => fn ($q) => $q->orderByDesc('created_at')->limit(5),
+        ]);
+
         return Inertia::render('produk/show', [
             'produk' => $produk,
         ]);

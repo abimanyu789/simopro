@@ -10,6 +10,19 @@ export interface Produk {
     bom_category_id: number | null;
     created_at: string;
     updated_at: string;
+    // Relasi
+    bom_categorie?: import('./bom').BomCategorie & {
+        bom_details: import('./bom').BomDetail[];
+    };
+    stok_history?: {
+        id: number;
+        jenis_transaksi: string;
+        qty: number;
+        stok_sebelum: number;
+        stok_sesudah: number;
+        keterangan: string | null;
+        created_at: string;
+    }[];
 }
 
 export interface ProdukFormData {

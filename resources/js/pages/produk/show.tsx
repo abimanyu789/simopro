@@ -140,25 +140,140 @@ export default function ProdukShow({ produk: item }: ProdukShowProps) {
                         <h2 className="mb-4 text-lg font-semibold">
                             Bill of Materials (BOM)
                         </h2>
-                        <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                        {item.bom_categorie ? (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="font-medium">
+                                        {item.bom_categorie.nama_bom}
+                                    </span>
+                                    {item.bom_categorie.keterangan && (
+                                        <span className="text-sm text-muted-foreground">
+                                            {item.bom_categorie.keterangan}
+                                        </span>
+                                    )}
+                                </div>
+                                {(item.bom_categorie.bom_details ?? []).length >
+                                0 ? (
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b text-muted-foreground">
+                                                <th className="pb-2 text-left font-medium">
+                                                    Bahan Baku
+                                                </th>
+                                                <th className="pb-2 text-left font-medium">
+                                                    Kode
+                                                </th>
+                                                <th className="pb-2 text-right font-medium">
+                                                    Qty/Pasang
+                                                </th>
+                                                <th className="pb-2 text-right font-medium">
+                                                    Satuan
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {(
+                                                item.bom_categorie
+                                                    .bom_details ?? []
+                                            ).map((detail) => (
+                                                <tr
+                                                    key={detail.id}
+                                                    className="border-b last:border-0"
+                                                >
+                                                    <td className="py-2">
+                                                        {detail.bahan_baku
+                                                            ?.nama_bahan ?? '-'}
+                                                    </td>
+                                                    <td className="py-2 font-mono text-xs text-muted-foreground">
+                                                        {detail.bahan_baku
+                                                            ?.kode_bahan ?? '-'}
+                                                    </td>
+                                                    <td className="py-2 text-right font-mono">
+                                                        {detail.qty_per_pair}
+                                                    </td>
+                                                    <td className="py-2 text-right text-muted-foreground">
+                                                        {detail.bahan_baku
+                                                            ?.satuan ?? '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        BOM belum memiliki detail bahan.
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
                             <p className="text-sm text-muted-foreground">
-                                Informasi BOM akan tersedia setelah Modul 5
-                                (Bill of Materials) selesai
+                                Produk ini belum memiliki BOM.
                             </p>
-                        </div>
+                        )}
                     </div>
 
                     {/* Riwayat Stok */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
-                            Riwayat Stok
+                            Riwayat Stok Terakhir
                         </h2>
-                        <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                        {(item.stok_history ?? []).length > 0 ? (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b text-muted-foreground">
+                                        <th className="pb-2 text-left font-medium">
+                                            Tanggal
+                                        </th>
+                                        <th className="pb-2 text-left font-medium">
+                                            Jenis
+                                        </th>
+                                        <th className="pb-2 text-right font-medium">
+                                            Qty
+                                        </th>
+                                        <th className="pb-2 text-right font-medium">
+                                            Sebelum
+                                        </th>
+                                        <th className="pb-2 text-right font-medium">
+                                            Sesudah
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(item.stok_history ?? []).map((h) => (
+                                        <tr
+                                            key={h.id}
+                                            className="border-b last:border-0"
+                                        >
+                                            <td className="py-2 text-muted-foreground">
+                                                {new Date(
+                                                    h.created_at,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                })}
+                                            </td>
+                                            <td className="py-2 capitalize">
+                                                {h.jenis_transaksi}
+                                            </td>
+                                            <td className="py-2 text-right font-mono">
+                                                {h.qty}
+                                            </td>
+                                            <td className="py-2 text-right font-mono text-muted-foreground">
+                                                {h.stok_sebelum}
+                                            </td>
+                                            <td className="py-2 text-right font-mono font-medium">
+                                                {h.stok_sesudah}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
                             <p className="text-sm text-muted-foreground">
-                                Riwayat perubahan stok akan tersedia setelah
-                                Modul 10 (Stok Produk Jadi) selesai
+                                Belum ada riwayat perubahan stok.
                             </p>
-                        </div>
+                        )}
                     </div>
 
                     {/* Informasi Sistem */}
