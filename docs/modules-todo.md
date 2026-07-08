@@ -72,7 +72,7 @@ dari satu modul dalam satu percakapan.
       - Validasi qty_per_pair > 0
       - BOM yang terhubung produk tidak bisa dihapus
 
-## 6. Master Data — Karyawan ✅ SELESAI
+## 6. Master Data — Karyawan ✅ SELESAI (commit f429200)    
 - [x] Migration `karyawan` table (singular, `status` enum aktif/nonaktif default `aktif`)
 - [x] Seeder `KaryawanSeeder` (20 dummy: Penjahit, Tukang Sol, Finishing, QC, Supervisor, Pola & Potong — mix aktif/nonaktif)
 - [x] Model `Karyawan` dengan `$table = 'karyawan'`, fillable, relasi `detailProduksis()` (di-comment — aktif setelah Modul Produksi)
@@ -86,7 +86,7 @@ dari satu modul dalam satu percakapan.
 - [x] React Pages: Index (table + search + filter status + pagination), Create, Edit, Show
 - [x] Wayfinder route di-generate (`resources/js/routes/karyawan/index.ts`)
 - [x] Sidebar update (Karyawan → `karyawan.index()`, dark mode toggle ditambah, tombol Repository & Documentation dihapus)
-- [ ] Test manual:
+- [x] Test manual:
       - CRUD berhasil (tambah, lihat, edit, hapus)
       - Validasi: nama required, status required (enum aktif/nonaktif)
       - Search: nama_karyawan, no_hp, jabatan
@@ -129,34 +129,16 @@ dari satu modul dalam satu percakapan.
 - [ ] Test: multi produk per pesanan, status flow, invoice PDF
 
 ## 9. Stok Bahan Baku
-- [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi, qty, stok_sebelum, stok_sesudah, keterangan)
-- [x] Model `StokBahanBaku` ($table singular, $fillable, $casts float, relasi belongsTo BahanBaku)
-- [x] Relasi `hasMany(StokBahanBaku)` ditambahkan ke model `BahanBaku`
-- [x] Service `app/Services/Inventory/StockBahanBakuService.php` — addStock() + reduceStock() + DB::transaction()
-- [x] FormRequest `RestockBahanBakuRequest` (qty > 0, bahan_baku_id exists, keterangan nullable)
-- [x] Controller `StokBahanBakuController` (index, create, store, show — thin controller)
-- [x] Route resource `stok-bahan-baku` (only: index, create, store, show)
-- [x] Wayfinder generate — route typed functions tersedia di `@/routes/stok-bahan-baku`
-- [x] TypeScript types `stok-bahan-baku.ts` (StokBahanBaku, JenisTransaksiStok, props interfaces)
-- [x] React pages: index (riwayat + search + filter bahan + filter tanggal + pagination), create (form restock), show (detail transaksi)
-- [x] Sidebar "Stok > Bahan Baku" diupdate dari `#` ke route aktif
-- [x] Build berhasil tanpa error
-- [x] Test manual: restock berhasil, stok bahan_baku bertambah, log tercatat, search & filter OK
+- [ ] Migration `stok_bahan_baku` (log, singular — sesuai database-schema.md, bukan `stok_bahan_bakus`)
+- [ ] Service: restock manual + catat log
+- [ ] Controller + React page
+- [ ] Test: stok tidak boleh negatif, log tercatat
 
 ## 10. Stok Produk Jadi
-- [x] Migration `stok_produk_jadi` (kolom: produk_id, jenis_transaksi, qty int, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK users.id)
-- [x] Model `StokProdukJadi` ($table singular, $fillable, $casts integer, relasi belongsTo Produk + createdBy User)
-- [x] Relasi `hasMany(StokProdukJadi)` ditambahkan ke model `Produk`
-- [x] Service `app/Services/Inventory/StockProdukService.php` — addStock() + reduceStock() + DB::transaction() + created_by
-- [x] FormRequest `PengirimanProdukRequest` (produk_id exists, qty integer min:1, keterangan nullable — business rule stok di Service)
-- [x] Controller `StokProdukJadiController` (index, create, store, show — thin controller, error handling RuntimeException)
-- [x] Route resource `stok-produk-jadi` (only: index, create, store, show)
-- [x] Wayfinder generate — route typed functions tersedia di `@/routes/stok-produk-jadi`
-- [x] TypeScript types `stok-produk-jadi.ts` (StokProdukJadi, JenisTransaksiProduk, props interfaces)
-- [x] React pages: index (riwayat + search + filter produk + filter tanggal + pagination), create (form pengiriman + info stok saat ini), show (detail transaksi + perubahan stok)
-- [x] Sidebar "Stok > Produk Jadi" diupdate dari `#` ke route aktif
-- [x] Build berhasil tanpa error
-- [x] Test manual: pengiriman berhasil, stok produk berkurang, log tercatat, stok tidak bisa negatif, search & filter OK
+- [ ] Migration `stok_produk_jadi` (log, singular — sesuai database-schema.md, bukan `stok_produk_jadis`)
+- [ ] Service: catat pengiriman + log
+- [ ] Controller + React page
+- [ ] Test: stok tidak boleh negatif, log tercatat
 
 ## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
 - [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
