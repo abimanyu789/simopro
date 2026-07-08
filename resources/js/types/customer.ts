@@ -8,6 +8,14 @@ export interface Customer {
     alamat: string | null;
     created_at: string;
     updated_at: string;
+    // Relasi
+    pesanans?: {
+        id: number;
+        nomor_pesanan: string;
+        tanggal: string;
+        status: 'pending' | 'proses' | 'selesai' | 'dibatalkan';
+        total: string;
+    }[];
 }
 
 export interface CustomerFormData {

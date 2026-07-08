@@ -76,6 +76,10 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
+        $customer->load([
+            'pesanans' => fn ($q) => $q->orderByDesc('created_at')->limit(5),
+        ]);
+
         return Inertia::render('customer/show', [
             'customer' => $customer,
         ]);

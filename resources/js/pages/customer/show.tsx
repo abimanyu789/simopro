@@ -2,8 +2,10 @@ import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { CustomerBadge } from '@/components/customer/customer-badge';
 import { CustomerDeleteDialog } from '@/components/customer/customer-delete-dialog';
+import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
 import { Button } from '@/components/ui/button';
 import customer from '@/routes/customer';
+import pesanan from '@/routes/pesanan';
 import type { CustomerShowProps } from '@/types';
 
 export default function CustomerShow({ customer: item }: CustomerShowProps) {
@@ -50,9 +52,7 @@ export default function CustomerShow({ customer: item }: CustomerShowProps) {
                             customer={item}
                             redirectTo={customer.index.url()}
                             trigger={
-                                <Button variant="destructive">
-                                    Hapus
-                                </Button>
+                                <Button variant="destructive">Hapus</Button>
                             }
                         />
                     </div>
@@ -79,7 +79,9 @@ export default function CustomerShow({ customer: item }: CustomerShowProps) {
                                     Jenis Customer
                                 </p>
                                 <div className="mt-1">
-                                    <CustomerBadge jenis={item.jenis_customer} />
+                                    <CustomerBadge
+                                        jenis={item.jenis_customer}
+                                    />
                                 </div>
                             </div>
                             <div>
@@ -88,7 +90,7 @@ export default function CustomerShow({ customer: item }: CustomerShowProps) {
                                 </p>
                                 <p className="mt-1 font-mono text-sm">
                                     {item.no_hp ?? (
-                                        <span className="italic text-muted-foreground">
+                                        <span className="text-muted-foreground italic">
                                             Tidak ada
                                         </span>
                                     )}
@@ -102,24 +104,94 @@ export default function CustomerShow({ customer: item }: CustomerShowProps) {
                         <h2 className="mb-4 text-lg font-semibold">Alamat</h2>
                         <p className="text-sm leading-relaxed">
                             {item.alamat ?? (
-                                <span className="italic text-muted-foreground">
+                                <span className="text-muted-foreground italic">
                                     Alamat belum diisi.
                                 </span>
                             )}
                         </p>
                     </div>
 
-                    {/* Riwayat Pesanan (placeholder) */}
+                    {/* Riwayat Pesanan */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">
                             Riwayat Pesanan
                         </h2>
-                        <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                        {(item.pesanans ?? []).length > 0 ? (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b text-muted-foreground">
+                                        <th className="pb-2 text-left font-medium">
+                                            Nomor Pesanan
+                                        </th>
+                                        <th className="pb-2 text-left font-medium">
+                                            Tanggal
+                                        </th>
+                                        <th className="pb-2 text-left font-medium">
+                                            Status
+                                        </th>
+                                        <th className="pb-2 text-right font-medium">
+                                            Total
+                                        </th>
+                                        <th className="pb-2"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(item.pesanans ?? []).map((p) => (
+                                        <tr
+                                            key={p.id}
+                                            className="border-b last:border-0"
+                                        >
+                                            <td className="py-2 font-mono text-xs">
+                                                {p.nomor_pesanan}
+                                            </td>
+                                            <td className="py-2 text-muted-foreground">
+                                                {new Date(
+                                                    p.tanggal,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                })}
+                                            </td>
+                                            <td className="py-2">
+                                                <PesananStatusBadge
+                                                    status={p.status}
+                                                />
+                                            </td>
+                                            <td className="py-2 text-right font-mono">
+                                                {new Intl.NumberFormat(
+                                                    'id-ID',
+                                                    {
+                                                        style: 'currency',
+                                                        currency: 'IDR',
+                                                        minimumFractionDigits: 0,
+                                                    },
+                                                ).format(Number(p.total))}
+                                            </td>
+                                            <td className="py-2 text-right">
+                                                <Link
+                                                    href={pesanan.show.url(
+                                                        p.id,
+                                                    )}
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 text-xs"
+                                                    >
+                                                        Detail
+                                                    </Button>
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
                             <p className="text-sm text-muted-foreground">
-                                Riwayat pesanan akan tersedia setelah Modul
-                                Pesanan selesai.
+                                Belum ada pesanan dari customer ini.
                             </p>
-                        </div>
+                        )}
                     </div>
 
                     {/* Informasi Sistem */}
