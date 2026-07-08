@@ -1,8 +1,19 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Plus, Search } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    ChevronsUpDown,
+    Eye,
+    Plus,
+    Search,
+    TrendingUp,
+    User,
+    Wrench,
+} from 'lucide-react';
 import { useState } from 'react';
 import { ProduksiStatusBadge } from '@/components/produksi/produksi-status-badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -22,22 +33,26 @@ import {
 import produksi from '@/routes/produksi';
 import type { ProduksiIndexProps } from '@/types';
 
-export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps) {
+export default function ProduksiIndex({
+    produksis,
+    filters,
+}: ProduksiIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
 
-    const sortBy  = filters.sort_by  || 'created_at';
+    const sortBy = filters.sort_by || 'created_at';
     const sortDir = filters.sort_dir || 'desc';
 
-    type SortableColumn = 'created_at' | 'deadline' | 'qty_target' | 'qty_selesai' | 'status';
+    type SortableColumn =
+        'created_at' | 'deadline' | 'qty_target' | 'qty_selesai' | 'status';
 
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             produksi.index.url(),
             {
-                search:   search || undefined,
-                status:   status || undefined,
-                sort_by:  sortBy,
+                search: search || undefined,
+                status: status || undefined,
+                sort_by: sortBy,
                 sort_dir: sortDir,
                 ...overrides,
             },
@@ -51,18 +66,28 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 opacity-50" />;
-        return sortDir === 'asc'
-            ? <ChevronUp className="ml-1 inline size-3.5" />
-            : <ChevronDown className="ml-1 inline size-3.5" />;
+        if (sortBy !== column)
+            return (
+                <ChevronsUpDown className="ml-1 inline size-3.5 opacity-50" />
+            );
+        return sortDir === 'asc' ? (
+            <ChevronUp className="ml-1 inline size-3.5" />
+        ) : (
+            <ChevronDown className="ml-1 inline size-3.5" />
+        );
     };
 
-    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+    const sortableHead = (
+        column: SortableColumn,
+        label: string,
+        className?: string,
+    ) => (
         <TableHead
-            className={`cursor-pointer select-none whitespace-nowrap hover:bg-muted/50 ${className ?? ''}`}
+            className={`cursor-pointer whitespace-nowrap select-none hover:bg-muted/50 ${className ?? ''}`}
             onClick={() => handleSort(column)}
         >
-            {label}<SortIcon column={column} />
+            {label}
+            <SortIcon column={column} />
         </TableHead>
     );
 
@@ -102,7 +127,9 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Produksi</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Produksi
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Kelola proses produksi berdasarkan pesanan
                         </p>
@@ -115,11 +142,76 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                     </Link>
                 </div>
 
+                {/* Summary Cards — statis, akan dibuat dinamis setelah Tahap 3 selesai */}
+                <div className="grid gap-4 sm:grid-cols-3">
+                    {/* Card 1 — Total Produksi Hari Ini */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Produksi Hari Ini
+                            </CardTitle>
+                            <Wrench className="size-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-bold">1.240</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Pasang diproduksi hari ini
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    {/* Card 2 — Karyawan Paling Produktif */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Karyawan Paling Produktif
+                            </CardTitle>
+                            <User className="size-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-bold">Budi Santoso</p>
+                            <div className="mt-2 space-y-1">
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>Progress bulan ini</span>
+                                    <span>84%</span>
+                                </div>
+                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                    <div className="h-full w-[84%] rounded-full bg-primary" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Card 3 — Rata-rata Output */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Rata-rata Output
+                            </CardTitle>
+                            <TrendingUp className="size-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-bold">
+                                186{' '}
+                                <span className="text-base font-normal text-muted-foreground">
+                                    Pasang/Hari
+                                </span>
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Target harian: 200 pasang
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* Toolbar */}
                 <div className="flex flex-wrap items-center gap-3">
-                    <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
+                    <form
+                        onSubmit={handleSearch}
+                        className="flex flex-1 items-center gap-2"
+                    >
                         <div className="relative max-w-sm flex-1">
-                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 placeholder="Cari nomor pesanan atau nama customer..."
                                 value={search}
@@ -127,10 +219,15 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                                 className="pl-9"
                             />
                         </div>
-                        <Button type="submit" variant="secondary">Cari</Button>
+                        <Button type="submit" variant="secondary">
+                            Cari
+                        </Button>
                     </form>
 
-                    <Select value={status || 'semua'} onValueChange={handleStatusFilter}>
+                    <Select
+                        value={status || 'semua'}
+                        onValueChange={handleStatusFilter}
+                    >
                         <SelectTrigger className="w-40">
                             <SelectValue placeholder="Semua Status" />
                         </SelectTrigger>
@@ -139,12 +236,19 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="proses">Proses</SelectItem>
                             <SelectItem value="selesai">Selesai</SelectItem>
-                            <SelectItem value="dibatalkan">Dibatalkan</SelectItem>
+                            <SelectItem value="dibatalkan">
+                                Dibatalkan
+                            </SelectItem>
                         </SelectContent>
                     </Select>
 
                     {(search || activeFilterCount > 0) && (
-                        <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={handleReset}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            onClick={handleReset}
+                        >
                             Reset filter
                         </Button>
                     )}
@@ -159,42 +263,75 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                                 <TableHead>Pesanan</TableHead>
                                 <TableHead>Customer</TableHead>
                                 {sortableHead('status', 'Status')}
-                                {sortableHead('qty_target', 'Target', 'text-right')}
-                                {sortableHead('qty_selesai', 'Selesai', 'text-right')}
+                                {sortableHead(
+                                    'qty_target',
+                                    'Target',
+                                    'text-right',
+                                )}
+                                {sortableHead(
+                                    'qty_selesai',
+                                    'Selesai',
+                                    'text-right',
+                                )}
                                 {sortableHead('deadline', 'Deadline')}
-                                <TableHead className="w-16 text-center">Aksi</TableHead>
+                                <TableHead className="w-16 text-center">
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {produksis.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                                        {search || status ? 'Tidak ada data yang ditemukan.' : 'Belum ada data produksi.'}
+                                    <TableCell
+                                        colSpan={8}
+                                        className="h-24 text-center text-muted-foreground"
+                                    >
+                                        {search || status
+                                            ? 'Tidak ada data yang ditemukan.'
+                                            : 'Belum ada data produksi.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 produksis.data.map((item, idx) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="text-muted-foreground">
-                                            {(produksis.current_page - 1) * produksis.per_page + idx + 1}
+                                            {(produksis.current_page - 1) *
+                                                produksis.per_page +
+                                                idx +
+                                                1}
                                         </TableCell>
                                         <TableCell className="font-mono text-sm font-medium">
                                             {item.pesanan?.nomor_pesanan ?? '-'}
                                         </TableCell>
                                         <TableCell>
-                                            {item.pesanan?.customer?.nama_customer ?? '-'}
+                                            {item.pesanan?.customer
+                                                ?.nama_customer ?? '-'}
                                         </TableCell>
                                         <TableCell>
-                                            <ProduksiStatusBadge status={item.status} />
+                                            <ProduksiStatusBadge
+                                                status={item.status}
+                                            />
                                         </TableCell>
-                                        <TableCell className="text-right font-mono">{item.qty_target}</TableCell>
-                                        <TableCell className="text-right font-mono">{item.qty_selesai}</TableCell>
-                                        <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                                        <TableCell className="text-right font-mono">
+                                            {item.qty_target}
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono">
+                                            {item.qty_selesai}
+                                        </TableCell>
+                                        <TableCell className="text-sm whitespace-nowrap text-muted-foreground">
                                             {formatDate(item.deadline)}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Link href={produksi.show.url(item.id)}>
-                                                <Button variant="ghost" size="icon" className="size-8">
+                                            <Link
+                                                href={produksi.show.url(
+                                                    item.id,
+                                                )}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-8"
+                                                >
                                                     <Eye className="size-4" />
                                                 </Button>
                                             </Link>
@@ -209,17 +346,29 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
                     {produksis.last_page > 1 && (
                         <div className="flex items-center justify-between border-t px-4 py-3">
                             <p className="text-sm text-muted-foreground">
-                                Menampilkan {produksis.from ?? 0}–{produksis.to ?? 0} dari {produksis.total} data
+                                Menampilkan {produksis.from ?? 0}–
+                                {produksis.to ?? 0} dari {produksis.total} data
                             </p>
                             <div className="flex gap-1">
                                 {produksis.links.map((link, i) => (
                                     <Button
                                         key={i}
-                                        variant={link.active ? 'default' : 'outline'}
+                                        variant={
+                                            link.active ? 'default' : 'outline'
+                                        }
                                         size="sm"
                                         disabled={!link.url}
-                                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        onClick={() =>
+                                            link.url &&
+                                            router.get(
+                                                link.url,
+                                                {},
+                                                { preserveState: true },
+                                            )
+                                        }
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -232,7 +381,5 @@ export default function ProduksiIndex({ produksis, filters }: ProduksiIndexProps
 }
 
 ProduksiIndex.layout = {
-    breadcrumbs: [
-        { title: 'Produksi', href: produksi.index.url() },
-    ],
+    breadcrumbs: [{ title: 'Produksi', href: produksi.index.url() }],
 };
