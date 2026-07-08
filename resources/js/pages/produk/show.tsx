@@ -29,9 +29,6 @@ export default function ProdukShow({ produk: item }: ProdukShowProps) {
         });
     };
 
-    const isLowStock =
-        item.minimum_stok !== null && Number(item.stok) <= Number(item.minimum_stok);
-
     const deleteRedirectHref = produk.index.url();
 
     return (

@@ -14,14 +14,13 @@ class BahanBakuController extends Controller
      */
     public function index(Request $request)
     {
-        $search     = $request->input('search');
-        $satuan     = $request->input('satuan');
-        $stokRendah = $request->boolean('stok_rendah');
-        $sortBy     = $request->input('sort_by', 'created_at');
-        $sortDir    = $request->input('sort_dir', 'desc');
+        $search  = $request->input('search');
+        $satuan  = $request->input('satuan');
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
 
         // Whitelist kolom yang boleh di-sort
-        $allowedSorts = ['kode_bahan', 'nama_bahan', 'satuan', 'stok', 'minimum_stok', 'created_at'];
+        $allowedSorts = ['kode_bahan', 'nama_bahan', 'satuan', 'minimum_stok', 'created_at'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
         }
@@ -36,10 +35,6 @@ class BahanBakuController extends Controller
             ->when($satuan, function ($query, $satuan) {
                 $query->where('satuan', $satuan);
             })
-            ->when($stokRendah, function ($query) {
-                $query->whereNotNull('minimum_stok')
-                    ->whereColumn('stok', '<=', 'minimum_stok');
-            })
             ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
@@ -47,11 +42,10 @@ class BahanBakuController extends Controller
         return Inertia::render('bahan-baku/index', [
             'bahanBakus'    => $bahanBakus,
             'filters'       => [
-                'search'      => $search,
-                'satuan'      => $satuan,
-                'stok_rendah' => $stokRendah,
-                'sort_by'     => $sortBy,
-                'sort_dir'    => $sortDir,
+                'search'   => $search,
+                'satuan'   => $satuan,
+                'sort_by'  => $sortBy,
+                'sort_dir' => $sortDir,
             ],
             'satuanOptions' => $this->getSatuanOptions(),
         ]);

@@ -171,12 +171,22 @@ export function ProdukForm({
                             min="0"
                             value={data.stok}
                             onChange={(e) =>
-                                setData(
-                                    'stok',
-                                    parseInt(e.target.value, 10) || 0,
-                                )
+                                mode === 'create'
+                                    ? setData(
+                                          'stok',
+                                          parseInt(e.target.value, 10) || 0,
+                                      )
+                                    : undefined
                             }
-                            className={errors.stok ? 'border-red-500' : ''}
+                            readOnly={mode === 'edit'}
+                            className={[
+                                errors.stok ? 'border-red-500' : '',
+                                mode === 'edit'
+                                    ? 'cursor-not-allowed bg-muted text-muted-foreground'
+                                    : '',
+                            ]
+                                .filter(Boolean)
+                                .join(' ')}
                         />
                         {errors.stok && (
                             <p className="text-sm text-red-500">
@@ -185,8 +195,8 @@ export function ProdukForm({
                         )}
                         {mode === 'edit' && (
                             <p className="text-xs text-muted-foreground">
-                                Edit manual hanya untuk koreksi. Stok akan
-                                otomatis berubah melalui modul Produksi.
+                                Stok hanya dapat diubah melalui modul Stok
+                                Produk Jadi.
                             </p>
                         )}
                     </div>

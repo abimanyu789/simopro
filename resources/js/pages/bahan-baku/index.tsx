@@ -1,5 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    ChevronsUpDown,
+    Eye,
+    Pencil,
+    Plus,
+    Search,
+} from 'lucide-react';
 import { useState } from 'react';
 import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -29,12 +37,12 @@ export default function BahanBakuIndex({
 }: BahanBakuIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [satuan, setSatuan] = useState(filters.satuan || '');
-    const [stokRendah, setStokRendah] = useState(filters.stok_rendah || false);
 
-    const sortBy  = filters.sort_by  || 'created_at';
+    const sortBy = filters.sort_by || 'created_at';
     const sortDir = filters.sort_dir || 'desc';
 
-    type SortableColumn = 'kode_bahan' | 'nama_bahan' | 'satuan' | 'stok' | 'minimum_stok' | 'created_at';
+    type SortableColumn =
+        'kode_bahan' | 'nama_bahan' | 'satuan' | 'minimum_stok' | 'created_at';
 
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
@@ -42,7 +50,6 @@ export default function BahanBakuIndex({
             {
                 search,
                 satuan: satuan || undefined,
-                stok_rendah: stokRendah || undefined,
                 sort_by: sortBy,
                 sort_dir: sortDir,
                 ...overrides,
@@ -57,18 +64,28 @@ export default function BahanBakuIndex({
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
-        return sortDir === 'asc'
-            ? <ChevronUp className="ml-1 inline size-3.5" />
-            : <ChevronDown className="ml-1 inline size-3.5" />;
+        if (sortBy !== column)
+            return (
+                <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />
+            );
+        return sortDir === 'asc' ? (
+            <ChevronUp className="ml-1 inline size-3.5" />
+        ) : (
+            <ChevronDown className="ml-1 inline size-3.5" />
+        );
     };
 
-    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+    const sortableHead = (
+        column: SortableColumn,
+        label: string,
+        className?: string,
+    ) => (
         <TableHead
             className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
             onClick={() => handleSort(column)}
         >
-            {label}<SortIcon column={column} />
+            {label}
+            <SortIcon column={column} />
         </TableHead>
     );
 
@@ -83,12 +100,6 @@ export default function BahanBakuIndex({
         navigate({ satuan: newSatuan || undefined });
     };
 
-    const handleStokRendahFilter = (value: string) => {
-        const newVal = value === 'stok_rendah';
-        setStokRendah(newVal);
-        navigate({ stok_rendah: newVal || undefined });
-    };
-
     const formatNumber = (value: number | null) => {
         if (value === null) return '-';
         return new Intl.NumberFormat('id-ID', {
@@ -98,10 +109,7 @@ export default function BahanBakuIndex({
     };
 
     // Hitung filter aktif untuk badge
-    const activeFilterCount = [
-        satuan,
-        stokRendah,
-    ].filter(Boolean).length;
+    const activeFilterCount = [satuan].filter(Boolean).length;
 
     return (
         <>
@@ -165,22 +173,6 @@ export default function BahanBakuIndex({
                         </SelectContent>
                     </Select>
 
-                    {/* Filter Stok */}
-                    <Select
-                        value={stokRendah ? 'stok_rendah' : 'semua'}
-                        onValueChange={handleStokRendahFilter}
-                    >
-                        <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Semua Stok" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="semua">Semua Stok</SelectItem>
-                            <SelectItem value="stok_rendah">
-                                ⚠ Stok Rendah
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-
                     {/* Reset filter */}
                     {activeFilterCount > 0 && (
                         <Button
@@ -189,11 +181,7 @@ export default function BahanBakuIndex({
                             className="text-muted-foreground"
                             onClick={() => {
                                 setSatuan('');
-                                setStokRendah(false);
-                                navigate({
-                                    satuan: undefined,
-                                    stok_rendah: undefined,
-                                });
+                                navigate({ satuan: undefined });
                             }}
                         >
                             Reset filter ({activeFilterCount})
@@ -210,31 +198,30 @@ export default function BahanBakuIndex({
                                 {sortableHead('kode_bahan', 'Kode Bahan')}
                                 {sortableHead('nama_bahan', 'Nama Bahan')}
                                 {sortableHead('satuan', 'Satuan')}
-                                {sortableHead('stok', 'Stok', 'text-right')}
-                                {sortableHead('minimum_stok', 'Min. Stok', 'text-right')}
-                                <TableHead className="w-32 text-center">Aksi</TableHead>
+                                {sortableHead(
+                                    'minimum_stok',
+                                    'Min. Stok',
+                                    'text-right',
+                                )}
+                                <TableHead className="w-32 text-center">
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {bahanBakus.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={7}
+                                        colSpan={6}
                                         className="h-24 text-center"
                                     >
-                                        {filters.search ||
-                                        filters.satuan ||
-                                        filters.stok_rendah
+                                        {filters.search || filters.satuan
                                             ? 'Tidak ada data yang ditemukan.'
                                             : 'Belum ada data bahan baku.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 bahanBakus.data.map((item, index) => {
-                                    const isLowStock =
-                                        item.minimum_stok !== null &&
-                                        Number(item.stok) <= Number(item.minimum_stok);
-
                                     return (
                                         <TableRow key={item.id}>
                                             <TableCell className="font-medium">
@@ -250,22 +237,6 @@ export default function BahanBakuIndex({
                                                 <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-400">
                                                     {item.satuan}
                                                 </span>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex flex-col items-end">
-                                                    <span
-                                                        className={`font-mono text-sm font-medium ${isLowStock ? 'text-orange-600 dark:text-orange-400' : ''}`}
-                                                    >
-                                                        {formatNumber(
-                                                            item.stok,
-                                                        )}
-                                                    </span>
-                                                    {isLowStock && (
-                                                        <span className="text-xs text-orange-500">
-                                                            ⚠ stok rendah
-                                                        </span>
-                                                    )}
-                                                </div>
                                             </TableCell>
                                             <TableCell className="text-right font-mono text-sm text-muted-foreground">
                                                 {formatNumber(
@@ -317,8 +288,8 @@ export default function BahanBakuIndex({
                 {bahanBakus.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Menampilkan {bahanBakus.from} - {bahanBakus.to}{' '}
-                            dari {bahanBakus.total} data
+                            Menampilkan {bahanBakus.from} - {bahanBakus.to} dari{' '}
+                            {bahanBakus.total} data
                         </p>
                         <div className="flex gap-1">
                             {bahanBakus.links.map((link, index) => (

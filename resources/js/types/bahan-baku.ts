@@ -40,7 +40,6 @@ export interface BahanBakuIndexProps {
     filters: {
         search?: string;
         satuan?: string;
-        stok_rendah?: boolean;
         sort_by?: string;
         sort_dir?: string;
     };

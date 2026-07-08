@@ -1,5 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, ChevronsUpDown, ClipboardList, Eye, Pencil, Plus, Search } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    ChevronsUpDown,
+    ClipboardList,
+    Eye,
+    Pencil,
+    Plus,
+    Search,
+} from 'lucide-react';
 import { useState } from 'react';
 import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -25,20 +34,24 @@ import type { ProdukIndexProps } from '@/types';
 
 export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
-    const [stokRendah, setStokRendah] = useState(filters.stok_rendah ?? false);
     const [bom, setBom] = useState(filters.bom ?? '');
 
-    const sortBy  = filters.sort_by  || 'created_at';
+    const sortBy = filters.sort_by || 'created_at';
     const sortDir = filters.sort_dir || 'desc';
 
-    type SortableColumn = 'kode_produk' | 'nama_produk' | 'ukuran' | 'warna' | 'harga_jual' | 'stok' | 'created_at';
+    type SortableColumn =
+        | 'kode_produk'
+        | 'nama_produk'
+        | 'ukuran'
+        | 'warna'
+        | 'harga_jual'
+        | 'created_at';
 
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             produk.index.url(),
             {
                 search,
-                stok_rendah: stokRendah || undefined,
                 bom: bom || undefined,
                 sort_by: sortBy,
                 sort_dir: sortDir,
@@ -54,30 +67,34 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />;
-        return sortDir === 'asc'
-            ? <ChevronUp className="ml-1 inline size-3.5" />
-            : <ChevronDown className="ml-1 inline size-3.5" />;
+        if (sortBy !== column)
+            return (
+                <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />
+            );
+        return sortDir === 'asc' ? (
+            <ChevronUp className="ml-1 inline size-3.5" />
+        ) : (
+            <ChevronDown className="ml-1 inline size-3.5" />
+        );
     };
 
-    const sortableHead = (column: SortableColumn, label: string, className?: string) => (
+    const sortableHead = (
+        column: SortableColumn,
+        label: string,
+        className?: string,
+    ) => (
         <TableHead
             className={`cursor-pointer select-none hover:bg-muted/50 ${className ?? ''}`}
             onClick={() => handleSort(column)}
         >
-            {label}<SortIcon column={column} />
+            {label}
+            <SortIcon column={column} />
         </TableHead>
     );
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         navigate();
-    };
-
-    const handleStokRendahFilter = (value: string) => {
-        const newVal = value === 'stok_rendah';
-        setStokRendah(newVal);
-        navigate({ stok_rendah: newVal || undefined });
     };
 
     const handleBomFilter = (value: string) => {
@@ -96,7 +113,7 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
         }).format(value);
     };
 
-    const activeFilterCount = [stokRendah, bom].filter(Boolean).length;
+    const activeFilterCount = [bom].filter(Boolean).length;
 
     return (
         <>
@@ -150,22 +167,6 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                         </Button>
                     </form>
 
-                    {/* Filter Stok */}
-                    <Select
-                        value={stokRendah ? 'stok_rendah' : 'semua'}
-                        onValueChange={handleStokRendahFilter}
-                    >
-                        <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Semua Stok" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="semua">Semua Stok</SelectItem>
-                            <SelectItem value="stok_rendah">
-                                ⚠ Stok Rendah
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-
                     {/* Filter BOM */}
                     <Select
                         value={bom || 'semua'}
@@ -190,12 +191,8 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                             size="sm"
                             className="text-muted-foreground"
                             onClick={() => {
-                                setStokRendah(false);
                                 setBom('');
-                                navigate({
-                                    stok_rendah: undefined,
-                                    bom: undefined,
-                                });
+                                navigate({ bom: undefined });
                             }}
                         >
                             Reset filter ({activeFilterCount})
@@ -213,31 +210,33 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                 {sortableHead('nama_produk', 'Nama Produk')}
                                 {sortableHead('ukuran', 'Ukuran')}
                                 {sortableHead('warna', 'Warna')}
-                                {sortableHead('harga_jual', 'Harga Jual', 'text-right')}
-                                {sortableHead('stok', 'Stok', 'text-right')}
-                                <TableHead className="w-8 text-center">BOM</TableHead>
-                                <TableHead className="w-32 text-center">Aksi</TableHead>
+                                {sortableHead(
+                                    'harga_jual',
+                                    'Harga Jual',
+                                    'text-right',
+                                )}
+                                <TableHead className="w-8 text-center">
+                                    BOM
+                                </TableHead>
+                                <TableHead className="w-32 text-center">
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {produks.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={9}
+                                        colSpan={8}
                                         className="h-24 text-center"
                                     >
-                                        {filters.search ||
-                                        filters.stok_rendah ||
-                                        filters.bom
+                                        {filters.search || filters.bom
                                             ? 'Tidak ada data yang ditemukan.'
                                             : 'Belum ada data produk.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 produks.data.map((item, index) => {
-                                    const isLowStock =
-                                        item.minimum_stok !== null &&
-                                        Number(item.stok) <= Number(item.minimum_stok);
                                     const hasBom =
                                         item.bom_category_id !== null;
 
@@ -276,20 +275,6 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                                             </TableCell>
                                             <TableCell className="text-right font-mono text-sm">
                                                 {formatHarga(item.harga_jual)}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex flex-col items-end">
-                                                    <span
-                                                        className={`font-mono text-sm font-medium ${isLowStock ? 'text-orange-600 dark:text-orange-400' : ''}`}
-                                                    >
-                                                        {item.stok}
-                                                    </span>
-                                                    {isLowStock && (
-                                                        <span className="text-xs text-orange-500">
-                                                            ⚠ stok rendah
-                                                        </span>
-                                                    )}
-                                                </div>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 {hasBom ? (

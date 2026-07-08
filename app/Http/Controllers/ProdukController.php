@@ -15,14 +15,13 @@ class ProdukController extends Controller
      */
     public function index(Request $request)
     {
-        $search     = $request->input('search');
-        $stokRendah = $request->boolean('stok_rendah');
-        $bom        = $request->input('bom'); // 'ada' | 'tidak'
-        $sortBy     = $request->input('sort_by', 'created_at');
-        $sortDir    = $request->input('sort_dir', 'desc');
+        $search  = $request->input('search');
+        $bom     = $request->input('bom'); // 'ada' | 'tidak'
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
 
         // Whitelist kolom yang boleh di-sort
-        $allowedSorts = ['kode_produk', 'nama_produk', 'ukuran', 'warna', 'harga_jual', 'stok', 'created_at'];
+        $allowedSorts = ['kode_produk', 'nama_produk', 'ukuran', 'warna', 'harga_jual', 'created_at'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
         }
@@ -33,10 +32,6 @@ class ProdukController extends Controller
                 $query->where('kode_produk', 'like', "%{$search}%")
                     ->orWhere('nama_produk', 'like', "%{$search}%")
                     ->orWhere('warna', 'like', "%{$search}%");
-            })
-            ->when($stokRendah, function ($query) {
-                $query->whereNotNull('minimum_stok')
-                    ->whereColumn('stok', '<=', 'minimum_stok');
             })
             ->when($bom === 'ada', function ($query) {
                 $query->whereNotNull('bom_category_id');
@@ -51,11 +46,10 @@ class ProdukController extends Controller
         return Inertia::render('produk/index', [
             'produks' => $produks,
             'filters' => [
-                'search'      => $search,
-                'stok_rendah' => $stokRendah,
-                'bom'         => $bom,
-                'sort_by'     => $sortBy,
-                'sort_dir'    => $sortDir,
+                'search'   => $search,
+                'bom'      => $bom,
+                'sort_by'  => $sortBy,
+                'sort_dir' => $sortDir,
             ],
         ]);
     }

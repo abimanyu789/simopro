@@ -13,18 +13,22 @@ import {
 import bahanBaku from '@/routes/bahan-baku';
 import type { BahanBakuCreateEditProps, BahanBakuFormData } from '@/types';
 
-export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanBakuCreateEditProps) {
+export default function BahanBakuEdit({
+    bahanBaku: item,
+    satuanOptions,
+}: BahanBakuCreateEditProps) {
     if (!item) {
         return null;
     }
 
-    const { data, setData, put, processing, errors } = useForm<BahanBakuFormData>({
-        kode_bahan: item.kode_bahan,
-        nama_bahan: item.nama_bahan,
-        satuan: item.satuan,
-        stok: item.stok,
-        minimum_stok: item.minimum_stok,
-    });
+    const { data, setData, put, processing, errors } =
+        useForm<BahanBakuFormData>({
+            kode_bahan: item.kode_bahan,
+            nama_bahan: item.nama_bahan,
+            satuan: item.satuan,
+            stok: item.stok,
+            minimum_stok: item.minimum_stok,
+        });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,7 +48,9 @@ export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanB
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Edit Bahan Baku</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Edit Bahan Baku
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Perbarui data bahan baku: {item.nama_bahan}
                         </p>
@@ -61,94 +67,119 @@ export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanB
                             {/* Kode Bahan */}
                             <div className="space-y-2">
                                 <Label htmlFor="kode_bahan">
-                                    Kode Bahan <span className="text-red-500">*</span>
+                                    Kode Bahan{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="kode_bahan"
                                     type="text"
                                     value={data.kode_bahan}
-                                    onChange={(e) => setData('kode_bahan', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('kode_bahan', e.target.value)
+                                    }
                                     placeholder="Contoh: BB-001"
-                                    className={errors.kode_bahan ? 'border-red-500' : ''}
+                                    className={
+                                        errors.kode_bahan
+                                            ? 'border-red-500'
+                                            : ''
+                                    }
                                 />
                                 {errors.kode_bahan && (
-                                    <p className="text-sm text-red-500">{errors.kode_bahan}</p>
+                                    <p className="text-sm text-red-500">
+                                        {errors.kode_bahan}
+                                    </p>
                                 )}
                             </div>
 
                             {/* Nama Bahan */}
                             <div className="space-y-2">
                                 <Label htmlFor="nama_bahan">
-                                    Nama Bahan <span className="text-red-500">*</span>
+                                    Nama Bahan{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="nama_bahan"
                                     type="text"
                                     value={data.nama_bahan}
-                                    onChange={(e) => setData('nama_bahan', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('nama_bahan', e.target.value)
+                                    }
                                     placeholder="Contoh: Kulit Sapi Premium"
-                                    className={errors.nama_bahan ? 'border-red-500' : ''}
+                                    className={
+                                        errors.nama_bahan
+                                            ? 'border-red-500'
+                                            : ''
+                                    }
                                 />
                                 {errors.nama_bahan && (
-                                    <p className="text-sm text-red-500">{errors.nama_bahan}</p>
+                                    <p className="text-sm text-red-500">
+                                        {errors.nama_bahan}
+                                    </p>
                                 )}
                             </div>
 
                             {/* Satuan */}
                             <div className="space-y-2">
                                 <Label htmlFor="satuan">
-                                    Satuan <span className="text-red-500">*</span>
+                                    Satuan{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
                                     value={data.satuan}
-                                    onValueChange={(value) => setData('satuan', value)}
+                                    onValueChange={(value) =>
+                                        setData('satuan', value)
+                                    }
                                 >
                                     <SelectTrigger
-                                        className={errors.satuan ? 'border-red-500' : ''}
+                                        className={
+                                            errors.satuan
+                                                ? 'border-red-500'
+                                                : ''
+                                        }
                                     >
                                         <SelectValue placeholder="Pilih satuan" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {satuanOptions.map((option) => (
-                                            <SelectItem key={option.value} value={option.value}>
+                                            <SelectItem
+                                                key={option.value}
+                                                value={option.value}
+                                            >
                                                 {option.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                                 {errors.satuan && (
-                                    <p className="text-sm text-red-500">{errors.satuan}</p>
+                                    <p className="text-sm text-red-500">
+                                        {errors.satuan}
+                                    </p>
                                 )}
                             </div>
 
-                            {/* Stok */}
+                            {/* Stok — readonly, hanya bisa diubah via Modul Stok Bahan Baku */}
                             <div className="space-y-2">
-                                <Label htmlFor="stok">
-                                    Stok <span className="text-red-500">*</span>
-                                </Label>
+                                <Label htmlFor="stok">Stok</Label>
                                 <Input
                                     id="stok"
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={data.stok}
-                                    onChange={(e) =>
-                                        setData('stok', parseFloat(e.target.value) || 0)
-                                    }
-                                    className={errors.stok ? 'border-red-500' : ''}
+                                    readOnly
+                                    className="cursor-not-allowed bg-muted text-muted-foreground"
                                 />
-                                {errors.stok && (
-                                    <p className="text-sm text-red-500">{errors.stok}</p>
-                                )}
                                 <p className="text-xs text-muted-foreground">
-                                    Edit manual stok hanya untuk koreksi. Gunakan fitur Restock untuk
-                                    perubahan stok normal.
+                                    Stok hanya dapat diubah melalui modul Stok
+                                    Bahan Baku.
                                 </p>
                             </div>
 
                             {/* Minimum Stok */}
                             <div className="space-y-2">
-                                <Label htmlFor="minimum_stok">Minimum Stok</Label>
+                                <Label htmlFor="minimum_stok">
+                                    Minimum Stok
+                                </Label>
                                 <Input
                                     id="minimum_stok"
                                     type="number"
@@ -158,14 +189,22 @@ export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanB
                                     onChange={(e) =>
                                         setData(
                                             'minimum_stok',
-                                            e.target.value ? parseFloat(e.target.value) : null,
+                                            e.target.value
+                                                ? parseFloat(e.target.value)
+                                                : null,
                                         )
                                     }
                                     placeholder="Opsional"
-                                    className={errors.minimum_stok ? 'border-red-500' : ''}
+                                    className={
+                                        errors.minimum_stok
+                                            ? 'border-red-500'
+                                            : ''
+                                    }
                                 />
                                 {errors.minimum_stok && (
-                                    <p className="text-sm text-red-500">{errors.minimum_stok}</p>
+                                    <p className="text-sm text-red-500">
+                                        {errors.minimum_stok}
+                                    </p>
                                 )}
                                 <p className="text-xs text-muted-foreground">
                                     Batas minimum stok untuk peringatan
@@ -180,7 +219,9 @@ export default function BahanBakuEdit({ bahanBaku: item, satuanOptions }: BahanB
                                     </Button>
                                 </Link>
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                    {processing
+                                        ? 'Menyimpan...'
+                                        : 'Simpan Perubahan'}
                                 </Button>
                             </div>
                         </div>
