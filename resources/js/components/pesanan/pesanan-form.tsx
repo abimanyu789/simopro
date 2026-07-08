@@ -22,7 +22,10 @@ import type {
 
 interface PesananFormProps {
     data: PesananFormData;
-    setData: <K extends keyof PesananFormData>(key: K, value: PesananFormData[K]) => void;
+    setData: <K extends keyof PesananFormData>(
+        key: K,
+        value: PesananFormData[K],
+    ) => void;
     errors: Partial<Record<string, string>>;
     processing: boolean;
     onSubmit: (e: React.FormEvent) => void;
@@ -45,12 +48,13 @@ export function PesananForm({
     customers,
     produks,
 }: PesananFormProps) {
-    const defaultLabel = mode === 'create' ? 'Simpan Pesanan' : 'Simpan Perubahan';
+    const defaultLabel =
+        mode === 'create' ? 'Simpan Pesanan' : 'Simpan Perubahan';
 
     // ─── Kalkulasi real-time ──────────────────────────────────────────────────
 
     const subtotal = data.items.reduce((sum, item) => {
-        const qty   = Number(item.qty)   || 0;
+        const qty = Number(item.qty) || 0;
         const harga = Number(item.harga) || 0;
         return sum + qty * harga;
     }, 0);
@@ -63,31 +67,47 @@ export function PesananForm({
             : d;
     })();
 
-    const total = Math.max(0, subtotal - nilaiDiskon + (Number(data.ongkir) || 0));
+    const total = Math.max(
+        0,
+        subtotal - nilaiDiskon + (Number(data.ongkir) || 0),
+    );
 
     // ─── Item helpers ─────────────────────────────────────────────────────────
 
     const addItem = () => {
-        setData('items', [...data.items, { produk_id: '', qty: '', harga: '' }]);
+        setData('items', [
+            ...data.items,
+            { produk_id: '', qty: '', harga: '' },
+        ]);
     };
 
     const removeItem = (idx: number) => {
-        setData('items', data.items.filter((_, i) => i !== idx));
+        setData(
+            'items',
+            data.items.filter((_, i) => i !== idx),
+        );
     };
 
-    const updateItem = (idx: number, field: keyof PesananItemFormData, value: string | number) => {
+    const updateItem = (
+        idx: number,
+        field: keyof PesananItemFormData,
+        value: string | number,
+    ) => {
         const updated = data.items.map((item, i) =>
-            i === idx ? { ...item, [field]: value } : item
+            i === idx ? { ...item, [field]: value } : item,
         );
         setData('items', updated);
     };
 
-    // Auto-fill harga dari harga_jual produk
+    // Auto-fill harga dari harga_jual produk — satu operasi untuk hindari stale closure
     const handleProdukChange = (idx: number, produkId: number) => {
         const produk = produks.find((p) => p.id === produkId);
-        const harga  = produk?.harga_jual ? Number(produk.harga_jual) : '';
-        updateItem(idx, 'produk_id', produkId);
-        updateItem(idx, 'harga', harga);
+        const harga = produk?.harga_jual ? Number(produk.harga_jual) : '';
+
+        const updated = data.items.map((item, i) =>
+            i === idx ? { ...item, produk_id: produkId, harga } : item,
+        );
+        setData('items', updated);
     };
 
     const formatRupiah = (value: number) =>
@@ -101,7 +121,7 @@ export function PesananForm({
         <form onSubmit={onSubmit} className="space-y-6">
             {/* ─── Header Info ─────────────────────────────────────────── */}
             <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                     Informasi Pesanan
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -111,17 +131,28 @@ export function PesananForm({
                             Customer <span className="text-red-500">*</span>
                         </Label>
                         <Select
-                            value={data.customer_id !== '' ? String(data.customer_id) : ''}
-                            onValueChange={(v) => setData('customer_id', Number(v))}
+                            value={
+                                data.customer_id !== ''
+                                    ? String(data.customer_id)
+                                    : ''
+                            }
+                            onValueChange={(v) =>
+                                setData('customer_id', Number(v))
+                            }
                         >
-                            <SelectTrigger id="customer_id" className={errors.customer_id ? 'border-red-500' : ''}>
+                            <SelectTrigger
+                                id="customer_id"
+                                className={
+                                    errors.customer_id ? 'border-red-500' : ''
+                                }
+                            >
                                 <SelectValue placeholder="Pilih customer..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {customers.map((c) => (
                                     <SelectItem key={c.id} value={String(c.id)}>
                                         {c.nama_customer}
-                                        <span className="ml-2 text-xs uppercase text-muted-foreground">
+                                        <span className="ml-2 text-xs text-muted-foreground uppercase">
                                             ({c.jenis_customer})
                                         </span>
                                     </SelectItem>
@@ -129,14 +160,17 @@ export function PesananForm({
                             </SelectContent>
                         </Select>
                         {errors.customer_id && (
-                            <p className="text-sm text-red-500">{errors.customer_id}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.customer_id}
+                            </p>
                         )}
                     </div>
 
                     {/* Tanggal */}
                     <div className="space-y-2">
                         <Label htmlFor="tanggal">
-                            Tanggal Pesanan <span className="text-red-500">*</span>
+                            Tanggal Pesanan{' '}
+                            <span className="text-red-500">*</span>
                         </Label>
                         <Input
                             id="tanggal"
@@ -146,7 +180,9 @@ export function PesananForm({
                             className={errors.tanggal ? 'border-red-500' : ''}
                         />
                         {errors.tanggal && (
-                            <p className="text-sm text-red-500">{errors.tanggal}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.tanggal}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -155,10 +191,15 @@ export function PesananForm({
             {/* ─── Item Produk ─────────────────────────────────────────── */}
             <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                         Item Produk
                     </h2>
-                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addItem}
+                    >
                         <Plus className="mr-1 size-3.5" />
                         Tambah Produk
                     </Button>
@@ -170,10 +211,11 @@ export function PesananForm({
 
                 <div className="space-y-3">
                     {data.items.map((item, idx) => {
-                        const itemSubtotal = (Number(item.qty) || 0) * (Number(item.harga) || 0);
-                        const produkError  = errors[`items.${idx}.produk_id`];
-                        const qtyError     = errors[`items.${idx}.qty`];
-                        const hargaError   = errors[`items.${idx}.harga`];
+                        const itemSubtotal =
+                            (Number(item.qty) || 0) * (Number(item.harga) || 0);
+                        const produkError = errors[`items.${idx}.produk_id`];
+                        const qtyError = errors[`items.${idx}.qty`];
+                        const hargaError = errors[`items.${idx}.harga`];
 
                         return (
                             <div
@@ -183,32 +225,54 @@ export function PesananForm({
                                 {/* Produk */}
                                 <div className="space-y-1">
                                     {idx === 0 && (
-                                        <Label className="text-xs text-muted-foreground">Produk</Label>
+                                        <Label className="text-xs text-muted-foreground">
+                                            Produk
+                                        </Label>
                                     )}
                                     <Select
-                                        value={item.produk_id !== '' ? String(item.produk_id) : ''}
-                                        onValueChange={(v) => handleProdukChange(idx, Number(v))}
+                                        value={
+                                            item.produk_id !== ''
+                                                ? String(item.produk_id)
+                                                : ''
+                                        }
+                                        onValueChange={(v) =>
+                                            handleProdukChange(idx, Number(v))
+                                        }
                                     >
-                                        <SelectTrigger className={produkError ? 'border-red-500' : ''}>
+                                        <SelectTrigger
+                                            className={
+                                                produkError
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            }
+                                        >
                                             <SelectValue placeholder="Pilih produk..." />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {produks.map((p) => (
-                                                <SelectItem key={p.id} value={String(p.id)}>
-                                                    {p.kode_produk} — {p.nama_produk}
+                                                <SelectItem
+                                                    key={p.id}
+                                                    value={String(p.id)}
+                                                >
+                                                    {p.kode_produk} —{' '}
+                                                    {p.nama_produk}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                     {produkError && (
-                                        <p className="text-xs text-red-500">{produkError}</p>
+                                        <p className="text-xs text-red-500">
+                                            {produkError}
+                                        </p>
                                     )}
                                 </div>
 
                                 {/* Qty */}
                                 <div className="space-y-1">
                                     {idx === 0 && (
-                                        <Label className="text-xs text-muted-foreground">Qty</Label>
+                                        <Label className="text-xs text-muted-foreground">
+                                            Qty
+                                        </Label>
                                     )}
                                     <Input
                                         type="number"
@@ -216,19 +280,31 @@ export function PesananForm({
                                         placeholder="0"
                                         value={item.qty}
                                         onChange={(e) =>
-                                            updateItem(idx, 'qty', e.target.value === '' ? '' : Number(e.target.value))
+                                            updateItem(
+                                                idx,
+                                                'qty',
+                                                e.target.value === ''
+                                                    ? ''
+                                                    : Number(e.target.value),
+                                            )
                                         }
-                                        className={qtyError ? 'border-red-500' : ''}
+                                        className={
+                                            qtyError ? 'border-red-500' : ''
+                                        }
                                     />
                                     {qtyError && (
-                                        <p className="text-xs text-red-500">{qtyError}</p>
+                                        <p className="text-xs text-red-500">
+                                            {qtyError}
+                                        </p>
                                     )}
                                 </div>
 
                                 {/* Harga */}
                                 <div className="space-y-1">
                                     {idx === 0 && (
-                                        <Label className="text-xs text-muted-foreground">Harga (Rp)</Label>
+                                        <Label className="text-xs text-muted-foreground">
+                                            Harga (Rp)
+                                        </Label>
                                     )}
                                     <Input
                                         type="number"
@@ -236,19 +312,31 @@ export function PesananForm({
                                         placeholder="0"
                                         value={item.harga}
                                         onChange={(e) =>
-                                            updateItem(idx, 'harga', e.target.value === '' ? '' : Number(e.target.value))
+                                            updateItem(
+                                                idx,
+                                                'harga',
+                                                e.target.value === ''
+                                                    ? ''
+                                                    : Number(e.target.value),
+                                            )
                                         }
-                                        className={hargaError ? 'border-red-500' : ''}
+                                        className={
+                                            hargaError ? 'border-red-500' : ''
+                                        }
                                     />
                                     {hargaError && (
-                                        <p className="text-xs text-red-500">{hargaError}</p>
+                                        <p className="text-xs text-red-500">
+                                            {hargaError}
+                                        </p>
                                     )}
                                 </div>
 
                                 {/* Subtotal per item */}
                                 <div className="space-y-1">
                                     {idx === 0 && (
-                                        <Label className="text-xs text-muted-foreground">Subtotal</Label>
+                                        <Label className="text-xs text-muted-foreground">
+                                            Subtotal
+                                        </Label>
                                     )}
                                     <div className="flex h-9 items-center rounded-md border bg-muted/50 px-3 font-mono text-sm text-muted-foreground">
                                         {formatRupiah(itemSubtotal)}
@@ -276,7 +364,7 @@ export function PesananForm({
 
             {/* ─── Diskon, Ongkir, Total ───────────────────────────────── */}
             <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                     Ringkasan Pembayaran
                 </h2>
 
@@ -284,7 +372,9 @@ export function PesananForm({
                     {/* Subtotal (read-only) */}
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Subtotal</span>
-                        <span className="font-mono font-medium">{formatRupiah(subtotal)}</span>
+                        <span className="font-mono font-medium">
+                            {formatRupiah(subtotal)}
+                        </span>
                     </div>
 
                     {/* Diskon */}
@@ -300,25 +390,40 @@ export function PesananForm({
                                 onClick={() =>
                                     setData(
                                         'tipe_diskon',
-                                        data.tipe_diskon === 'persen' ? 'nominal' : 'persen',
+                                        data.tipe_diskon === 'persen'
+                                            ? 'nominal'
+                                            : 'persen',
                                     )
                                 }
                             >
                                 {data.tipe_diskon === 'persen' ? '%' : 'Rp'}
                             </Button>
                             <span className="text-xs text-muted-foreground">
-                                {data.tipe_diskon === 'persen' ? 'Persen dari subtotal' : 'Nominal rupiah'}
+                                {data.tipe_diskon === 'persen'
+                                    ? 'Persen dari subtotal'
+                                    : 'Nominal rupiah'}
                             </span>
                         </div>
                         <Input
                             type="number"
                             min="0"
-                            max={data.tipe_diskon === 'persen' ? 100 : undefined}
+                            max={
+                                data.tipe_diskon === 'persen' ? 100 : undefined
+                            }
                             step={data.tipe_diskon === 'persen' ? '0.01' : '1'}
-                            placeholder={data.tipe_diskon === 'persen' ? 'Contoh: 10 (= 10%)' : 'Contoh: 50000'}
+                            placeholder={
+                                data.tipe_diskon === 'persen'
+                                    ? 'Contoh: 10 (= 10%)'
+                                    : 'Contoh: 50000'
+                            }
                             value={data.diskon}
                             onChange={(e) =>
-                                setData('diskon', e.target.value === '' ? '' : Number(e.target.value))
+                                setData(
+                                    'diskon',
+                                    e.target.value === ''
+                                        ? ''
+                                        : Number(e.target.value),
+                                )
                             }
                             className={errors.diskon ? 'border-red-500' : ''}
                         />
@@ -328,13 +433,17 @@ export function PesananForm({
                             </p>
                         )}
                         {errors.diskon && (
-                            <p className="text-sm text-red-500">{errors.diskon}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.diskon}
+                            </p>
                         )}
                     </div>
 
                     {/* Ongkir */}
                     <div className="space-y-2">
-                        <Label htmlFor="ongkir" className="text-sm">Ongkos Kirim</Label>
+                        <Label htmlFor="ongkir" className="text-sm">
+                            Ongkos Kirim
+                        </Label>
                         <Input
                             id="ongkir"
                             type="number"
@@ -342,19 +451,28 @@ export function PesananForm({
                             placeholder="0 (gratis)"
                             value={data.ongkir}
                             onChange={(e) =>
-                                setData('ongkir', e.target.value === '' ? '' : Number(e.target.value))
+                                setData(
+                                    'ongkir',
+                                    e.target.value === ''
+                                        ? ''
+                                        : Number(e.target.value),
+                                )
                             }
                             className={errors.ongkir ? 'border-red-500' : ''}
                         />
                         {errors.ongkir && (
-                            <p className="text-sm text-red-500">{errors.ongkir}</p>
+                            <p className="text-sm text-red-500">
+                                {errors.ongkir}
+                            </p>
                         )}
                     </div>
 
                     {/* Total */}
                     <div className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
                         <span className="font-semibold">Total</span>
-                        <span className="font-mono text-xl font-bold">{formatRupiah(total)}</span>
+                        <span className="font-mono text-xl font-bold">
+                            {formatRupiah(total)}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -371,7 +489,9 @@ export function PesananForm({
                         rows={3}
                     />
                     {errors.keterangan && (
-                        <p className="text-sm text-red-500">{errors.keterangan}</p>
+                        <p className="text-sm text-red-500">
+                            {errors.keterangan}
+                        </p>
                     )}
                 </div>
             </div>
@@ -379,10 +499,14 @@ export function PesananForm({
             {/* ─── Actions ─────────────────────────────────────────────── */}
             <div className="flex justify-end gap-3">
                 <Link href={cancelHref}>
-                    <Button type="button" variant="outline">Batal</Button>
+                    <Button type="button" variant="outline">
+                        Batal
+                    </Button>
                 </Link>
                 <Button type="submit" disabled={processing}>
-                    {processing ? 'Menyimpan...' : (submitLabel ?? defaultLabel)}
+                    {processing
+                        ? 'Menyimpan...'
+                        : (submitLabel ?? defaultLabel)}
                 </Button>
             </div>
         </form>

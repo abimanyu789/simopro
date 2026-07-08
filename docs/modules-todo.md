@@ -120,13 +120,30 @@ dari satu modul dalam satu percakapan.
       - Badge warna: B2B biru, B2C hijau
       - Hapus via dialog (index & show page)
 
-## 8. Pesanan + Invoice
-- [ ] Migration `pesanan` + `detail_pesanan` (singular, sesuai database-schema.md — bukan `pesanans`)
-- [ ] Model + relasi Customer, Produk
-- [ ] Service: hitung subtotal & total otomatis
-- [ ] Controller (create multi-item, update status, cetak invoice PDF)
-- [ ] React page (form pesanan, list, detail, invoice)
-- [ ] Test: multi produk per pesanan, status flow, invoice PDF
+## 8. Pesanan + Invoice (CRUD & status flow selesai — invoice PDF belum)
+- [x] Migration `pesanan` + `detail_pesanan` (singular, enum status: pending/proses/selesai/dibatalkan)
+- [x] Model `Pesanan` — boot auto-generate `nomor_pesanan` (PSN-{YYYYMMDD}-{0001}), helper isLocked()
+- [x] Model `DetailPesanan` — relasi belongsTo Pesanan & Produk
+- [x] Aktifkan relasi `Customer::pesanans()` hasMany
+- [x] Tambah relasi `Produk::detailPesanans()` hasMany
+- [x] Guard hapus Customer jika punya pesanan (BR Customer)
+- [x] Guard hapus Produk jika ada di detail_pesanan (BR Produk)
+- [x] FormRequest `PesananRequest` (customer_id exists, min 1 item, items.*.produk_id exists, qty > 0, diskon tipe persen/nominal)
+- [x] FormRequest `UpdateStatusPesananRequest` (enum status valid)
+- [x] Service `PesananService` — createWithDetails(), updateWithDetails(), updateStatus(), hitungTotal() dalam DB::transaction()
+- [x] Controller `PesananController` — index, create, store, show, edit, update, updateStatus, destroy
+- [x] Route resource `pesanan` + PATCH `pesanan/{pesanan}/status`
+- [x] Wayfinder generate — typed routes tersedia di `@/routes/pesanan`
+- [x] Seeder `PesananSeeder` — 12 pesanan dummy mix status
+- [x] TypeScript types `pesanan.ts` (StatusPesanan, Pesanan, DetailPesanan, PesananFormData, props interfaces)
+- [x] Component `PesananStatusBadge` — 4 warna (kuning=pending, biru=proses, hijau=selesai, merah=dibatalkan)
+- [x] Component `PesananDeleteDialog`
+- [x] Component `PesananForm` — multi-item, toggle diskon persen/nominal, preview total real-time
+- [x] React pages: index (search + filter status + sort + pagination), create, edit, show (detail + ubah status + ringkasan)
+- [x] Sidebar menu Pesanan diaktifkan
+- [x] Build berhasil tanpa error
+- [ ] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, pesanan selesai/dibatalkan tidak bisa dihapus/diedit
+- [ ] Invoice PDF — belum diimplementasi (scope sesi berikutnya)
 
 ## 9. Stok Bahan Baku ✅ SELESAI
 - [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi enum, qty decimal, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK)
