@@ -128,17 +128,45 @@ dari satu modul dalam satu percakapan.
 - [ ] React page (form pesanan, list, detail, invoice)
 - [ ] Test: multi produk per pesanan, status flow, invoice PDF
 
-## 9. Stok Bahan Baku
-- [ ] Migration `stok_bahan_baku` (log, singular — sesuai database-schema.md, bukan `stok_bahan_bakus`)
-- [ ] Service: restock manual + catat log
-- [ ] Controller + React page
-- [ ] Test: stok tidak boleh negatif, log tercatat
+## 9. Stok Bahan Baku ✅ SELESAI
+- [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi enum, qty decimal, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK)
+- [x] Model `StokBahanBaku` ($table singular, $fillable, $casts float, relasi belongsTo BahanBaku + createdBy User)
+- [x] Relasi `hasMany(StokBahanBaku)` ditambahkan ke model `BahanBaku`
+- [x] Service `app/Services/Inventory/StockBahanBakuService.php` — addStock() + reduceStock() + DB::transaction()
+- [x] FormRequest `TransaksiBahanBakuRequest` (jenis_transaksi: restock|penyesuaian, qty not_in:0, keterangan wajib untuk penyesuaian)
+- [x] Controller `StokBahanBakuController` (index, create, store, show — thin, routing ke addStock/reduceStock berdasarkan jenis + sign qty)
+- [x] Route resource `stok-bahan-baku` (only: index, create, store, show)
+- [x] Wayfinder generate — route typed functions tersedia di `@/routes/stok-bahan-baku`
+- [x] TypeScript types `stok-bahan-baku.ts` (StokBahanBaku, JenisTransaksiStok, props interfaces, RestockFormData dengan jenis_transaksi)
+- [x] React pages:
+      - index: riwayat + search + filter bahan baku + filter jenis transaksi + filter rentang tanggal + sort + pagination
+      - create: form terpadu (dropdown jenis: restock/penyesuaian, qty ±, preview stok sesudah real-time, keterangan wajib untuk penyesuaian)
+      - show: detail transaksi lengkap
+- [x] Sidebar "Stok > Bahan Baku" aktif
+- [x] Refactor: Master Data Bahan Baku tidak lagi menampilkan info stok (index/show)
+- [x] Refactor: Edit Bahan Baku — field stok dihapus, diganti information card + tombol "Lihat Stok"
+- [x] Build berhasil tanpa error
+- [ ] Test manual: restock berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
 
-## 10. Stok Produk Jadi
-- [ ] Migration `stok_produk_jadi` (log, singular — sesuai database-schema.md, bukan `stok_produk_jadis`)
-- [ ] Service: catat pengiriman + log
-- [ ] Controller + React page
-- [ ] Test: stok tidak boleh negatif, log tercatat
+## 10. Stok Produk Jadi ✅ SELESAI
+- [x] Migration `stok_produk_jadi` (kolom: produk_id, jenis_transaksi enum, qty int, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK → users)
+- [x] Model `StokProdukJadi` ($table singular, $fillable, $casts integer, relasi belongsTo Produk + createdBy User)
+- [x] Relasi `hasMany(StokProdukJadi)` ditambahkan ke model `Produk`
+- [x] Service `app/Services/Inventory/StockProdukService.php` — addStock() + reduceStock() + DB::transaction() + created_by
+- [x] FormRequest `TransaksiProdukRequest` (jenis_transaksi: pengiriman|penyesuaian, qty not_in:0, keterangan wajib untuk penyesuaian)
+- [x] Controller `StokProdukJadiController` (index, create, store, show — thin, routing ke addStock/reduceStock berdasarkan jenis + sign qty)
+- [x] Route resource `stok-produk-jadi` (only: index, create, store, show)
+- [x] Wayfinder generate — route typed functions tersedia di `@/routes/stok-produk-jadi`
+- [x] TypeScript types `stok-produk-jadi.ts` (StokProdukJadi, JenisTransaksiProduk, props interfaces, PengirimanFormData dengan jenis_transaksi)
+- [x] React pages:
+      - index: riwayat + search + filter produk + filter jenis transaksi + filter rentang tanggal + sort + pagination
+      - create: form terpadu (dropdown jenis: pengiriman/penyesuaian, qty ±, preview stok sesudah real-time, keterangan wajib untuk penyesuaian)
+      - show: detail transaksi lengkap (qty ± dengan warna merah/hijau)
+- [x] Sidebar "Stok > Produk Jadi" aktif
+- [x] Refactor: Master Data Produk tidak lagi menampilkan info stok (index/show)
+- [x] Refactor: Edit Produk — field stok dihapus, diganti information card + tombol "Lihat Stok"
+- [x] Build berhasil tanpa error
+- [ ] Test manual: pengiriman berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
 
 ## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
 - [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
