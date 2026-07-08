@@ -96,4 +96,9 @@ class Pesanan extends Model
     {
         return $this->hasMany(DetailPesanan::class, 'pesanan_id');
     }
+
+    public function produksi(): HasMany
+    {
+        return $this->hasMany(Produksi::class, 'pesanan_id');
+    }
 }

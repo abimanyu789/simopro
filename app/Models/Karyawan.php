@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Karyawan extends Model
 {
@@ -41,8 +42,8 @@ class Karyawan extends Model
      * Akan diaktifkan sepenuhnya setelah Modul Produksi selesai.
      * Deklarasi ini sudah siap dipakai untuk validasi hapus nanti.
      */
-    // public function detailProduksis(): \Illuminate\Database\Eloquent\Relations\HasMany
-    // {
-    //     return $this->hasMany(DetailProduksi::class, 'karyawan_id');
-    // }
+    public function detailProduksis(): HasMany
+    {
+        return $this->hasMany(DetailProduksi::class, 'karyawan_id');
+    }
 }

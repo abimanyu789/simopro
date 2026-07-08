@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\StokBahanBakuController;
 use App\Http\Controllers\StokProdukJadiController;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pesanan', PesananController::class);
     Route::patch('pesanan/{pesanan}/status', [PesananController::class, 'updateStatus'])
         ->name('pesanan.update-status');
+    Route::get('pesanan/{pesanan}/invoice', [PesananController::class, 'invoice'])
+        ->name('pesanan.invoice');
+
+    // Produksi
+    Route::resource('produksi', ProduksiController::class)
+        ->only(['index', 'create', 'store', 'show']);
 });
 
 require __DIR__.'/settings.php';

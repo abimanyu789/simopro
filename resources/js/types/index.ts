@@ -26,3 +26,4 @@ export type {
     ProdukOption as ProdukJadiOption,
 } from './stok-produk-jadi';
 export type * from './pesanan';
+export type * from './produksi';
