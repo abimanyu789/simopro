@@ -148,7 +148,7 @@ dari satu modul dalam satu percakapan.
 - [x] Fix: field "Dibuat oleh" menampilkan nama admin dari relasi createdBy
 - [x] Sidebar menu Pesanan diaktifkan
 - [x] Build berhasil tanpa error
-- [ ] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, cetak invoice PDF berfungsi
+- [x] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, cetak invoice PDF berfungsi
 
 ## 9. Stok Bahan Baku ✅ SELESAI
 - [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi enum, qty decimal, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK)
