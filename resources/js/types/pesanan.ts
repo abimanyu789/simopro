@@ -29,11 +29,11 @@ export interface Pesanan {
     ongkir: string;
     total: string;
     keterangan: string | null;
+    created_by: number | { id: number; nama: string };
     created_at: string;
     updated_at: string;
     // Relasi
     customer?: Customer;
-    created_by_user?: { id: number; nama: string };
     detail_pesanan?: DetailPesanan[];
 }
 

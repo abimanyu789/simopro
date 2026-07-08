@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, FileText, Pencil } from 'lucide-react';
 import { PesananDeleteDialog } from '@/components/pesanan/pesanan-delete-dialog';
 import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ export default function PesananShow({
         dibatalkan: 'Dibatalkan',
     };
 
-    const isLocked = ['selesai', 'dibatalkan'].includes(item.status);
+    const isLocked = item.status === 'selesai';
 
     return (
         <>
@@ -148,8 +148,8 @@ export default function PesananShow({
                                         Dibuat oleh
                                     </p>
                                     <p className="mt-1 font-medium">
-                                        {item.created_by_user?.nama ??
-                                            `Admin #${item.created_by}`}
+                                        {(item as any).created_by_nama ??
+                                            'Admin'}
                                     </p>
                                 </div>
                                 <div className="px-6 py-4">
@@ -238,20 +238,18 @@ export default function PesananShow({
                                 <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                                     Ubah Status
                                 </h2>
-                                <div className="space-y-2">
-                                    {statusTransisi.map((s) => (
-                                        <Button
-                                            key={s}
-                                            variant="outline"
-                                            className="w-full justify-start"
-                                            onClick={() =>
-                                                handleUpdateStatus(s)
-                                            }
-                                        >
-                                            {statusLabels[s]}
-                                        </Button>
-                                    ))}
-                                </div>
+                                <Select onValueChange={handleUpdateStatus}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Pilih status baru..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {statusTransisi.map((s) => (
+                                            <SelectItem key={s} value={s}>
+                                                {statusLabels[s]}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         )}
 

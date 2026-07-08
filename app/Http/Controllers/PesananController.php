@@ -92,8 +92,10 @@ class PesananController extends Controller
         $pesanan->load(['customer', 'createdBy', 'detailPesanan.produk']);
 
         return Inertia::render('pesanan/show', [
-            'pesanan'          => $pesanan,
-            'statusTransisi'   => $this->getStatusTransisi($pesanan->status),
+            'pesanan'        => array_merge($pesanan->toArray(), [
+                'created_by_nama' => $pesanan->createdBy?->nama ?? 'Admin',
+            ]),
+            'statusTransisi' => $this->getStatusTransisi($pesanan->status),
         ]);
     }
 
@@ -102,10 +104,10 @@ class PesananController extends Controller
      */
     public function edit(Pesanan $pesanan)
     {
-        if ($pesanan->isLocked()) {
+        if ($pesanan->isSelesai()) {
             return redirect()
                 ->route('pesanan.show', $pesanan)
-                ->with('error', 'Pesanan ini tidak dapat diedit.');
+                ->with('error', 'Pesanan yang sudah selesai tidak dapat diedit.');
         }
 
         $pesanan->load('detailPesanan.produk');
@@ -122,8 +124,8 @@ class PesananController extends Controller
      */
     public function update(PesananRequest $request, Pesanan $pesanan)
     {
-        if ($pesanan->isLocked()) {
-            return back()->with('error', 'Pesanan ini tidak dapat diedit.');
+        if ($pesanan->isSelesai()) {
+            return back()->with('error', 'Pesanan yang sudah selesai tidak dapat diedit.');
         }
 
         $this->service->updateWithDetails($pesanan, $request->validated());
