@@ -135,54 +135,6 @@ export default function ProdukShow({ produk: item }: ProdukShowProps) {
                         </div>
                     </div>
 
-                    {/* Informasi Stok */}
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-                        <h2 className="mb-4 text-lg font-semibold">
-                            Informasi Stok
-                        </h2>
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Stok Saat Ini
-                                </p>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <p
-                                        className={`text-2xl font-bold ${
-                                            isLowStock
-                                                ? 'text-orange-600 dark:text-orange-400'
-                                                : ''
-                                        }`}
-                                    >
-                                        {item.stok}
-                                    </p>
-                                    <span className="text-sm text-muted-foreground">
-                                        pasang
-                                    </span>
-                                </div>
-                                {isLowStock && (
-                                    <p className="mt-1 text-sm text-orange-600 dark:text-orange-500">
-                                        ⚠️ Stok di bawah minimum
-                                    </p>
-                                )}
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Minimum Stok
-                                </p>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <p className="text-2xl font-bold">
-                                        {item.minimum_stok ?? '-'}
-                                    </p>
-                                    {item.minimum_stok !== null && (
-                                        <span className="text-sm text-muted-foreground">
-                                            pasang
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Informasi BOM */}
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                         <h2 className="mb-4 text-lg font-semibold">

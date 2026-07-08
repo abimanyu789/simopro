@@ -148,7 +148,8 @@ export default function PesananShow({
                                         Dibuat oleh
                                     </p>
                                     <p className="mt-1 font-medium">
-                                        {item.created_by}
+                                        {item.created_by_user?.nama ??
+                                            `Admin #${item.created_by}`}
                                     </p>
                                 </div>
                                 <div className="px-6 py-4">
