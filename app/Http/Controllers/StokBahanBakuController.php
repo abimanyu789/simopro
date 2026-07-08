@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RestockBahanBakuRequest;
+use App\Http\Requests\TransaksiBahanBakuRequest;
 use App\Models\BahanBaku;
 use App\Models\StokBahanBaku;
 use App\Services\Inventory\StockBahanBakuService;
@@ -20,9 +20,10 @@ class StokBahanBakuController extends Controller
      */
     public function index(Request $request)
     {
-        $search       = $request->input('search');
-        $bahanBakuId  = $request->input('bahan_baku_id');
-        $tanggalDari  = $request->input('tanggal_dari');
+        $search        = $request->input('search');
+        $bahanBakuId   = $request->input('bahan_baku_id');
+        $jenisTranaksi = $request->input('jenis_transaksi');
+        $tanggalDari   = $request->input('tanggal_dari');
         $tanggalSampai = $request->input('tanggal_sampai');
         $sortBy       = $request->input('sort_by', 'created_at');
         $sortDir      = $request->input('sort_dir', 'desc');
@@ -42,6 +43,9 @@ class StokBahanBakuController extends Controller
             })
             ->when($bahanBakuId, function ($query, $id) {
                 $query->where('bahan_baku_id', $id);
+            })
+            ->when($jenisTranaksi, function ($query, $jenis) {
+                $query->where('jenis_transaksi', $jenis);
             })
             ->when($tanggalDari, function ($query, $tanggal) {
                 $query->whereDate('created_at', '>=', $tanggal);
@@ -63,6 +67,7 @@ class StokBahanBakuController extends Controller
             'filters'         => [
                 'search'         => $search,
                 'bahan_baku_id'  => $bahanBakuId,
+                'jenis_transaksi' => $jenisTranaksi,
                 'tanggal_dari'   => $tanggalDari,
                 'tanggal_sampai' => $tanggalSampai,
                 'sort_by'        => $sortBy,
@@ -89,22 +94,41 @@ class StokBahanBakuController extends Controller
     }
 
     /**
-     * Proses restock — panggil service, redirect ke index.
+     * Proses transaksi stok bahan baku — routing ke addStock/reduceStock berdasarkan jenis & sign qty.
      */
-    public function store(RestockBahanBakuRequest $request)
+    public function store(TransaksiBahanBakuRequest $request)
     {
         $bahanBaku = BahanBaku::findOrFail($request->validated('bahan_baku_id'));
+        $jenis     = $request->validated('jenis_transaksi');
+        $qty       = (float) $request->validated('qty');
+        $keterangan = $request->validated('keterangan');
 
-        $this->service->addStock(
-            bahanBaku:   $bahanBaku,
-            qty:         (float) $request->validated('qty'),
-            jenis:       'restock',
-            keterangan:  $request->validated('keterangan'),
-        );
+        try {
+            // Restock selalu tambah. Penyesuaian bisa + atau − tergantung sign qty.
+            if ($jenis === 'restock' || $qty > 0) {
+                $this->service->addStock(
+                    bahanBaku:  $bahanBaku,
+                    qty:        abs($qty),
+                    jenis:      $jenis,
+                    keterangan: $keterangan,
+                );
+            } else {
+                $this->service->reduceStock(
+                    bahanBaku:  $bahanBaku,
+                    qty:        abs($qty),
+                    jenis:      $jenis,
+                    keterangan: $keterangan,
+                );
+            }
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        $label = $jenis === 'restock' ? 'Restock' : 'Penyesuaian stok';
 
         return redirect()
             ->route('stok-bahan-baku.index')
-            ->with('success', "Restock {$bahanBaku->nama_bahan} berhasil dicatat.");
+            ->with('success', "{$label} {$bahanBaku->nama_bahan} berhasil dicatat.");
     }
 
     /**

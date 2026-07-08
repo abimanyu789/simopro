@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import bahanBaku from '@/routes/bahan-baku';
+import stokBahanBaku from '@/routes/stok-bahan-baku';
 import type { BahanBakuCreateEditProps, BahanBakuFormData } from '@/types';
 
 export default function BahanBakuEdit({
@@ -158,21 +159,36 @@ export default function BahanBakuEdit({
                             </div>
 
                             {/* Stok — readonly, hanya bisa diubah via Modul Stok Bahan Baku */}
-                            <div className="space-y-2">
-                                <Label htmlFor="stok">Stok</Label>
-                                <Input
-                                    id="stok"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={data.stok}
-                                    readOnly
-                                    className="cursor-not-allowed bg-muted text-muted-foreground"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Stok hanya dapat diubah melalui modul Stok
-                                    Bahan Baku.
-                                </p>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-start gap-3">
+                                        <Package className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                                        <div>
+                                            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                                Pengelolaan stok dilakukan
+                                                melalui Modul Inventory.
+                                            </p>
+                                            <p className="mt-0.5 text-xs text-blue-700 dark:text-blue-300">
+                                                Untuk restock atau melihat
+                                                riwayat perubahan stok, gunakan
+                                                halaman Stok Bahan Baku.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href={stokBahanBaku.index.url()}
+                                        className="shrink-0"
+                                    >
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900"
+                                        >
+                                            Lihat Stok
+                                        </Button>
+                                    </Link>
+                                </div>
                             </div>
 
                             {/* Minimum Stok */}

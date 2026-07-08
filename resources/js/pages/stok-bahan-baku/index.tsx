@@ -1,5 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Plus, Search } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    ChevronsUpDown,
+    Eye,
+    Plus,
+    Search,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,26 +34,37 @@ export default function StokBahanBakuIndex({
     bahanBakuOptions,
     filters,
 }: StokBahanBakuIndexProps) {
-    const [search, setSearch]               = useState(filters.search || '');
-    const [bahanBakuId, setBahanBakuId]     = useState(filters.bahan_baku_id || '');
-    const [tanggalDari, setTanggalDari]     = useState(filters.tanggal_dari || '');
-    const [tanggalSampai, setTanggalSampai] = useState(filters.tanggal_sampai || '');
+    const [search, setSearch] = useState(filters.search || '');
+    const [bahanBakuId, setBahanBakuId] = useState(filters.bahan_baku_id || '');
+    const [jenisTransaksi, setJenisTransaksi] = useState(
+        filters.jenis_transaksi || '',
+    );
+    const [tanggalDari, setTanggalDari] = useState(filters.tanggal_dari || '');
+    const [tanggalSampai, setTanggalSampai] = useState(
+        filters.tanggal_sampai || '',
+    );
 
-    const sortBy  = filters.sort_by  || 'created_at';
+    const sortBy = filters.sort_by || 'created_at';
     const sortDir = filters.sort_dir || 'desc';
 
-    type SortableColumn = 'created_at' | 'qty' | 'stok_sebelum' | 'stok_sesudah' | 'jenis_transaksi';
+    type SortableColumn =
+        | 'created_at'
+        | 'qty'
+        | 'stok_sebelum'
+        | 'stok_sesudah'
+        | 'jenis_transaksi';
 
     const navigate = (overrides: Record<string, unknown> = {}) => {
         router.get(
             stokBahanBaku.index.url(),
             {
-                search:          search || undefined,
-                bahan_baku_id:   bahanBakuId || undefined,
-                tanggal_dari:    tanggalDari || undefined,
-                tanggal_sampai:  tanggalSampai || undefined,
-                sort_by:         sortBy,
-                sort_dir:        sortDir,
+                search: search || undefined,
+                bahan_baku_id: bahanBakuId || undefined,
+                jenis_transaksi: jenisTransaksi || undefined,
+                tanggal_dari: tanggalDari || undefined,
+                tanggal_sampai: tanggalSampai || undefined,
+                sort_by: sortBy,
+                sort_dir: sortDir,
                 ...overrides,
             },
             { preserveState: true, preserveScroll: true },
@@ -59,18 +77,24 @@ export default function StokBahanBakuIndex({
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column) return <ChevronsUpDown className="ml-1 inline size-3.5 opacity-50" />;
-        return sortDir === 'asc'
-            ? <ChevronUp className="ml-1 inline size-3.5" />
-            : <ChevronDown className="ml-1 inline size-3.5" />;
+        if (sortBy !== column)
+            return (
+                <ChevronsUpDown className="ml-1 inline size-3.5 opacity-50" />
+            );
+        return sortDir === 'asc' ? (
+            <ChevronUp className="ml-1 inline size-3.5" />
+        ) : (
+            <ChevronDown className="ml-1 inline size-3.5" />
+        );
     };
 
     const sortableHead = (column: SortableColumn, label: string) => (
         <TableHead
-            className="cursor-pointer select-none whitespace-nowrap"
+            className="cursor-pointer whitespace-nowrap select-none"
             onClick={() => handleSort(column)}
         >
-            {label}<SortIcon column={column} />
+            {label}
+            <SortIcon column={column} />
         </TableHead>
     );
 
@@ -83,6 +107,12 @@ export default function StokBahanBakuIndex({
         const newVal = value === 'semua' ? '' : value;
         setBahanBakuId(newVal);
         navigate({ bahan_baku_id: newVal || undefined });
+    };
+
+    const handleJenisFilter = (value: string) => {
+        const newVal = value === 'semua' ? '' : value;
+        setJenisTransaksi(newVal);
+        navigate({ jenis_transaksi: newVal || undefined });
     };
 
     const handleTanggalDari = (value: string) => {
@@ -98,11 +128,18 @@ export default function StokBahanBakuIndex({
     const handleReset = () => {
         setSearch('');
         setBahanBakuId('');
+        setJenisTransaksi('');
         setTanggalDari('');
         setTanggalSampai('');
         router.get(stokBahanBaku.index.url(), {}, { preserveState: false });
     };
 
+    const activeFilterCount = [
+        bahanBakuId,
+        jenisTransaksi,
+        tanggalDari,
+        tanggalSampai,
+    ].filter(Boolean).length;
     const formatNumber = (value: number) =>
         new Intl.NumberFormat('id-ID', {
             minimumFractionDigits: 2,
@@ -119,17 +156,24 @@ export default function StokBahanBakuIndex({
         });
 
     const jenisBadge = (jenis: JenisTransaksiStok) => {
-        const map: Record<JenisTransaksiStok, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-            restock:    { label: 'Restock',    variant: 'default' },
-            produksi:   { label: 'Produksi',   variant: 'secondary' },
-            rollback:   { label: 'Rollback',   variant: 'outline' },
+        const map: Record<
+            JenisTransaksiStok,
+            {
+                label: string;
+                variant: 'default' | 'secondary' | 'destructive' | 'outline';
+            }
+        > = {
+            restock: { label: 'Restock', variant: 'default' },
+            produksi: { label: 'Produksi', variant: 'secondary' },
+            rollback: { label: 'Rollback', variant: 'outline' },
             adjustment: { label: 'Adjustment', variant: 'outline' },
         };
-        const config = map[jenis] ?? { label: jenis, variant: 'outline' as const };
+        const config = map[jenis] ?? {
+            label: jenis,
+            variant: 'outline' as const,
+        };
         return <Badge variant={config.variant}>{config.label}</Badge>;
     };
-
-    const activeFilterCount = [bahanBakuId, tanggalDari, tanggalSampai].filter(Boolean).length;
 
     return (
         <>
@@ -139,7 +183,9 @@ export default function StokBahanBakuIndex({
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Stok Bahan Baku</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Stok Bahan Baku
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Riwayat seluruh perubahan stok bahan baku
                         </p>
@@ -158,7 +204,7 @@ export default function StokBahanBakuIndex({
                         {/* Baris 1: Search */}
                         <form onSubmit={handleSearch} className="flex gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     placeholder="Cari kode bahan, nama bahan, keterangan..."
                                     value={search}
@@ -166,9 +212,15 @@ export default function StokBahanBakuIndex({
                                     className="pl-9"
                                 />
                             </div>
-                            <Button type="submit" variant="secondary">Cari</Button>
+                            <Button type="submit" variant="secondary">
+                                Cari
+                            </Button>
                             {(search || activeFilterCount > 0) && (
-                                <Button type="button" variant="ghost" onClick={handleReset}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={handleReset}
+                                >
                                     Reset
                                 </Button>
                             )}
@@ -185,39 +237,82 @@ export default function StokBahanBakuIndex({
                                     <SelectValue placeholder="Semua Bahan Baku" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="semua">Semua Bahan Baku</SelectItem>
+                                    <SelectItem value="semua">
+                                        Semua Bahan Baku
+                                    </SelectItem>
                                     {bahanBakuOptions.map((b) => (
-                                        <SelectItem key={b.id} value={String(b.id)}>
+                                        <SelectItem
+                                            key={b.id}
+                                            value={String(b.id)}
+                                        >
                                             {b.kode_bahan} — {b.nama_bahan}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
 
+                            {/* Filter Jenis Transaksi */}
+                            <Select
+                                value={jenisTransaksi || 'semua'}
+                                onValueChange={handleJenisFilter}
+                            >
+                                <SelectTrigger className="w-44">
+                                    <SelectValue placeholder="Semua Jenis" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="semua">
+                                        Semua Jenis
+                                    </SelectItem>
+                                    <SelectItem value="restock">
+                                        Restock
+                                    </SelectItem>
+                                    <SelectItem value="produksi">
+                                        Produksi
+                                    </SelectItem>
+                                    <SelectItem value="rollback">
+                                        Rollback
+                                    </SelectItem>
+                                    <SelectItem value="penyesuaian">
+                                        Penyesuaian
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+
                             {/* Filter Tanggal Dari */}
                             <div className="flex items-center gap-1">
-                                <span className="text-sm text-muted-foreground">Dari</span>
+                                <span className="text-sm text-muted-foreground">
+                                    Dari
+                                </span>
                                 <Input
                                     type="date"
                                     value={tanggalDari}
-                                    onChange={(e) => handleTanggalDari(e.target.value)}
+                                    onChange={(e) =>
+                                        handleTanggalDari(e.target.value)
+                                    }
                                     className="w-40"
                                 />
                             </div>
 
                             {/* Filter Tanggal Sampai */}
                             <div className="flex items-center gap-1">
-                                <span className="text-sm text-muted-foreground">Sampai</span>
+                                <span className="text-sm text-muted-foreground">
+                                    Sampai
+                                </span>
                                 <Input
                                     type="date"
                                     value={tanggalSampai}
-                                    onChange={(e) => handleTanggalSampai(e.target.value)}
+                                    onChange={(e) =>
+                                        handleTanggalSampai(e.target.value)
+                                    }
                                     className="w-40"
                                 />
                             </div>
 
                             {activeFilterCount > 0 && (
-                                <Badge variant="secondary" className="self-center">
+                                <Badge
+                                    variant="secondary"
+                                    className="self-center"
+                                >
                                     {activeFilterCount} filter aktif
                                 </Badge>
                             )}
@@ -238,7 +333,9 @@ export default function StokBahanBakuIndex({
                                 {sortableHead('stok_sebelum', 'Stok Sebelum')}
                                 {sortableHead('stok_sesudah', 'Stok Sesudah')}
                                 <TableHead>Keterangan</TableHead>
-                                <TableHead className="w-16 text-right">Aksi</TableHead>
+                                <TableHead className="w-16 text-right">
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -255,17 +352,22 @@ export default function StokBahanBakuIndex({
                                 riwayat.data.map((item, idx) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="text-muted-foreground">
-                                            {(riwayat.current_page - 1) * riwayat.per_page + idx + 1}
+                                            {(riwayat.current_page - 1) *
+                                                riwayat.per_page +
+                                                idx +
+                                                1}
                                         </TableCell>
-                                        <TableCell className="whitespace-nowrap text-sm">
+                                        <TableCell className="text-sm whitespace-nowrap">
                                             {formatDate(item.created_at)}
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium">
-                                                {item.bahan_baku?.nama_bahan ?? '-'}
+                                                {item.bahan_baku?.nama_bahan ??
+                                                    '-'}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {item.bahan_baku?.kode_bahan ?? '-'}
+                                                {item.bahan_baku?.kode_bahan ??
+                                                    '-'}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -284,8 +386,15 @@ export default function StokBahanBakuIndex({
                                             {item.keterangan ?? '-'}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Link href={stokBahanBaku.show.url(item.id)}>
-                                                <Button variant="ghost" size="icon">
+                                            <Link
+                                                href={stokBahanBaku.show.url(
+                                                    item.id,
+                                                )}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                >
                                                     <Eye className="size-4" />
                                                 </Button>
                                             </Link>
@@ -300,18 +409,32 @@ export default function StokBahanBakuIndex({
                     {riwayat.last_page > 1 && (
                         <div className="flex items-center justify-between border-t px-4 py-3">
                             <p className="text-sm text-muted-foreground">
-                                Menampilkan {riwayat.from ?? 0}–{riwayat.to ?? 0} dari{' '}
-                                {riwayat.total} data
+                                Menampilkan {riwayat.from ?? 0}–
+                                {riwayat.to ?? 0} dari {riwayat.total} data
                             </p>
                             <div className="flex gap-1">
                                 {riwayat.links.map((link, i) => (
                                     <Button
                                         key={i}
-                                        variant={link.active ? 'default' : 'outline'}
+                                        variant={
+                                            link.active ? 'default' : 'outline'
+                                        }
                                         size="sm"
                                         disabled={!link.url}
-                                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        onClick={() =>
+                                            link.url &&
+                                            router.get(
+                                                link.url,
+                                                {},
+                                                {
+                                                    preserveState: true,
+                                                    preserveScroll: true,
+                                                },
+                                            )
+                                        }
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
                                     />
                                 ))}
                             </div>

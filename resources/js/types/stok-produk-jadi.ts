@@ -1,6 +1,7 @@
 import type { Produk } from './produk';
 
-export type JenisTransaksiProduk = 'produksi' | 'pengiriman' | 'rollback' | 'penyesuaian';
+export type JenisTransaksiProduk =
+    'produksi' | 'pengiriman' | 'rollback' | 'penyesuaian';
 
 export interface StokProdukJadi {
     id: number;
@@ -43,6 +44,7 @@ export interface StokProdukJadiIndexProps {
     filters: {
         search?: string;
         produk_id?: string;
+        jenis_transaksi?: string;
         tanggal_dari?: string;
         tanggal_sampai?: string;
         sort_by?: string;
@@ -61,6 +63,7 @@ export interface StokProdukJadiShowProps {
 
 export interface PengirimanFormData {
     produk_id: number | '';
+    jenis_transaksi: 'pengiriman' | 'penyesuaian';
     qty: number | '';
     keterangan: string;
 }

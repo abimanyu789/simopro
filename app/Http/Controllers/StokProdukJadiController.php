@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PengirimanProdukRequest;
+use App\Http\Requests\TransaksiProdukRequest;
 use App\Models\Produk;
 use App\Models\StokProdukJadi;
 use App\Services\Inventory\StockProdukService;
@@ -22,6 +22,7 @@ class StokProdukJadiController extends Controller
     {
         $search        = $request->input('search');
         $produkId      = $request->input('produk_id');
+        $jenisTransaksi = $request->input('jenis_transaksi');
         $tanggalDari   = $request->input('tanggal_dari');
         $tanggalSampai = $request->input('tanggal_sampai');
         $sortBy        = $request->input('sort_by', 'created_at');
@@ -43,6 +44,9 @@ class StokProdukJadiController extends Controller
             ->when($produkId, function ($query, $id) {
                 $query->where('produk_id', $id);
             })
+            ->when($jenisTransaksi, function ($query, $jenis) {
+                $query->where('jenis_transaksi', $jenis);
+            })
             ->when($tanggalDari, function ($query, $tanggal) {
                 $query->whereDate('created_at', '>=', $tanggal);
             })
@@ -60,10 +64,11 @@ class StokProdukJadiController extends Controller
             'riwayat'      => $riwayat,
             'produkOptions' => $produkOptions,
             'filters'      => [
-                'search'         => $search,
-                'produk_id'      => $produkId,
-                'tanggal_dari'   => $tanggalDari,
-                'tanggal_sampai' => $tanggalSampai,
+                'search'          => $search,
+                'produk_id'       => $produkId,
+                'jenis_transaksi' => $jenisTransaksi,
+                'tanggal_dari'    => $tanggalDari,
+                'tanggal_sampai'  => $tanggalSampai,
                 'sort_by'        => $sortBy,
                 'sort_dir'       => $sortDir,
             ],
@@ -87,29 +92,43 @@ class StokProdukJadiController extends Controller
     }
 
     /**
-     * Proses pengiriman — panggil service, redirect ke index.
+     * Proses transaksi stok produk jadi — routing ke addStock/reduceStock berdasarkan jenis & sign qty.
      */
-    public function store(PengirimanProdukRequest $request)
+    public function store(TransaksiProdukRequest $request)
     {
-        $produk = Produk::findOrFail($request->validated('produk_id'));
+        $produk     = Produk::findOrFail($request->validated('produk_id'));
+        $jenis      = $request->validated('jenis_transaksi');
+        $qty        = (int) $request->validated('qty');
+        $keterangan = $request->validated('keterangan');
 
         try {
-            $this->service->reduceStock(
-                produk:      $produk,
-                qty:         (int) $request->validated('qty'),
-                jenis:       'pengiriman',
-                keterangan:  $request->validated('keterangan'),
-                createdBy:   auth()->id(),
-            );
+            // Pengiriman selalu kurangi. Penyesuaian bisa + atau − tergantung sign qty.
+            if ($jenis === 'pengiriman' || $qty < 0) {
+                $this->service->reduceStock(
+                    produk:     $produk,
+                    qty:        abs($qty),
+                    jenis:      $jenis,
+                    keterangan: $keterangan,
+                    createdBy:  auth()->id(),
+                );
+            } else {
+                $this->service->addStock(
+                    produk:     $produk,
+                    qty:        abs($qty),
+                    jenis:      $jenis,
+                    keterangan: $keterangan,
+                    createdBy:  auth()->id(),
+                );
+            }
         } catch (\RuntimeException $e) {
-            return back()
-                ->withInput()
-                ->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         }
+
+        $label = $jenis === 'pengiriman' ? 'Pengiriman' : 'Penyesuaian stok';
 
         return redirect()
             ->route('stok-produk-jadi.index')
-            ->with('success', "Pengiriman {$produk->nama_produk} berhasil dicatat.");
+            ->with('success', "{$label} {$produk->nama_produk} berhasil dicatat.");
     }
 
     /**

@@ -1,6 +1,7 @@
 import type { BahanBaku } from './bahan-baku';
 
-export type JenisTransaksiStok = 'restock' | 'produksi' | 'rollback' | 'adjustment';
+export type JenisTransaksiStok =
+    'restock' | 'produksi' | 'rollback' | 'adjustment';
 
 export interface StokBahanBaku {
     id: number;
@@ -43,6 +44,7 @@ export interface StokBahanBakuIndexProps {
     filters: {
         search?: string;
         bahan_baku_id?: string;
+        jenis_transaksi?: string;
         tanggal_dari?: string;
         tanggal_sampai?: string;
         sort_by?: string;
@@ -61,6 +63,7 @@ export interface StokBahanBakuShowProps {
 
 export interface RestockFormData {
     bahan_baku_id: number | '';
+    jenis_transaksi: 'restock' | 'penyesuaian';
     qty: number | '';
     keterangan: string;
 }

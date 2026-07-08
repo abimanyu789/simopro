@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import stokProdukJadi from '@/routes/stok-produk-jadi';
 import type { BomCategoryOption, ProdukFormData } from '@/types';
 
 interface ProdukFormProps {
@@ -156,50 +158,33 @@ export function ProdukForm({
 
                 {/* Stok & Minimum Stok — berdampingan */}
                 <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Stok */}
-                    <div className="space-y-2">
-                        <Label htmlFor="stok">
-                            Stok{' '}
-                            {mode === 'create' && (
-                                <span className="text-red-500">*</span>
+                    {/* Stok — hanya create, edit pakai information card */}
+                    {mode === 'create' && (
+                        <div className="space-y-2">
+                            <Label htmlFor="stok">
+                                Stok <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="stok"
+                                type="number"
+                                step="1"
+                                min="0"
+                                value={data.stok}
+                                onChange={(e) =>
+                                    setData(
+                                        'stok',
+                                        parseInt(e.target.value, 10) || 0,
+                                    )
+                                }
+                                className={errors.stok ? 'border-red-500' : ''}
+                            />
+                            {errors.stok && (
+                                <p className="text-sm text-red-500">
+                                    {errors.stok}
+                                </p>
                             )}
-                        </Label>
-                        <Input
-                            id="stok"
-                            type="number"
-                            step="1"
-                            min="0"
-                            value={data.stok}
-                            onChange={(e) =>
-                                mode === 'create'
-                                    ? setData(
-                                          'stok',
-                                          parseInt(e.target.value, 10) || 0,
-                                      )
-                                    : undefined
-                            }
-                            readOnly={mode === 'edit'}
-                            className={[
-                                errors.stok ? 'border-red-500' : '',
-                                mode === 'edit'
-                                    ? 'cursor-not-allowed bg-muted text-muted-foreground'
-                                    : '',
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
-                        />
-                        {errors.stok && (
-                            <p className="text-sm text-red-500">
-                                {errors.stok}
-                            </p>
-                        )}
-                        {mode === 'edit' && (
-                            <p className="text-xs text-muted-foreground">
-                                Stok hanya dapat diubah melalui modul Stok
-                                Produk Jadi.
-                            </p>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Minimum Stok */}
                     <div className="space-y-2">
@@ -234,7 +219,40 @@ export function ProdukForm({
                     </div>
                 </div>
 
-                {/* BOM */}
+                {/* Information card — hanya tampil saat edit */}
+                {mode === 'edit' && (
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                                <Package className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                                <div>
+                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                        Pengelolaan stok dilakukan melalui Modul
+                                        Inventory.
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-blue-700 dark:text-blue-300">
+                                        Untuk pengiriman atau melihat riwayat
+                                        perubahan stok, gunakan halaman Stok
+                                        Produk Jadi.
+                                    </p>
+                                </div>
+                            </div>
+                            <Link
+                                href={stokProdukJadi.index.url()}
+                                className="shrink-0"
+                            >
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900"
+                                >
+                                    Lihat Stok
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                )}
                 {bomCategories.length > 0 && (
                     <div className="space-y-2">
                         <Label htmlFor="bom_category_id">
