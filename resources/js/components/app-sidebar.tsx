@@ -23,6 +23,7 @@ import {
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
 import stokBahanBaku from '@/routes/stok-bahan-baku';
+import stokProdukJadi from '@/routes/stok-produk-jadi';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
 import karyawan from '@/routes/karyawan';
@@ -78,7 +79,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Produk Jadi',
-                href: '#',
+                href: stokProdukJadi.index.url(),
             },
         ],
     },

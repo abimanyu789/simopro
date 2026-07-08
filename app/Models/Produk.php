@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Produk extends Model
 {
@@ -45,5 +46,13 @@ class Produk extends Model
     public function bomCategorie(): BelongsTo
     {
         return $this->belongsTo(BomCategorie::class, 'bom_category_id');
+    }
+
+    /**
+     * Get the stock history records for this produk.
+     */
+    public function stokHistory(): HasMany
+    {
+        return $this->hasMany(StokProdukJadi::class, 'produk_id');
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokBahanBakuController;
+use App\Http\Controllers\StokProdukJadiController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -48,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Inventory - Stok Bahan Baku
     Route::resource('stok-bahan-baku', StokBahanBakuController::class)
+        ->only(['index', 'create', 'store', 'show']);
+
+    // Inventory - Stok Produk Jadi
+    Route::resource('stok-produk-jadi', StokProdukJadiController::class)
         ->only(['index', 'create', 'store', 'show']);
 });
 
