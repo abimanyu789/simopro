@@ -146,7 +146,7 @@ dari satu modul dalam satu percakapan.
 - [x] Refactor: Master Data Bahan Baku tidak lagi menampilkan info stok (index/show)
 - [x] Refactor: Edit Bahan Baku — field stok dihapus, diganti information card + tombol "Lihat Stok"
 - [x] Build berhasil tanpa error
-- [ ] Test manual: restock berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
+- [x] Test manual: restock berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
 
 ## 10. Stok Produk Jadi ✅ SELESAI
 - [x] Migration `stok_produk_jadi` (kolom: produk_id, jenis_transaksi enum, qty int, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK → users)
@@ -166,7 +166,7 @@ dari satu modul dalam satu percakapan.
 - [x] Refactor: Master Data Produk tidak lagi menampilkan info stok (index/show)
 - [x] Refactor: Edit Produk — field stok dihapus, diganti information card + tombol "Lihat Stok"
 - [x] Build berhasil tanpa error
-- [ ] Test manual: pengiriman berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
+- [x] Test manual: pengiriman berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
 
 ## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
 - [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
