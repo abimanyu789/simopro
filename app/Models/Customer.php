@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
@@ -36,13 +37,8 @@ class Customer extends Model
 
     // ─── Relasi ──────────────────────────────────────────────────────────────
 
-    /**
-     * Relasi ke tabel pesanan.
-     * Akan diaktifkan sepenuhnya setelah Modul Pesanan selesai.
-     * Deklarasi ini sudah siap dipakai untuk validasi hapus nanti.
-     */
-    // public function pesanans(): \Illuminate\Database\Eloquent\Relations\HasMany
-    // {
-    //     return $this->hasMany(Pesanan::class, 'customer_id');
-    // }
+    public function pesanans(): HasMany
+    {
+        return $this->hasMany(Pesanan::class, 'customer_id');
+    }
 }

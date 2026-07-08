@@ -122,10 +122,10 @@ class ProdukController extends Controller
      */
     public function destroy(Produk $produk)
     {
-        // Validasi relasi dengan tabel detail_pesanan akan diterapkan setelah Modul 8
-        // (Pesanan) selesai diimplementasi. Proteksi di level database sudah akan ada
-        // melalui FK onDelete('restrict') yang ditambahkan bersama migration detail_pesanan
-        // pada modul tersebut.
+        // Validasi: produk tidak bisa dihapus jika sudah dipakai di pesanan (BR Produk)
+        if ($produk->detailPesanans()->exists()) {
+            return back()->with('error', 'Produk tidak dapat dihapus karena sudah digunakan dalam pesanan.');
+        }
 
         $produk->delete();
 

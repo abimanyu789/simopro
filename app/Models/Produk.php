@@ -55,4 +55,9 @@ class Produk extends Model
     {
         return $this->hasMany(StokProdukJadi::class, 'produk_id');
     }
+
+    public function detailPesanans(): HasMany
+    {
+        return $this->hasMany(DetailPesanan::class, 'produk_id');
+    }
 }

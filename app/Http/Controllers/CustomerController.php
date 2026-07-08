@@ -111,12 +111,12 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        // ── Validasi pesanan aktif (aktifkan saat Modul Pesanan selesai) ──────
-        // if ($customer->pesanans()->exists()) {
-        //     return back()->withErrors([
-        //         'delete' => 'Customer tidak dapat dihapus karena masih memiliki pesanan.',
-        //     ]);
-        // }
+        // ── Validasi pesanan aktif (BR-07) ──────────────────────────────────
+        if ($customer->pesanans()->exists()) {
+            return back()->withErrors([
+                'delete' => 'Customer tidak dapat dihapus karena masih memiliki pesanan.',
+            ])->with('error', 'Customer tidak dapat dihapus karena masih memiliki pesanan.');
+        }
 
         $customer->delete();
 

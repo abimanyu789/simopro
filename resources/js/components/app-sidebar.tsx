@@ -27,6 +27,7 @@ import stokProdukJadi from '@/routes/stok-produk-jadi';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
 import karyawan from '@/routes/karyawan';
+import pesanan from '@/routes/pesanan';
 import produk from '@/routes/produk';
 import type { NavItem } from '@/types';
 
@@ -65,7 +66,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Pesanan',
-        href: '#',
+        href: pesanan.index.url(),
         icon: ShoppingCart,
     },
     {

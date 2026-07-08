@@ -6,6 +6,7 @@ use App\Http\Controllers\BomDetailController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokBahanBakuController;
 use App\Http\Controllers\StokProdukJadiController;
@@ -54,6 +55,11 @@ Route::middleware(['auth'])->group(function () {
     // Inventory - Stok Produk Jadi
     Route::resource('stok-produk-jadi', StokProdukJadiController::class)
         ->only(['index', 'create', 'store', 'show']);
+
+    // Pesanan
+    Route::resource('pesanan', PesananController::class);
+    Route::patch('pesanan/{pesanan}/status', [PesananController::class, 'updateStatus'])
+        ->name('pesanan.update-status');
 });
 
 require __DIR__.'/settings.php';

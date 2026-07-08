@@ -9,3 +9,4 @@ export type * from './produk';
 export type * from './bom';
 export type * from './stok-bahan-baku';
 export type * from './stok-produk-jadi';
+export type * from './pesanan';

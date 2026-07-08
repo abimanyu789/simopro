@@ -1,0 +1,390 @@
+import { Link } from '@inertiajs/react';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import type {
+    CustomerOption,
+    PesananFormData,
+    PesananItemFormData,
+    ProdukOption,
+    TipeDiskon,
+} from '@/types';
+
+interface PesananFormProps {
+    data: PesananFormData;
+    setData: <K extends keyof PesananFormData>(key: K, value: PesananFormData[K]) => void;
+    errors: Partial<Record<string, string>>;
+    processing: boolean;
+    onSubmit: (e: React.FormEvent) => void;
+    cancelHref: string;
+    submitLabel?: string;
+    mode: 'create' | 'edit';
+    customers: CustomerOption[];
+    produks: ProdukOption[];
+}
+
+export function PesananForm({
+    data,
+    setData,
+    errors,
+    processing,
+    onSubmit,
+    cancelHref,
+    submitLabel,
+    mode,
+    customers,
+    produks,
+}: PesananFormProps) {
+    const defaultLabel = mode === 'create' ? 'Simpan Pesanan' : 'Simpan Perubahan';
+
+    // ─── Kalkulasi real-time ──────────────────────────────────────────────────
+
+    const subtotal = data.items.reduce((sum, item) => {
+        const qty   = Number(item.qty)   || 0;
+        const harga = Number(item.harga) || 0;
+        return sum + qty * harga;
+    }, 0);
+
+    const nilaiDiskon = (() => {
+        const d = Number(data.diskon) || 0;
+        if (d <= 0) return 0;
+        return data.tipe_diskon === 'persen'
+            ? Math.round(subtotal * (d / 100))
+            : d;
+    })();
+
+    const total = Math.max(0, subtotal - nilaiDiskon + (Number(data.ongkir) || 0));
+
+    // ─── Item helpers ─────────────────────────────────────────────────────────
+
+    const addItem = () => {
+        setData('items', [...data.items, { produk_id: '', qty: '', harga: '' }]);
+    };
+
+    const removeItem = (idx: number) => {
+        setData('items', data.items.filter((_, i) => i !== idx));
+    };
+
+    const updateItem = (idx: number, field: keyof PesananItemFormData, value: string | number) => {
+        const updated = data.items.map((item, i) =>
+            i === idx ? { ...item, [field]: value } : item
+        );
+        setData('items', updated);
+    };
+
+    // Auto-fill harga dari harga_jual produk
+    const handleProdukChange = (idx: number, produkId: number) => {
+        const produk = produks.find((p) => p.id === produkId);
+        const harga  = produk?.harga_jual ? Number(produk.harga_jual) : '';
+        updateItem(idx, 'produk_id', produkId);
+        updateItem(idx, 'harga', harga);
+    };
+
+    const formatRupiah = (value: number) =>
+        new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        }).format(value);
+
+    return (
+        <form onSubmit={onSubmit} className="space-y-6">
+            {/* ─── Header Info ─────────────────────────────────────────── */}
+            <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    Informasi Pesanan
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Customer */}
+                    <div className="space-y-2">
+                        <Label htmlFor="customer_id">
+                            Customer <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                            value={data.customer_id !== '' ? String(data.customer_id) : ''}
+                            onValueChange={(v) => setData('customer_id', Number(v))}
+                        >
+                            <SelectTrigger id="customer_id" className={errors.customer_id ? 'border-red-500' : ''}>
+                                <SelectValue placeholder="Pilih customer..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {customers.map((c) => (
+                                    <SelectItem key={c.id} value={String(c.id)}>
+                                        {c.nama_customer}
+                                        <span className="ml-2 text-xs uppercase text-muted-foreground">
+                                            ({c.jenis_customer})
+                                        </span>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.customer_id && (
+                            <p className="text-sm text-red-500">{errors.customer_id}</p>
+                        )}
+                    </div>
+
+                    {/* Tanggal */}
+                    <div className="space-y-2">
+                        <Label htmlFor="tanggal">
+                            Tanggal Pesanan <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="tanggal"
+                            type="date"
+                            value={data.tanggal}
+                            onChange={(e) => setData('tanggal', e.target.value)}
+                            className={errors.tanggal ? 'border-red-500' : ''}
+                        />
+                        {errors.tanggal && (
+                            <p className="text-sm text-red-500">{errors.tanggal}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── Item Produk ─────────────────────────────────────────── */}
+            <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        Item Produk
+                    </h2>
+                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                        <Plus className="mr-1 size-3.5" />
+                        Tambah Produk
+                    </Button>
+                </div>
+
+                {errors.items && (
+                    <p className="mb-3 text-sm text-red-500">{errors.items}</p>
+                )}
+
+                <div className="space-y-3">
+                    {data.items.map((item, idx) => {
+                        const itemSubtotal = (Number(item.qty) || 0) * (Number(item.harga) || 0);
+                        const produkError  = errors[`items.${idx}.produk_id`];
+                        const qtyError     = errors[`items.${idx}.qty`];
+                        const hargaError   = errors[`items.${idx}.harga`];
+
+                        return (
+                            <div
+                                key={idx}
+                                className="grid grid-cols-[1fr_100px_140px_120px_40px] items-end gap-2"
+                            >
+                                {/* Produk */}
+                                <div className="space-y-1">
+                                    {idx === 0 && (
+                                        <Label className="text-xs text-muted-foreground">Produk</Label>
+                                    )}
+                                    <Select
+                                        value={item.produk_id !== '' ? String(item.produk_id) : ''}
+                                        onValueChange={(v) => handleProdukChange(idx, Number(v))}
+                                    >
+                                        <SelectTrigger className={produkError ? 'border-red-500' : ''}>
+                                            <SelectValue placeholder="Pilih produk..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {produks.map((p) => (
+                                                <SelectItem key={p.id} value={String(p.id)}>
+                                                    {p.kode_produk} — {p.nama_produk}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {produkError && (
+                                        <p className="text-xs text-red-500">{produkError}</p>
+                                    )}
+                                </div>
+
+                                {/* Qty */}
+                                <div className="space-y-1">
+                                    {idx === 0 && (
+                                        <Label className="text-xs text-muted-foreground">Qty</Label>
+                                    )}
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        placeholder="0"
+                                        value={item.qty}
+                                        onChange={(e) =>
+                                            updateItem(idx, 'qty', e.target.value === '' ? '' : Number(e.target.value))
+                                        }
+                                        className={qtyError ? 'border-red-500' : ''}
+                                    />
+                                    {qtyError && (
+                                        <p className="text-xs text-red-500">{qtyError}</p>
+                                    )}
+                                </div>
+
+                                {/* Harga */}
+                                <div className="space-y-1">
+                                    {idx === 0 && (
+                                        <Label className="text-xs text-muted-foreground">Harga (Rp)</Label>
+                                    )}
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        placeholder="0"
+                                        value={item.harga}
+                                        onChange={(e) =>
+                                            updateItem(idx, 'harga', e.target.value === '' ? '' : Number(e.target.value))
+                                        }
+                                        className={hargaError ? 'border-red-500' : ''}
+                                    />
+                                    {hargaError && (
+                                        <p className="text-xs text-red-500">{hargaError}</p>
+                                    )}
+                                </div>
+
+                                {/* Subtotal per item */}
+                                <div className="space-y-1">
+                                    {idx === 0 && (
+                                        <Label className="text-xs text-muted-foreground">Subtotal</Label>
+                                    )}
+                                    <div className="flex h-9 items-center rounded-md border bg-muted/50 px-3 font-mono text-sm text-muted-foreground">
+                                        {formatRupiah(itemSubtotal)}
+                                    </div>
+                                </div>
+
+                                {/* Hapus baris */}
+                                <div className={idx === 0 ? 'pt-5' : ''}>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-9 text-red-500 hover:bg-red-50 hover:text-red-600"
+                                        onClick={() => removeItem(idx)}
+                                        disabled={data.items.length === 1}
+                                    >
+                                        <Trash2 className="size-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ─── Diskon, Ongkir, Total ───────────────────────────────── */}
+            <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    Ringkasan Pembayaran
+                </h2>
+
+                <div className="space-y-4">
+                    {/* Subtotal (read-only) */}
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span className="font-mono font-medium">{formatRupiah(subtotal)}</span>
+                    </div>
+
+                    {/* Diskon */}
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <Label className="text-sm">Diskon</Label>
+                            {/* Toggle tipe diskon */}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                onClick={() =>
+                                    setData(
+                                        'tipe_diskon',
+                                        data.tipe_diskon === 'persen' ? 'nominal' : 'persen',
+                                    )
+                                }
+                            >
+                                {data.tipe_diskon === 'persen' ? '%' : 'Rp'}
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                                {data.tipe_diskon === 'persen' ? 'Persen dari subtotal' : 'Nominal rupiah'}
+                            </span>
+                        </div>
+                        <Input
+                            type="number"
+                            min="0"
+                            max={data.tipe_diskon === 'persen' ? 100 : undefined}
+                            step={data.tipe_diskon === 'persen' ? '0.01' : '1'}
+                            placeholder={data.tipe_diskon === 'persen' ? 'Contoh: 10 (= 10%)' : 'Contoh: 50000'}
+                            value={data.diskon}
+                            onChange={(e) =>
+                                setData('diskon', e.target.value === '' ? '' : Number(e.target.value))
+                            }
+                            className={errors.diskon ? 'border-red-500' : ''}
+                        />
+                        {nilaiDiskon > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                                Nilai diskon: {formatRupiah(nilaiDiskon)}
+                            </p>
+                        )}
+                        {errors.diskon && (
+                            <p className="text-sm text-red-500">{errors.diskon}</p>
+                        )}
+                    </div>
+
+                    {/* Ongkir */}
+                    <div className="space-y-2">
+                        <Label htmlFor="ongkir" className="text-sm">Ongkos Kirim</Label>
+                        <Input
+                            id="ongkir"
+                            type="number"
+                            min="0"
+                            placeholder="0 (gratis)"
+                            value={data.ongkir}
+                            onChange={(e) =>
+                                setData('ongkir', e.target.value === '' ? '' : Number(e.target.value))
+                            }
+                            className={errors.ongkir ? 'border-red-500' : ''}
+                        />
+                        {errors.ongkir && (
+                            <p className="text-sm text-red-500">{errors.ongkir}</p>
+                        )}
+                    </div>
+
+                    {/* Total */}
+                    <div className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
+                        <span className="font-semibold">Total</span>
+                        <span className="font-mono text-xl font-bold">{formatRupiah(total)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── Keterangan ──────────────────────────────────────────── */}
+            <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                <div className="space-y-2">
+                    <Label htmlFor="keterangan">Keterangan</Label>
+                    <Textarea
+                        id="keterangan"
+                        placeholder="Catatan pesanan (opsional)..."
+                        value={data.keterangan}
+                        onChange={(e) => setData('keterangan', e.target.value)}
+                        rows={3}
+                    />
+                    {errors.keterangan && (
+                        <p className="text-sm text-red-500">{errors.keterangan}</p>
+                    )}
+                </div>
+            </div>
+
+            {/* ─── Actions ─────────────────────────────────────────────── */}
+            <div className="flex justify-end gap-3">
+                <Link href={cancelHref}>
+                    <Button type="button" variant="outline">Batal</Button>
+                </Link>
+                <Button type="submit" disabled={processing}>
+                    {processing ? 'Menyimpan...' : (submitLabel ?? defaultLabel)}
+                </Button>
+            </div>
+        </form>
+    );
+}

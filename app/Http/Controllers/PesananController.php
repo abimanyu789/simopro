@@ -1,0 +1,179 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\PesananRequest;
+use App\Http\Requests\UpdateStatusPesananRequest;
+use App\Models\Customer;
+use App\Models\Pesanan;
+use App\Models\Produk;
+use App\Services\PesananService;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class PesananController extends Controller
+{
+    public function __construct(
+        private readonly PesananService $service
+    ) {}
+
+    /**
+     * Daftar semua pesanan.
+     */
+    public function index(Request $request)
+    {
+        $search  = $request->input('search');
+        $status  = $request->input('status');
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        $allowedSorts = ['nomor_pesanan', 'tanggal', 'total', 'status', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+
+        $pesanans = Pesanan::with('customer')
+            ->when($search, function ($query, $search) {
+                $query->where('nomor_pesanan', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('nama_customer', 'like', "%{$search}%");
+                    });
+            })
+            ->when($status && in_array($status, ['pending', 'proses', 'selesai', 'dibatalkan']), function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->orderBy($sortBy, $sortDir)
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('pesanan/index', [
+            'pesanans' => $pesanans,
+            'filters'  => [
+                'search'   => $search,
+                'status'   => $status,
+                'sort_by'  => $sortBy,
+                'sort_dir' => $sortDir,
+            ],
+        ]);
+    }
+
+    /**
+     * Form buat pesanan baru.
+     */
+    public function create()
+    {
+        return Inertia::render('pesanan/create', [
+            'customers' => Customer::orderBy('nama_customer')->get(['id', 'nama_customer', 'jenis_customer']),
+            'produks'   => Produk::orderBy('nama_produk')->get(['id', 'kode_produk', 'nama_produk', 'harga_jual', 'stok']),
+        ]);
+    }
+
+    /**
+     * Simpan pesanan baru.
+     */
+    public function store(PesananRequest $request)
+    {
+        $pesanan = $this->service->createWithDetails(
+            $request->validated(),
+            auth()->id()
+        );
+
+        return redirect()
+            ->route('pesanan.show', $pesanan)
+            ->with('success', "Pesanan {$pesanan->nomor_pesanan} berhasil dibuat.");
+    }
+
+    /**
+     * Detail pesanan.
+     */
+    public function show(Pesanan $pesanan)
+    {
+        $pesanan->load(['customer', 'createdBy', 'detailPesanan.produk']);
+
+        return Inertia::render('pesanan/show', [
+            'pesanan'          => $pesanan,
+            'statusTransisi'   => $this->getStatusTransisi($pesanan->status),
+        ]);
+    }
+
+    /**
+     * Form edit pesanan — hanya saat status pending.
+     */
+    public function edit(Pesanan $pesanan)
+    {
+        if ($pesanan->isLocked()) {
+            return redirect()
+                ->route('pesanan.show', $pesanan)
+                ->with('error', 'Pesanan ini tidak dapat diedit.');
+        }
+
+        $pesanan->load('detailPesanan.produk');
+
+        return Inertia::render('pesanan/edit', [
+            'pesanan'   => $pesanan,
+            'customers' => Customer::orderBy('nama_customer')->get(['id', 'nama_customer', 'jenis_customer']),
+            'produks'   => Produk::orderBy('nama_produk')->get(['id', 'kode_produk', 'nama_produk', 'harga_jual', 'stok']),
+        ]);
+    }
+
+    /**
+     * Update pesanan — hanya saat status pending.
+     */
+    public function update(PesananRequest $request, Pesanan $pesanan)
+    {
+        if ($pesanan->isLocked()) {
+            return back()->with('error', 'Pesanan ini tidak dapat diedit.');
+        }
+
+        $this->service->updateWithDetails($pesanan, $request->validated());
+
+        return redirect()
+            ->route('pesanan.show', $pesanan)
+            ->with('success', 'Pesanan berhasil diperbarui.');
+    }
+
+    /**
+     * Update status pesanan.
+     */
+    public function updateStatus(UpdateStatusPesananRequest $request, Pesanan $pesanan)
+    {
+        try {
+            $this->service->updateStatus($pesanan, $request->validated('status'));
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus pesanan — hanya saat status pending/proses (BR-07).
+     */
+    public function destroy(Pesanan $pesanan)
+    {
+        if ($pesanan->isLocked()) {
+            return back()->with('error', 'Pesanan berstatus selesai atau dibatalkan tidak dapat dihapus.');
+        }
+
+        $nomor = $pesanan->nomor_pesanan;
+        $pesanan->detailPesanan()->delete();
+        $pesanan->delete();
+
+        return redirect()
+            ->route('pesanan.index')
+            ->with('success', "Pesanan {$nomor} berhasil dihapus.");
+    }
+
+    /**
+     * Kembalikan daftar status yang bisa ditransisi dari status saat ini.
+     */
+    private function getStatusTransisi(string $status): array
+    {
+        return match ($status) {
+            'pending' => ['proses', 'dibatalkan'],
+            'proses'  => ['selesai', 'dibatalkan'],
+            default   => [],
+        };
+    }
+}
