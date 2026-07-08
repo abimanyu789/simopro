@@ -20,7 +20,6 @@ export interface DetailPesanan {
 export interface Pesanan {
     id: number;
     customer_id: number;
-    created_by: number;
     nomor_pesanan: string;
     tanggal: string;
     status: StatusPesanan;

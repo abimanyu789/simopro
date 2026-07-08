@@ -8,7 +8,6 @@ import {
     Wrench,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -22,13 +21,13 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import bahanBaku from '@/routes/bahan-baku';
-import stokBahanBaku from '@/routes/stok-bahan-baku';
-import stokProdukJadi from '@/routes/stok-produk-jadi';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
 import karyawan from '@/routes/karyawan';
 import pesanan from '@/routes/pesanan';
 import produk from '@/routes/produk';
+import stokBahanBaku from '@/routes/stok-bahan-baku';
+import stokProdukJadi from '@/routes/stok-produk-jadi';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [

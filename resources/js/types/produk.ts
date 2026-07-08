@@ -1,3 +1,5 @@
+import type { BomCategorie, BomDetail, BomCategoryOption } from './bom';
+
 export interface Produk {
     id: number;
     kode_produk: string;
@@ -11,8 +13,8 @@ export interface Produk {
     created_at: string;
     updated_at: string;
     // Relasi
-    bom_categorie?: import('./bom').BomCategorie & {
-        bom_details: import('./bom').BomDetail[];
+    bom_categorie?: BomCategorie & {
+        bom_details: BomDetail[];
     };
     stok_history?: {
         id: number;
@@ -63,12 +65,12 @@ export interface ProdukIndexProps {
 
 export interface ProdukCreateProps {
     produk?: never;
-    bomCategories: import('./bom').BomCategoryOption[];
+    bomCategories: BomCategoryOption[];
 }
 
 export interface ProdukEditProps {
     produk: Produk;
-    bomCategories: import('./bom').BomCategoryOption[];
+    bomCategories: BomCategoryOption[];
 }
 
 export interface ProdukShowProps {

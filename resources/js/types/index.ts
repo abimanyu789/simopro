@@ -7,6 +7,22 @@ export type * from './navigation';
 export type * from './ui';
 export type * from './produk';
 export type * from './bom';
-export type * from './stok-bahan-baku';
-export type * from './stok-produk-jadi';
+export type {
+    JenisTransaksiStok,
+    StokBahanBaku,
+    StokBahanBakuIndexProps,
+    StokBahanBakuCreateProps,
+    StokBahanBakuShowProps,
+    RestockFormData,
+    BahanBakuOption as BahanBakuStokOption,
+} from './stok-bahan-baku';
+export type {
+    JenisTransaksiProduk,
+    StokProdukJadi,
+    StokProdukJadiIndexProps,
+    StokProdukJadiCreateProps,
+    StokProdukJadiShowProps,
+    PengirimanFormData,
+    ProdukOption as ProdukJadiOption,
+} from './stok-produk-jadi';
 export type * from './pesanan';

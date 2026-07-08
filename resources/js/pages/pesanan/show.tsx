@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, FileText, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil } from 'lucide-react';
 import { PesananDeleteDialog } from '@/components/pesanan/pesanan-delete-dialog';
 import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
 import { Button } from '@/components/ui/button';

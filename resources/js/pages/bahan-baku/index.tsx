@@ -64,10 +64,11 @@ export default function BahanBakuIndex({
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column)
+        if (sortBy !== column) {
             return (
                 <ChevronsUpDown className="ml-1 inline size-3.5 text-muted-foreground/50" />
             );
+        }
         return sortDir === 'asc' ? (
             <ChevronUp className="ml-1 inline size-3.5" />
         ) : (
@@ -101,7 +102,9 @@ export default function BahanBakuIndex({
     };
 
     const formatNumber = (value: number | null) => {
-        if (value === null) return '-';
+        if (value === null) {
+            return '-';
+        }
         return new Intl.NumberFormat('id-ID', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,

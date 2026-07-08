@@ -120,9 +120,9 @@ dari satu modul dalam satu percakapan.
       - Badge warna: B2B biru, B2C hijau
       - Hapus via dialog (index & show page)
 
-## 8. Pesanan + Invoice (CRUD & status flow selesai — invoice PDF belum)
+## 8. Pesanan + Invoice ✅ SELESAI (invoice PDF scope sesi berikutnya)
 - [x] Migration `pesanan` + `detail_pesanan` (singular, enum status: pending/proses/selesai/dibatalkan)
-- [x] Model `Pesanan` — boot auto-generate `nomor_pesanan` (PSN-{YYYYMMDD}-{0001}), helper isLocked()
+- [x] Model `Pesanan` — boot auto-generate `nomor_pesanan` (PSN-{YYYYMMDD}-{0001}), accessor `nomor_invoice` (INV-xxx), helper isLocked()/isSelesai()
 - [x] Model `DetailPesanan` — relasi belongsTo Pesanan & Produk
 - [x] Aktifkan relasi `Customer::pesanans()` hasMany
 - [x] Tambah relasi `Produk::detailPesanans()` hasMany
@@ -131,19 +131,24 @@ dari satu modul dalam satu percakapan.
 - [x] FormRequest `PesananRequest` (customer_id exists, min 1 item, items.*.produk_id exists, qty > 0, diskon tipe persen/nominal)
 - [x] FormRequest `UpdateStatusPesananRequest` (enum status valid)
 - [x] Service `PesananService` — createWithDetails(), updateWithDetails(), updateStatus(), hitungTotal() dalam DB::transaction()
-- [x] Controller `PesananController` — index, create, store, show, edit, update, updateStatus, destroy
-- [x] Route resource `pesanan` + PATCH `pesanan/{pesanan}/status`
+- [x] Controller `PesananController` — index, create, store, show, edit, update, updateStatus, destroy, invoice
+- [x] Route resource `pesanan` + PATCH `pesanan/{pesanan}/status` + GET `pesanan/{pesanan}/invoice`
 - [x] Wayfinder generate — typed routes tersedia di `@/routes/pesanan`
 - [x] Seeder `PesananSeeder` — 12 pesanan dummy mix status
+- [x] Install `barryvdh/laravel-dompdf` v3.1.2
+- [x] Blade template `resources/views/pdf/invoice.blade.php` — layout profesional (logo, info perusahaan, customer, tabel item, ringkasan, footer)
 - [x] TypeScript types `pesanan.ts` (StatusPesanan, Pesanan, DetailPesanan, PesananFormData, props interfaces)
 - [x] Component `PesananStatusBadge` — 4 warna (kuning=pending, biru=proses, hijau=selesai, merah=dibatalkan)
 - [x] Component `PesananDeleteDialog`
-- [x] Component `PesananForm` — multi-item, toggle diskon persen/nominal, preview total real-time
-- [x] React pages: index (search + filter status + sort + pagination), create, edit, show (detail + ubah status + ringkasan)
+- [x] Component `PesananForm` — multi-item, toggle diskon persen/nominal, preview total real-time, fix stale closure bug pada handleProdukChange
+- [x] React pages: index (search + filter status + sort + pagination), create, edit, show
+- [x] Show page: ubah status via dropdown Select, tombol Cetak Invoice (stream PDF di tab baru)
+- [x] Edit diizinkan untuk status pending DAN dibatalkan (hanya selesai yang tidak bisa diedit)
+- [x] Detail produk: BOM dan riwayat stok ditampilkan dinamis (load relasi di controller)
+- [x] Fix: field "Dibuat oleh" menampilkan nama admin dari relasi createdBy
 - [x] Sidebar menu Pesanan diaktifkan
 - [x] Build berhasil tanpa error
-- [ ] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, pesanan selesai/dibatalkan tidak bisa dihapus/diedit
-- [ ] Invoice PDF — belum diimplementasi (scope sesi berikutnya)
+- [ ] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, cetak invoice PDF berfungsi
 
 ## 9. Stok Bahan Baku ✅ SELESAI
 - [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi enum, qty decimal, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK)
