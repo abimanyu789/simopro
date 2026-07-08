@@ -85,7 +85,7 @@ const mainNavItems: NavItem[] = [
         ],
     },
     {
-        title: 'Produksi Karyawan',
+        title: 'Produksi',
         href: produksi.index.url(),
         icon: Wrench,
     },
