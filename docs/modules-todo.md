@@ -190,13 +190,50 @@ dari satu modul dalam satu percakapan.
 - [x] Build berhasil tanpa error
 - [x] Test manual: pengiriman berhasil, penyesuaian + dan − berhasil, stok tidak bisa negatif, log tercatat, filter jenis OK
 
-## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
-- [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
-- [ ] Service: hitung kebutuhan bahan dari BOM, cek stok, potong stok bahan (DB::transaction)
-- [ ] Service: update progres → tambah stok produk jadi (DB::transaction)
-- [ ] Service: cancel produksi → kembalikan stok bahan (DB::transaction)
-- [ ] Controller + React page
-- [ ] Test: stok cukup vs tidak cukup, update progres bertahap, cancel
+## 11. Produksi — Tahap 1 (Production Planning) ✅ SELESAI
+- [x] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md)
+- [x] Model `Produksi` (status helpers: isDraft/isProses/isAktif, relasi pesanan/createdBy/detailProduksi)
+- [x] Model `DetailProduksi` (relasi produksi, karyawan)
+- [x] Aktifkan relasi `Karyawan::detailProduksis()` hasMany
+- [x] Tambah relasi `Pesanan::produksi()` hasMany
+- [x] Guard hapus Karyawan jika terlibat produksi aktif (BR Karyawan)
+- [x] FormRequest `ProduksiRequest` (pesanan_id exists, deadline nullable, catatan)
+- [x] Service `ProduksiService`:
+      - [x] create() — DB::transaction, validasi BR-11 (tidak ada produksi aktif ganda)
+      - [x] hitungTargetProduksi() — sum qty dari detail_pesanan
+      - [x] hitungKebutuhanBahan() — kalkulasi BOM per produk di pesanan
+      - [x] cekKecukupanStok() — bandingkan kebutuhan vs stok tersedia
+- [x] Controller `ProduksiController` (index, create, store, show — thin)
+- [x] Route resource `produksi` (only: index, create, store, show)
+- [x] Wayfinder generate
+- [x] Seeder `ProduksiSeeder` — 4 data dummy variasi status
+- [x] TypeScript types `produksi.ts`
+- [x] Component `ProduksiStatusBadge` — 4 warna (abu=draft, biru=proses, hijau=selesai, merah=dibatalkan)
+- [x] React pages: index (search + filter status + sort + pagination), create (dropdown pesanan + preview kebutuhan bahan via Inertia props), show (detail + tabel kebutuhan bahan + status kecukupan stok + progress bar)
+- [x] Sidebar menu Produksi diaktifkan
+- [x] Build berhasil tanpa error
+- [x] Test manual berhasil
+
+## 11. Produksi — Tahap 2 (Inventory Integration)
+- [ ] Mulai Produksi (status draft → proses)
+- [ ] StockBahanBakuService::reduceStock() dipanggil saat mulai produksi
+- [ ] Guard: stok tidak cukup → tolak, status tetap draft (BR-03, BR-05)
+- [ ] Rollback Produksi (status proses → dibatalkan)
+- [ ] StockBahanBakuService::addStock() dipanggil saat rollback (BR-08)
+- [ ] DB::transaction() untuk semua operasi inventory
+- [ ] Update status produksi endpoint
+- [ ] Test: stok cukup vs tidak cukup
+- [ ] Test: rollback kembalikan stok bahan
+
+## 11. Produksi — Tahap 3 (Execution & QC)
+- [ ] Assign karyawan ke produksi (detail_produksi)
+- [ ] Input qty selesai per karyawan
+- [ ] Update progress bertahap → tambah stok produk jadi (BR-06, BR-07)
+- [ ] StockProdukService::addStock() dipanggil saat progress update
+- [ ] Status QC diperbarui bertahap (BR-09)
+- [ ] Status selesai saat qty_selesai >= qty_target
+- [ ] Test: progress bertahap, stok produk jadi bertambah
+- [ ] Test: QC flow
 
 ## 12. Arus Kas
 - [ ] Migration arus_kas
