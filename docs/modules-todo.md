@@ -141,7 +141,7 @@ dari satu modul dalam satu percakapan.
 - [x] React pages: index (riwayat + search + filter bahan + filter tanggal + pagination), create (form restock), show (detail transaksi)
 - [x] Sidebar "Stok > Bahan Baku" diupdate dari `#` ke route aktif
 - [x] Build berhasil tanpa error
-- [ ] Test manual: restock berhasil, stok bahan_baku bertambah, log tercatat, search & filter OK
+- [x] Test manual: restock berhasil, stok bahan_baku bertambah, log tercatat, search & filter OK
 
 ## 10. Stok Produk Jadi
 - [x] Migration `stok_produk_jadi` (kolom: produk_id, jenis_transaksi, qty int, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK users.id)
@@ -156,7 +156,7 @@ dari satu modul dalam satu percakapan.
 - [x] React pages: index (riwayat + search + filter produk + filter tanggal + pagination), create (form pengiriman + info stok saat ini), show (detail transaksi + perubahan stok)
 - [x] Sidebar "Stok > Produk Jadi" diupdate dari `#` ke route aktif
 - [x] Build berhasil tanpa error
-- [ ] Test manual: pengiriman berhasil, stok produk berkurang, log tercatat, stok tidak bisa negatif, search & filter OK
+- [x] Test manual: pengiriman berhasil, stok produk berkurang, log tercatat, stok tidak bisa negatif, search & filter OK
 
 ## 11. Produksi (modul paling kompleks — pecah lagi jika perlu jadi beberapa sesi)
 - [ ] Migration `produksi` + `detail_produksi` (singular, sesuai database-schema.md — bukan `produksis`)
