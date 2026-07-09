@@ -72,13 +72,13 @@ instruksi eksplisit dari pemilik project.
 - BR-03 Produksi hanya bisa mulai (status Proses) jika stok bahan baku mencukupi.
 - BR-04 Saat status jadi Proses, stok bahan baku otomatis dikurangi sesuai BOM.
 - BR-05 Jika stok tidak cukup, status tetap Draft.
-- BR-06 Progres produksi diperbarui sesuai laporan tukang.
-- BR-07 Tiap penambahan progres produksi menambah stok produk jadi sebesar selisih yang
-  baru selesai diproduksi.
+- BR-06 Progress produksi dicatat per produk dan per karyawan berdasarkan laporan hasil pekerjaan.
+- BR-07 Setiap progress yang telah lolos QC akan langsung menambah stok produk jadi sesuai jumlah produk yang lolos.
 - BR-08 Produksi di-cancel → stok bahan baku yang sudah dipakai dikembalikan otomatis.
-- BR-09 Status QC diperbarui bertahap sesuai hasil pemeriksaan.
+- BR-09 Setiap hasil progress produksi wajib melalui proses QC. Progress yang lolos QC akan menambah stok produk jadi. Progress yang tidak lolos QC tidak menambah stok dan harus diperbaiki.
 - BR-10 Satu produksi bisa melibatkan lebih dari satu tukang.
 - BR-11 Satu produksi hanya berasal dari satu pesanan.
+- BR-12 Satu produksi dapat terdiri dari lebih dari satu produk sesuai detail pesanan. Progress produksi dicatat berdasarkan kombinasi: Produksi + Produk + Karyawan.
 
 ## Arus Kas (KF-17, KF-18)
 - BR-01 Setiap transaksi wajib berjenis Pemasukan atau Pengeluaran.

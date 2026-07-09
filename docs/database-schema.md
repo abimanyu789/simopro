@@ -124,6 +124,7 @@ supaya file ini diperbaiki lagi.
 |---|---|---|
 | id | bigint unsigned | PK |
 | produksi_id | bigint unsigned | NOT NULL, FK → `produksi.id` (RESTRICT) |
+| produk_id | bigint unsigned | NOT NULL, FK → `produk.id` (RESTRICT) |
 | karyawan_id | bigint unsigned | NOT NULL, FK → `karyawan.id` (RESTRICT) |
 | qty_selesai | int | NOT NULL |
 | created_at / updated_at | timestamp | nullable |
@@ -192,6 +193,7 @@ supaya file ini diperbaiki lagi.
 - `bahan_baku` 1—n `bom_detail` (RESTRICT)
 - `pesanan` 1—n `produksi` (RESTRICT)
 - `produksi` 1—n `detail_produksi` (RESTRICT)
+- `produk` 1—n `detail_produksi` (RESTRICT)
 - `karyawan` 1—n `detail_produksi` (RESTRICT)
 - `pesanan` 1—n `pembayaran` (RESTRICT)
 - `pembayaran` 1—n `arus_kas` (pembayaran_id, nullable, RESTRICT)

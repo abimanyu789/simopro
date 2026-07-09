@@ -33,8 +33,7 @@ Detail task per modul ada di `docs/modules-todo.md`.
 
 ## Entitas utama (ERD)
 User, Customer, Produk, BahanBaku, BOM (`bom_categorie` + `bom_detail`), Karyawan,
-Pesanan + DetailPesanan, Produksi + DetailProduksi, Pembayaran, ArusKas,
-StokBahanBaku (log), StokProdukJadi (log).
+Pesanan + DetailPesanan, Produksi + DetailProduksi (progress per produk dan per karyawan), Pembayaran, ArusKas, StokBahanBaku (log), StokProdukJadi (log).
 
 Skema lengkap (kolom & relasi) ada di `docs/database-schema.md` — **status: FINAL**, sudah
 dicocokkan dengan Gambar 4.16 & 4.17. Tidak perlu cek ulang ke folder `diagram/` lagi
@@ -52,7 +51,7 @@ konvensi default Laravel):
 - Produk wajib punya 1 BOM aktif sebelum bisa diproduksi.
 - Produksi: status awal `Draft`. Sistem hitung kebutuhan bahan dari BOM. Jika stok cukup →
   status `Proses` + stok bahan baku otomatis berkurang. Jika tidak cukup → tetap `Draft`.
-- Update progres produksi → menambah stok produk jadi sebesar selisih yang baru selesai.
+- Progress produksi dilakukan per produk berdasarkan laporan tukang. Setiap progress yang lolos QC langsung menambah stok produk jadi untuk produk tersebut. Satu Produksi dapat menangani banyak produk dari satu Pesanan.
 - Produksi `Cancel` → stok bahan baku yang sudah terpakai dikembalikan otomatis.
 - Stok (bahan baku & produk jadi) tidak boleh negatif.
 - Pesanan: status `Pending → Proses → Done/Cancel`. Status `Done`/`Cancel` tidak bisa dihapus.

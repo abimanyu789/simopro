@@ -237,23 +237,23 @@ dari satu modul dalam satu percakapan.
 - Catatan: validasi transisi menuju status “selesai” dan seluruh flow QC akan diuji setelah Tahap 3 selesai
 
 ## 11. Produksi — Tahap 3 (Execution & QC)
-- [ ] FormRequest AssignKaryawanRequest
-- [ ] ProduksiService::assignKaryawan() — tambah/update detail_produksi
-- [ ] ProduksiService::updateProgress() — tambah qty_selesai, panggil StockProdukService::addStock()
-- [ ] ProduksiService::updateStatusQc() — update status_qc (hanya jika qty_selesai == qty_target)
-- [ ] ProduksiService::selesaikanProduksi() — status proses → selesai (hanya jika qty_selesai == qty_target)
-- [ ] Guard: produksi selesai tidak bisa diedit/dibatalkan/diassign ulang
-- [ ] Guard: qty_selesai tidak boleh melebihi qty_target
-- [ ] Guard: stok produk jadi hanya ditambah satu kali (saat selesai)
-- [ ] Controller endpoints: assign, progress, qc, selesai
-- [ ] Routes + Wayfinder generate
-- [ ] TypeScript types update (DetailProduksi lengkap)
-- [ ] Component AssignKaryawanForm
-- [ ] Component UpdateProgressForm
-- [ ] Summary Cards dinamis (data dari controller: produksi hari ini, karyawan produktif, efisiensi)
-- [ ] React pages: update show.tsx dengan section assign karyawan + input progress + QC + tombol selesai
-- [ ] Build berhasil tanpa error
-- [ ] Test: assign karyawan, progress bertahap, stok produk jadi bertambah, QC flow, status selesai
+- ☐ Migration tambah produk_id pada detail_produksi
+- ☐ Update relasi Model DetailProduksi
+- ☐ Form Input Progress
+    - pilih produk
+    - pilih karyawan
+    - qty progress
+    - hasil QC
+- ☐ Update ProduksiService::inputProgress()
+- ☐ Jika QC lolos
+      tambah qty_selesai produksi
+      tambah stok produk jadi
+- ☐ Jika QC gagal
+      tidak menambah stok
+- ☐ Produksi selesai jika
+      total qty_selesai = qty_target
+- ☐ Summary Cards dinamis
+- ☐ Testing
 
 ## 12. Arus Kas
 - [ ] Migration arus_kas
