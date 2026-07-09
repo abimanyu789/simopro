@@ -2,6 +2,7 @@
 
 Tanggal: 2026-07-09
 Versi: Tahap 3 — Progress, QC, Penyelesaian, Summary Cards
+**Status: ✅ SELESAI — Seluruh 46 skenario LULUS**
 
 Legend:
 - [ ] Belum diuji
@@ -235,18 +236,21 @@ Legend:
 - **Hasil yang diharapkan:** Tombol "Selesaikan Produksi" muncul setelah kondisi terpenuhi
 - **DB yang dicek:** —
 - **BR:** Guard kondisi tombol di `show.tsx`
+- [x] Lulus
 
 ### 9.2 Selesaikan Produksi — Status Berubah
 - **Langkah:** Pastikan `qty_selesai == qty_target`. Klik "Selesaikan Produksi", konfirmasi dialog "Ya, Selesaikan".
 - **Hasil yang diharapkan:** Flash success "Produksi berhasil diselesaikan.", badge status berubah "Selesai" (hijau), `produksi.status = selesai`
 - **DB yang dicek:** `produksi.status`
 - **BR:** `selesaikanProduksi()`
+- [x] Lulus
 
 ### 9.3 Selesaikan Produksi — Stok TIDAK Bertambah Lagi
 - **Langkah:** Catat `produk.stok` sesaat sebelum klik selesai. Klik selesai. Cek `produk.stok` setelah.
 - **Hasil yang diharapkan:** `produk.stok` tidak berubah. Tidak ada baris baru di `stok_produk_jadi` dengan timestamp sekarang.
 - **DB yang dicek:** `produk` tidak berubah, `stok_produk_jadi` tidak bertambah
 - **BR:** `selesaikanProduksi()` tidak memanggil `StockProdukService`
+- [x] Lulus
 
 ### 9.4 Selesaikan Produksi Gagal saat `qty_selesai < qty_target` (Backend Guard)
 - **Langkah:** Via Tinker pada produksi yang `qty_selesai < qty_target`:
@@ -256,12 +260,14 @@ Legend:
 - **Hasil yang diharapkan:** RuntimeException: "Produksi belum dapat diselesaikan. Progress saat ini: X / Y pcs."
 - **DB yang dicek:** Tidak ada perubahan
 - **BR:** Guard `qty_selesai == qty_target`
+- [x] Lulus
 
 ### 9.5 Produksi Selesai — Tidak Bisa Input Progress, Batalkan, atau Mulai Lagi
 - **Langkah:** Buka halaman detail produksi yang sudah berstatus `selesai`
 - **Hasil yang diharapkan:** Section "Input Progress" tidak tampil. Tombol "Batalkan Produksi", "Mulai Produksi", dan "Selesaikan Produksi" semua tidak tampil.
 - **DB yang dicek:** —
 - **BR:** Guard `isSelesai()`
+- [x] Lulus
 
 ### 9.6 Produksi Selesai — Tidak Bisa Dibatalkan (Backend Guard)
 - **Langkah:** Via Tinker pada produksi selesai:
@@ -271,6 +277,7 @@ Legend:
 - **Hasil yang diharapkan:** RuntimeException: "Produksi dengan status 'selesai' tidak dapat dibatalkan."
 - **DB yang dicek:** Tidak ada perubahan
 - **BR:** Guard `isSelesai() || isDibatalkan()`
+- [x] Lulus
 
 ---
 
@@ -281,24 +288,28 @@ Legend:
 - **Hasil yang diharapkan:** Nilai batch bertambah 1. qty_selesai hari ini mengikuti total progress yang dicatat hari ini.
 - **DB yang dicek:** `produksi`, `detail_produksi`
 - **BR:** `hitungSummary()` — data dari backend
+- [x] Lulus
 
 ### 10.2 Card 2 — Karyawan Paling Produktif Dinamis
 - **Langkah:** Input beberapa progress QC Lolos untuk karyawan yang sama (hari ini atau 30 hari terakhir). Refresh halaman index.
 - **Hasil yang diharapkan:** Nama karyawan dengan total `qty_selesai` terbesar tampil. Persentase kontribusi dan progress bar sesuai.
 - **DB yang dicek:** `detail_produksi`, `karyawan`
 - **BR:** SUM qty_selesai per karyawan 30 hari terakhir
+- [x] Lulus
 
 ### 10.3 Card 3 — Efisiensi Produksi Aktif Dinamis
 - **Langkah:** Catat persentase efisiensi. Input beberapa progress QC Lolos pada produksi berstatus `proses`. Refresh.
 - **Hasil yang diharapkan:** Persentase efisiensi bertambah. Rumus: `SUM(qty_selesai proses) / SUM(qty_target proses) * 100%`
 - **DB yang dicek:** `produksi` (hanya status=proses)
 - **BR:** `hitungSummary()` — hanya produksi aktif
+- [x] Lulus
 
 ### 10.4 Card Menampilkan Nilai Default saat Tidak Ada Data
 - **Langkah:** Jika belum ada progress hari ini / 30 hari terakhir, buka halaman index
 - **Hasil yang diharapkan:** Card Karyawan menampilkan "Belum ada data". Card lain menampilkan 0. Tidak ada error.
 - **DB yang dicek:** —
 - **BR:** Null-safe handling di frontend dan backend
+- [x] Lulus
 
 ---
 
@@ -309,72 +320,84 @@ Legend:
 - **Hasil yang diharapkan:** Redirect ke halaman show produksi baru. `status=draft`, `qty_selesai=0`. Preview kebutuhan bahan baku tampil.
 - **DB yang dicek:** `produksi`
 - **BR:** BR-01, BR-11
+- [x] Lulus
 
 ### 11.2 Tidak Bisa Buat Produksi Ganda untuk Pesanan yang Sama (Tahap 1)
 - **Langkah:** Buat produksi untuk pesanan X (draft/proses). Coba buat produksi kedua untuk pesanan X.
 - **Hasil yang diharapkan:** Error: "Pesanan ... sudah memiliki produksi aktif." Pesanan X tidak tampil di dropdown.
 - **DB yang dicek:** `produksi` tidak bertambah
 - **BR:** BR-11
+- [x] Lulus
 
 ### 11.3 Preview Kebutuhan Bahan saat Pilih Pesanan (Tahap 1)
 - **Langkah:** Di `/produksi/create`, pilih pesanan dari dropdown
 - **Hasil yang diharapkan:** Halaman reload, tabel kebutuhan bahan baku dari BOM tampil dengan indikator cukup/tidak cukup per bahan
 - **DB yang dicek:** —
 - **BR:** BR-02, `hitungKebutuhanBahan()`
+- [x] Lulus
 
 ### 11.4 Mulai Produksi — Stok Bahan Berkurang (Tahap 2)
 - **Langkah:** Catat stok semua bahan yang dibutuhkan. Klik "Mulai Produksi" pada produksi `draft`. Konfirmasi dialog.
 - **Hasil yang diharapkan:** `status=proses`. Stok bahan berkurang sesuai `BOM x qty_target`. Log di `stok_bahan_baku` dengan `jenis_transaksi=produksi` dan `keterangan="Produksi PSN-xxx"`.
 - **DB yang dicek:** `produksi.status`, `bahan_baku.stok`, `stok_bahan_baku` (baris baru)
 - **BR:** BR-03, BR-04
+- [x] Lulus
 
 ### 11.5 Batalkan Produksi Proses — Stok Bahan Dikembalikan (Tahap 2)
 - **Langkah:** Mulai produksi. Catat stok bahan setelah mulai. Batalkan produksi `proses`. Konfirmasi dialog.
 - **Hasil yang diharapkan:** `status=dibatalkan`. Stok bahan kembali ke nilai sebelum mulai. Log di `stok_bahan_baku` dengan `jenis_transaksi=rollback` dan `keterangan="Rollback Produksi PSN-xxx"`.
 - **DB yang dicek:** `produksi.status`, `bahan_baku.stok`, `stok_bahan_baku` (baris rollback)
 - **BR:** BR-08
+- [x] Lulus
 
 ### 11.6 Batalkan Produksi Draft — Tidak Ada Perubahan Stok (Tahap 2)
 - **Langkah:** Catat stok bahan. Batalkan produksi berstatus `draft`.
 - **Hasil yang diharapkan:** `status=dibatalkan`. Stok bahan tidak berubah. Tidak ada log baru di `stok_bahan_baku`.
 - **DB yang dicek:** `produksi.status` saja berubah
 - **BR:** Guard draft — batalkan tanpa rollback stok
+- [x] Lulus
 
 ### 11.7 Mulai Produksi Gagal saat Stok Tidak Cukup (Tahap 2)
 - **Langkah:** Buat produksi dari pesanan yang stok bahan bakunya tidak cukup. Coba klik "Mulai Produksi".
 - **Hasil yang diharapkan:** Tombol "Mulai Produksi" disable (UI menampilkan warning) atau flash error setelah klik. Status tetap `draft`.
 - **DB yang dicek:** Tidak ada perubahan
 - **BR:** BR-03, BR-05
+- [x] Lulus
 
 ### 11.8 Filter dan Sorting di Index Produksi Berfungsi (Tahap 1)
 - **Langkah:** Filter status=`proses` → hanya produksi proses. Filter status=`selesai` → hanya produksi selesai. Search nomor pesanan. Klik sort header kolom.
 - **Hasil yang diharapkan:** Semua filter, sorting, dan pagination berfungsi normal
 - **DB yang dicek:** —
 - **BR:** Regression UI
+- [x] Lulus
 
 ### 11.9 Hapus Karyawan yang Terlibat Produksi Aktif Ditolak
 - **Langkah:** Temukan karyawan yang punya `detail_produksi` di produksi berstatus `draft` atau `proses`. Coba hapus dari halaman Master Data Karyawan.
 - **Hasil yang diharapkan:** Error: "Karyawan tidak dapat dihapus karena masih terlibat dalam produksi aktif."
 - **DB yang dicek:** `karyawan` tidak berubah
 - **BR:** Guard hapus karyawan
+- [x] Lulus
 
-### 11.10 Sidebar Menu "Produksi Karyawan" Mengarah ke Halaman yang Benar
+### 11.10 Sidebar Menu "Produksi" Mengarah ke Halaman yang Benar
 - **Langkah:** Klik menu "Produksi Karyawan" di sidebar
 - **Hasil yang diharapkan:** Redirect ke `/produksi`. Halaman index produksi tampil dengan summary cards.
 - **DB yang dicek:** —
 - **BR:** Navigasi sidebar
+- [x] Lulus
 
 ### 11.11 Modul Stok Produk Jadi Masih Berfungsi Normal
 - **Langkah:** Buka `/stok-produk-jadi`. Filter `jenis_transaksi=produksi`. Lihat riwayat log.
 - **Hasil yang diharapkan:** Semua log stok yang dihasilkan dari progress produksi tampil dengan data yang benar (produk, qty, keterangan, created_by)
 - **DB yang dicek:** `stok_produk_jadi`
 - **BR:** Regression Modul 10
+- [x] Lulus
 
 ### 11.12 Modul Pesanan Tidak Terpengaruh Otomatis oleh Perubahan Status Produksi
 - **Langkah:** Buka detail pesanan yang sedang diproduksi. Perhatikan status pesanan sebelum dan sesudah produksi diselesaikan.
 - **Hasil yang diharapkan:** Status pesanan tidak berubah secara otomatis karena produksi. Sinkronisasi status pesanan dilakukan secara terpisah.
 - **DB yang dicek:** `pesanan.status` tidak berubah otomatis
 - **BR:** Modul Produksi dan Pesanan masih independen
+- [x] Lulus
 
 ---
 

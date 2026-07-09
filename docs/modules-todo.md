@@ -236,24 +236,36 @@ dari satu modul dalam satu percakapan.
       - Regression test ✔
 - Catatan: validasi transisi menuju status “selesai” dan seluruh flow QC akan diuji setelah Tahap 3 selesai
 
-## 11. Produksi — Tahap 3 (Execution & QC)
-- ☐ Migration tambah produk_id pada detail_produksi
-- ☐ Update relasi Model DetailProduksi
-- ☐ Form Input Progress
-    - pilih produk
-    - pilih karyawan
-    - qty progress
-    - hasil QC
-- ☐ Update ProduksiService::inputProgress()
-- ☐ Jika QC lolos
-      tambah qty_selesai produksi
-      tambah stok produk jadi
-- ☐ Jika QC gagal
-      tidak menambah stok
-- ☐ Produksi selesai jika
-      total qty_selesai = qty_target
-- ☐ Summary Cards dinamis
-- ☐ Testing
+## 11. Produksi — Tahap 3 (Execution & QC) ✅ SELESAI
+- [x] Migration tambah `produk_id` FK pada `detail_produksi` (RESTRICT)
+- [x] Update Model `DetailProduksi` — tambah `produk_id` ke `$fillable`, relasi `produk()`
+- [x] FormRequest `InputProgressRequest` (produk_id exists, karyawan_id exists, qty min:1, qc_lolos boolean)
+- [x] `ProduksiService::inputProgress()` — BR-12 validasi produk dari pesanan, BR-09 QC sebagai keputusan input
+- [x] QC Lolos: simpan `detail_produksi`, recalculate `qty_selesai` dari SUM, `StockProdukService::addStock()`
+- [x] QC Tidak Lolos: tolak dengan RuntimeException, tidak ada yang disimpan
+- [x] `ProduksiService::selesaikanProduksi()` — hanya ubah status, TIDAK menambah stok
+- [x] Guard: `qty_selesai == qty_target` sebelum selesai
+- [x] Guard: produksi selesai tidak bisa progress/batalkan
+- [x] `ProduksiService::hitungSummary()` — data dari `detail_produksi` (batch hari ini, karyawan produktif, efisiensi)
+- [x] Controller: tambah `progress()`, `selesai()`, update `index()` kirim summary, update `show()` kirim produkList + karyawanList
+- [x] Route: `PATCH produksi/{produksi}/progress` + `PATCH produksi/{produksi}/selesai`
+- [x] Wayfinder generate
+- [x] Component `input-progress-form.tsx` (dropdown produk+karyawan, input qty, toggle QC)
+- [x] `show.tsx`: section form input progress + tabel histori detail_produksi + tombol selesai dengan dialog konfirmasi
+- [x] `index.tsx`: summary cards statis diganti dinamis dari `props.summary`
+- [x] Build berhasil tanpa error
+- [x] UAT 46 skenario — seluruhnya LULUS (lihat `docs/uat-produksi-tahap3.md`)
+      - Input Progress (3/3)
+      - Validasi Produk (2/2)
+      - Validasi Qty (3/3)
+      - QC Lolos (3/3)
+      - QC Tidak Lolos (4/4)
+      - Update qty_selesai (3/3)
+      - Update Stok Produk Jadi (3/3)
+      - Riwayat Stok Produk Jadi (3/3)
+      - Penyelesaian Produksi (6/6)
+      - Summary Cards (4/4)
+      - Regression Test Tahap 1+2 (12/12)
 
 ## 12. Arus Kas
 - [ ] Migration arus_kas
