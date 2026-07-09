@@ -214,26 +214,46 @@ dari satu modul dalam satu percakapan.
 - [x] Build berhasil tanpa error
 - [x] Test manual berhasil
 
-## 11. Produksi — Tahap 2 (Inventory Integration)
-- [ ] Mulai Produksi (status draft → proses)
-- [ ] StockBahanBakuService::reduceStock() dipanggil saat mulai produksi
-- [ ] Guard: stok tidak cukup → tolak, status tetap draft (BR-03, BR-05)
-- [ ] Rollback Produksi (status proses → dibatalkan)
-- [ ] StockBahanBakuService::addStock() dipanggil saat rollback (BR-08)
-- [ ] DB::transaction() untuk semua operasi inventory
-- [ ] Update status produksi endpoint
-- [ ] Test: stok cukup vs tidak cukup
-- [ ] Test: rollback kembalikan stok bahan
+## 11. Produksi — Tahap 2 (Inventory Integration) ✅ SELESAI
+- [x] Mulai Produksi (status draft → proses)
+- [x] StockBahanBakuService::reduceStock() dipanggil saat mulai produksi (BR-04)
+- [x] Guard: stok tidak cukup → tolak, status tetap draft (BR-03, BR-05)
+- [x] Rollback Produksi: draft → dibatalkan (tanpa rollback stok)
+- [x] Rollback Produksi: proses → dibatalkan (rollback stok via addStock jenis=rollback, BR-08)
+- [x] DB::transaction() untuk semua operasi inventory
+- [x] Route PATCH produksi/{produksi}/mulai + PATCH produksi/{produksi}/batalkan
+- [x] Wayfinder generate
+- [x] Component ProduksiActionDialog — dialog konfirmasi Mulai & Batalkan
+- [x] Keterangan audit trail otomatis: "Produksi PSN-xxx" / "Rollback Produksi PSN-xxx"
+- [x] Warning stok tidak cukup di halaman show
+- [x] Build berhasil tanpa error
+- [x] Test manual berhasil:
+      - Mulai Produksi ✔
+      - Validasi stok cukup ✔
+      - Pengurangan stok bahan baku ✔
+      - Rollback stok ✔
+      - Audit trail inventory ✔
+      - Regression test ✔
+- Catatan: validasi transisi menuju status “selesai” dan seluruh flow QC akan diuji setelah Tahap 3 selesai
 
 ## 11. Produksi — Tahap 3 (Execution & QC)
-- [ ] Assign karyawan ke produksi (detail_produksi)
-- [ ] Input qty selesai per karyawan
-- [ ] Update progress bertahap → tambah stok produk jadi (BR-06, BR-07)
-- [ ] StockProdukService::addStock() dipanggil saat progress update
-- [ ] Status QC diperbarui bertahap (BR-09)
-- [ ] Status selesai saat qty_selesai >= qty_target
-- [ ] Test: progress bertahap, stok produk jadi bertambah
-- [ ] Test: QC flow
+- [ ] FormRequest AssignKaryawanRequest
+- [ ] ProduksiService::assignKaryawan() — tambah/update detail_produksi
+- [ ] ProduksiService::updateProgress() — tambah qty_selesai, panggil StockProdukService::addStock()
+- [ ] ProduksiService::updateStatusQc() — update status_qc (hanya jika qty_selesai == qty_target)
+- [ ] ProduksiService::selesaikanProduksi() — status proses → selesai (hanya jika qty_selesai == qty_target)
+- [ ] Guard: produksi selesai tidak bisa diedit/dibatalkan/diassign ulang
+- [ ] Guard: qty_selesai tidak boleh melebihi qty_target
+- [ ] Guard: stok produk jadi hanya ditambah satu kali (saat selesai)
+- [ ] Controller endpoints: assign, progress, qc, selesai
+- [ ] Routes + Wayfinder generate
+- [ ] TypeScript types update (DetailProduksi lengkap)
+- [ ] Component AssignKaryawanForm
+- [ ] Component UpdateProgressForm
+- [ ] Summary Cards dinamis (data dari controller: produksi hari ini, karyawan produktif, efisiensi)
+- [ ] React pages: update show.tsx dengan section assign karyawan + input progress + QC + tombol selesai
+- [ ] Build berhasil tanpa error
+- [ ] Test: assign karyawan, progress bertahap, stok produk jadi bertambah, QC flow, status selesai
 
 ## 12. Arus Kas
 - [ ] Migration arus_kas
