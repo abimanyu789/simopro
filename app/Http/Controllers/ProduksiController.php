@@ -133,9 +133,39 @@ class ProduksiController extends Controller
         $stokCukup       = $this->service->cekKecukupanStok($produksi->pesanan);
 
         return Inertia::render('produksi/show', [
-            'produksi'      => $produksi,
+            'produksi'       => $produksi,
             'kebutuhanBahan' => $kebutuhanBahan,
-            'stokCukup'     => $stokCukup,
+            'stokCukup'      => $stokCukup,
         ]);
+    }
+
+    /**
+     * Mulai produksi — potong stok bahan baku, ubah status draft → proses.
+     */
+    public function mulai(Produksi $produksi)
+    {
+        try {
+            $this->service->mulaiProduksi($produksi, auth()->id());
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Produksi berhasil dimulai. Stok bahan baku telah dikurangi.');
+    }
+
+    /**
+     * Batalkan produksi.
+     * Draft  → dibatalkan (tanpa rollback stok).
+     * Proses → dibatalkan (rollback seluruh stok bahan baku).
+     */
+    public function batalkan(Produksi $produksi)
+    {
+        try {
+            $this->service->batalkanProduksi($produksi, auth()->id());
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Produksi berhasil dibatalkan.');
     }
 }

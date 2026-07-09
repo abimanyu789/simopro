@@ -67,6 +67,10 @@ Route::middleware(['auth'])->group(function () {
     // Produksi
     Route::resource('produksi', ProduksiController::class)
         ->only(['index', 'create', 'store', 'show']);
+    Route::patch('produksi/{produksi}/mulai', [ProduksiController::class, 'mulai'])
+        ->name('produksi.mulai');
+    Route::patch('produksi/{produksi}/batalkan', [ProduksiController::class, 'batalkan'])
+        ->name('produksi.batalkan');
 });
 
 require __DIR__.'/settings.php';
