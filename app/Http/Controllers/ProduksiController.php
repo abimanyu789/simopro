@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InputProgressRequest;
 use App\Http\Requests\ProduksiRequest;
+use App\Models\Karyawan;
 use App\Models\Pesanan;
 use App\Models\Produksi;
 use App\Services\ProduksiService;
@@ -49,6 +51,7 @@ class ProduksiController extends Controller
 
         return Inertia::render('produksi/index', [
             'produksis' => $produksis,
+            'summary'   => $this->service->hitungSummary(),
             'filters'   => [
                 'search'   => $search,
                 'status'   => $status,
@@ -124,18 +127,35 @@ class ProduksiController extends Controller
     {
         $produksi->load([
             'pesanan.customer',
+            'pesanan.detailPesanan.produk',
             'pesanan.detailPesanan.produk.bomCategorie.bomDetails.bahanBaku',
             'createdBy',
             'detailProduksi.karyawan',
+            'detailProduksi.produk',
         ]);
 
         $kebutuhanBahan  = $this->service->hitungKebutuhanBahan($produksi->pesanan);
         $stokCukup       = $this->service->cekKecukupanStok($produksi->pesanan);
 
+        // Daftar produk dari pesanan untuk form input progress
+        $produkList = $produksi->pesanan->detailPesanan->map(fn ($d) => [
+            'id'          => $d->produk->id,
+            'kode_produk' => $d->produk->kode_produk,
+            'nama_produk' => $d->produk->nama_produk,
+            'qty_pesanan' => $d->qty,
+        ])->unique('id')->values();
+
+        // Daftar karyawan aktif untuk form input progress
+        $karyawanList = Karyawan::where('status', 'aktif')
+            ->orderBy('nama_karyawan')
+            ->get(['id', 'nama_karyawan', 'jabatan']);
+
         return Inertia::render('produksi/show', [
             'produksi'       => $produksi,
             'kebutuhanBahan' => $kebutuhanBahan,
             'stokCukup'      => $stokCukup,
+            'produkList'     => $produkList,
+            'karyawanList'   => $karyawanList,
         ]);
     }
 
@@ -167,5 +187,41 @@ class ProduksiController extends Controller
         }
 
         return back()->with('success', 'Produksi berhasil dibatalkan.');
+    }
+
+    /**
+     * Input progress produksi — lolos QC: simpan histori + tambah stok produk jadi.
+     * Tidak lolos QC: tampilkan error, tidak ada yang disimpan.
+     */
+    public function progress(InputProgressRequest $request, Produksi $produksi)
+    {
+        try {
+            $this->service->inputProgress(
+                produksi:   $produksi,
+                produkId:   $request->validated('produk_id'),
+                karyawanId: $request->validated('karyawan_id'),
+                qty:        $request->validated('qty'),
+                qcLolos:    (bool) $request->validated('qc_lolos'),
+                userId:     auth()->id(),
+            );
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Progress produksi berhasil dicatat. Stok produk jadi telah bertambah.');
+    }
+
+    /**
+     * Selesaikan produksi — hanya mengubah status, tidak ada operasi stok.
+     */
+    public function selesai(Produksi $produksi)
+    {
+        try {
+            $this->service->selesaikanProduksi($produksi);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Produksi berhasil diselesaikan.');
     }
 }

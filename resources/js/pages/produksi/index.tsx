@@ -35,6 +35,7 @@ import type { ProduksiIndexProps } from '@/types';
 
 export default function ProduksiIndex({
     produksis,
+    summary,
     filters,
 }: ProduksiIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
@@ -142,20 +143,22 @@ export default function ProduksiIndex({
                     </Link>
                 </div>
 
-                {/* Summary Cards — statis, akan dibuat dinamis setelah Tahap 3 selesai */}
+                {/* Summary Cards — dinamis dari backend */}
                 <div className="grid gap-4 sm:grid-cols-3">
-                    {/* Card 1 — Total Produksi Hari Ini */}
+                    {/* Card 1 — Produksi Hari Ini */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Produksi Hari Ini
+                                Produksi Hari Ini
                             </CardTitle>
                             <Wrench className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">1.240</p>
+                            <p className="text-2xl font-bold">
+                                {summary.qty_selesai_hari_ini}
+                            </p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Pasang diproduksi hari ini
+                                {summary.batch_hari_ini} batch produksi hari ini
                             </p>
                         </CardContent>
                     </Card>
@@ -169,36 +172,62 @@ export default function ProduksiIndex({
                             <User className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">Budi Santoso</p>
-                            <div className="mt-2 space-y-1">
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>Progress bulan ini</span>
-                                    <span>84%</span>
-                                </div>
-                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                                    <div className="h-full w-[84%] rounded-full bg-primary" />
-                                </div>
-                            </div>
+                            {summary.karyawan_produktif ? (
+                                <>
+                                    <p className="truncate text-2xl font-bold">
+                                        {summary.karyawan_produktif.nama}
+                                    </p>
+                                    <div className="mt-2 space-y-1">
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>
+                                                {
+                                                    summary.karyawan_produktif
+                                                        .total_qty
+                                                }{' '}
+                                                pcs (30 hari)
+                                            </span>
+                                            <span>
+                                                {
+                                                    summary.karyawan_produktif
+                                                        .kontribusi
+                                                }
+                                                %
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                            <div
+                                                className="h-full rounded-full bg-primary"
+                                                style={{
+                                                    width: `${summary.karyawan_produktif.kontribusi}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Belum ada data
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
 
-                    {/* Card 3 — Rata-rata Output */}
+                    {/* Card 3 — Efisiensi Produksi */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Rata-rata Output
+                                Efisiensi Produksi
                             </CardTitle>
                             <TrendingUp className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
-                                186{' '}
-                                <span className="text-base font-normal text-muted-foreground">
-                                    Pasang/Hari
-                                </span>
+                                {summary.efisiensi.persentase}%
                             </p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Target harian: 200 pasang
+                                {summary.efisiensi.qty_selesai} /{' '}
+                                {summary.efisiensi.qty_target} pcs produksi
+                                aktif
                             </p>
                         </CardContent>
                     </Card>

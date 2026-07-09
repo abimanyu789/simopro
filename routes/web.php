@@ -71,6 +71,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('produksi.mulai');
     Route::patch('produksi/{produksi}/batalkan', [ProduksiController::class, 'batalkan'])
         ->name('produksi.batalkan');
+    Route::patch('produksi/{produksi}/progress', [ProduksiController::class, 'progress'])
+        ->name('produksi.progress');
+    Route::patch('produksi/{produksi}/selesai', [ProduksiController::class, 'selesai'])
+        ->name('produksi.selesai');
 });
 
 require __DIR__.'/settings.php';

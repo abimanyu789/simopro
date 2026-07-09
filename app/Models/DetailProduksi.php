@@ -11,12 +11,14 @@ class DetailProduksi extends Model
 
     protected $fillable = [
         'produksi_id',
+        'produk_id',
         'karyawan_id',
         'qty_selesai',
     ];
 
     protected $casts = [
         'qty_selesai' => 'integer',
+        'produk_id'   => 'integer',
     ];
 
     public function produksi(): BelongsTo
@@ -27,5 +29,10 @@ class DetailProduksi extends Model
     public function karyawan(): BelongsTo
     {
         return $this->belongsTo(Karyawan::class, 'karyawan_id');
+    }
+
+    public function produk(): BelongsTo
+    {
+        return $this->belongsTo(Produk::class, 'produk_id');
     }
 }

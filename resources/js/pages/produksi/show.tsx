@@ -1,8 +1,19 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { InputProgressForm } from '@/components/produksi/input-progress-form';
 import { ProduksiActionDialog } from '@/components/produksi/produksi-action-dialog';
 import { ProduksiStatusBadge } from '@/components/produksi/produksi-status-badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import {
     Table,
     TableBody,
@@ -12,13 +23,20 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import pesanan from '@/routes/pesanan';
-import produksi from '@/routes/produksi';
-import type { KebutuhanBahan, ProduksiShowProps } from '@/types';
+import produksiRoute from '@/routes/produksi';
+import type {
+    KebutuhanBahan,
+    KaryawanOption,
+    ProdukProgressOption,
+    ProduksiShowProps,
+} from '@/types';
 
 export default function ProduksiShow({
     produksi: item,
     kebutuhanBahan,
     stokCukup,
+    produkList,
+    karyawanList,
 }: ProduksiShowProps) {
     const formatDate = (dateString: string | null) => {
         if (!dateString) return '-';
@@ -53,7 +71,7 @@ export default function ProduksiShow({
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href={produksi.index.url()}>
+                        <Link href={produksiRoute.index.url()}>
                             <Button variant="outline" size="icon">
                                 <ArrowLeft className="size-4" />
                             </Button>
@@ -289,16 +307,147 @@ export default function ProduksiShow({
                                     dahulu.
                                 </div>
                             )}
+
+                        {/* Tombol Selesaikan Produksi */}
+                        {item.status === 'proses' &&
+                            item.qty_selesai === item.qty_target && (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            className="w-full"
+                                            variant="default"
+                                        >
+                                            Selesaikan Produksi
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Selesaikan Produksi
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                                Seluruh target produksi (
+                                                {item.qty_target} pcs) telah
+                                                selesai. Status produksi akan
+                                                diubah menjadi{' '}
+                                                <strong>Selesai</strong>. Tidak
+                                                ada perubahan stok karena stok
+                                                sudah bertambah bertahap.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter>
+                                            <DialogClose asChild>
+                                                <Button variant="outline">
+                                                    Batal
+                                                </Button>
+                                            </DialogClose>
+                                            <Button
+                                                onClick={() =>
+                                                    router.patch(
+                                                        produksiRoute.selesai.url(
+                                                            item.id,
+                                                        ),
+                                                        {},
+                                                        {
+                                                            preserveScroll: true,
+                                                        },
+                                                    )
+                                                }
+                                            >
+                                                Ya, Selesaikan
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
                     </div>
                 </div>
             </div>
+
+            {/* Section Input Progress + Histori — hanya saat proses */}
+            {item.status === 'proses' && (
+                <div className="grid gap-6 lg:grid-cols-3">
+                    {/* Form Input Progress */}
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                        <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                            Input Progress
+                        </h2>
+                        <InputProgressForm
+                            produksi={item}
+                            produkList={produkList}
+                            karyawanList={karyawanList}
+                        />
+                    </div>
+
+                    {/* Histori Detail Produksi */}
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background lg:col-span-2 dark:border-sidebar-border">
+                        <div className="border-b px-6 py-4">
+                            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Histori Progress
+                            </h2>
+                        </div>
+                        {(item.detail_produksi ?? []).length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Produk</TableHead>
+                                        <TableHead>Karyawan</TableHead>
+                                        <TableHead className="text-right">
+                                            Qty
+                                        </TableHead>
+                                        <TableHead>Tanggal</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {(item.detail_produksi ?? []).map((d) => (
+                                        <TableRow key={d.id}>
+                                            <TableCell>
+                                                <div className="font-medium">
+                                                    {d.produk?.nama_produk ??
+                                                        '-'}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {d.produk?.kode_produk ??
+                                                        '-'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {d.karyawan?.nama_karyawan ??
+                                                    '-'}
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono font-semibold">
+                                                {d.qty_selesai} pcs
+                                            </TableCell>
+                                            <TableCell className="text-sm text-muted-foreground">
+                                                {new Date(
+                                                    d.created_at,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                                Belum ada progress yang dicatat.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
 
 ProduksiShow.layout = {
     breadcrumbs: [
-        { title: 'Produksi', href: produksi.index.url() },
+        { title: 'Produksi', href: produksiRoute.index.url() },
         { title: 'Detail', href: '#' },
     ],
 };

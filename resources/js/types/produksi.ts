@@ -7,14 +7,21 @@ export type StatusQc = 'belum_dicek' | 'lolos' | 'tidak_lolos';
 export interface DetailProduksi {
     id: number;
     produksi_id: number;
+    produk_id: number;
     karyawan_id: number;
     qty_selesai: number;
     created_at: string;
     updated_at: string;
+    // Relasi
     karyawan?: {
         id: number;
         nama_karyawan: string;
         jabatan: string | null;
+    };
+    produk?: {
+        id: number;
+        kode_produk: string;
+        nama_produk: string;
     };
 }
 
@@ -57,6 +64,13 @@ export interface ProduksiFormData {
     catatan: string;
 }
 
+export interface InputProgressFormData {
+    produk_id: number | '';
+    karyawan_id: number | '';
+    qty: number | '';
+    qc_lolos: boolean;
+}
+
 // ─── Pesanan option untuk dropdown ───────────────────────────────────────────
 
 export interface PesananOption {
@@ -66,6 +80,38 @@ export interface PesananOption {
     tanggal: string;
     total: string;
     customer?: Customer;
+}
+
+// ─── Produk & Karyawan list untuk form progress ───────────────────────────────
+
+export interface ProdukProgressOption {
+    id: number;
+    kode_produk: string;
+    nama_produk: string;
+    qty_pesanan: number;
+}
+
+export interface KaryawanOption {
+    id: number;
+    nama_karyawan: string;
+    jabatan: string | null;
+}
+
+// ─── Summary cards ────────────────────────────────────────────────────────────
+
+export interface ProduksiSummary {
+    batch_hari_ini: number;
+    qty_selesai_hari_ini: number;
+    karyawan_produktif: {
+        nama: string;
+        total_qty: number;
+        kontribusi: number;
+    } | null;
+    efisiensi: {
+        qty_selesai: number;
+        qty_target: number;
+        persentase: number;
+    };
 }
 
 // ─── Props interfaces ─────────────────────────────────────────────────────────
@@ -87,6 +133,7 @@ export interface ProduksiPagination {
 
 export interface ProduksiIndexProps {
     produksis: ProduksiPagination;
+    summary: ProduksiSummary;
     filters: {
         search?: string;
         status?: string;
@@ -105,4 +152,6 @@ export interface ProduksiShowProps {
     produksi: Produksi;
     kebutuhanBahan: KebutuhanBahan[];
     stokCukup: boolean;
+    produkList: ProdukProgressOption[];
+    karyawanList: KaryawanOption[];
 }
