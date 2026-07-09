@@ -87,6 +87,7 @@ supaya file ini diperbaiki lagi.
 | nomor_pesanan | varchar(100) | unique, auto-generated |
 | tanggal | date | NOT NULL |
 | status | enum(`pending`,`proses`,`selesai`,`dibatalkan`) | NOT NULL |
+| jenis_pembayaran | enum(`dp`,`lunas`,`bertahap`,`cod`,`termin`) | nullable — kontrak pembayaran yang disepakati saat order |
 | subtotal | decimal(15,2) | nullable |
 | diskon | decimal(15,2) | nullable |
 | ongkir | decimal(15,2) | nullable |
@@ -109,8 +110,9 @@ supaya file ini diperbaiki lagi.
 | Kolom | Tipe | Ket |
 |---|---|---|
 | id | bigint unsigned | PK |
-| pesanan_id | bigint unsigned | NOT NULL, FK → `pesanan.id` (RESTRICT) |
+| pesanan_id | bigint unsigned | **nullable**, FK → `pesanan.id` (RESTRICT) — null jika jenis=restok |
 | created_by | bigint unsigned | NOT NULL, FK → `users.id` (RESTRICT) |
+| jenis_produksi | enum(`pesanan`,`restok`) | NOT NULL, default `pesanan` |
 | deadline | date | nullable |
 | qty_target | int | NOT NULL |
 | qty_selesai | int | default 0 |
@@ -119,14 +121,24 @@ supaya file ini diperbaiki lagi.
 | catatan | text | nullable |
 | created_at / updated_at | timestamp | nullable |
 
-### `detail_produksi`
+### `produksi_item` (target produk per produksi — sumber kebenaran qty per produk)
+| Kolom | Tipe | Ket |
+|---|---|---|
+| id | bigint unsigned | PK |
+| produksi_id | bigint unsigned | NOT NULL, FK → `produksi.id` (RESTRICT) |
+| produk_id | bigint unsigned | NOT NULL, FK → `produk.id` (RESTRICT) |
+| qty_target | int | NOT NULL — target per produk pada produksi ini |
+| created_at / updated_at | timestamp | nullable |
+
+### `detail_produksi` (histori progress per produk + karyawan)
 | Kolom | Tipe | Ket |
 |---|---|---|
 | id | bigint unsigned | PK |
 | produksi_id | bigint unsigned | NOT NULL, FK → `produksi.id` (RESTRICT) |
 | produk_id | bigint unsigned | NOT NULL, FK → `produk.id` (RESTRICT) |
 | karyawan_id | bigint unsigned | NOT NULL, FK → `karyawan.id` (RESTRICT) |
-| qty_selesai | int | NOT NULL |
+| qty_selesai | int | NOT NULL — qty yang dilaporkan pada entry ini |
+| qc_status | enum(`lolos`,`tidak_lolos`) | NOT NULL — hasil QC saat input progress |
 | created_at / updated_at | timestamp | nullable |
 
 ### `pembayaran`

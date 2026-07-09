@@ -120,19 +120,13 @@ dari satu modul dalam satu percakapan.
       - Badge warna: B2B biru, B2C hijau
       - Hapus via dialog (index & show page)
 
-## 8. Pesanan + Invoice ✅ SELESAI (invoice PDF scope sesi berikutnya)
-- [x] Migration `pesanan` + `detail_pesanan` (singular, enum status: pending/proses/selesai/dibatalkan)
-- [x] Model `Pesanan` — boot auto-generate `nomor_pesanan` (PSN-{YYYYMMDD}-{0001}), accessor `nomor_invoice` (INV-xxx), helper isLocked()/isSelesai()
-- [x] Model `DetailPesanan` — relasi belongsTo Pesanan & Produk
-- [x] Aktifkan relasi `Customer::pesanans()` hasMany
-- [x] Tambah relasi `Produk::detailPesanans()` hasMany
-- [x] Guard hapus Customer jika punya pesanan (BR Customer)
-- [x] Guard hapus Produk jika ada di detail_pesanan (BR Produk)
-- [x] FormRequest `PesananRequest` (customer_id exists, min 1 item, items.*.produk_id exists, qty > 0, diskon tipe persen/nominal)
-- [x] FormRequest `UpdateStatusPesananRequest` (enum status valid)
-- [x] Service `PesananService` — createWithDetails(), updateWithDetails(), updateStatus(), hitungTotal() dalam DB::transaction()
-- [x] Controller `PesananController` — index, create, store, show, edit, update, updateStatus, destroy, invoice
-- [x] Route resource `pesanan` + PATCH `pesanan/{pesanan}/status` + GET `pesanan/{pesanan}/invoice`
+## 8. Pesanan + Invoice ✅ SELESAI
+- [x] Migration `pesanan` + `detail_pesanan`
+- [x] Model `Pesanan`, `DetailPesanan`, relasi, service, controller, routes
+- [x] Build berhasil, test manual lulus
+- [ ] **Revisi:** Tambah kolom `jenis_pembayaran` enum(`dp`,`lunas`,`bertahap`,`cod`,`termin`) ke tabel `pesanan`
+- [ ] **Revisi:** Update form Create/Edit Pesanan untuk field `jenis_pembayaran`
+- [ ] **Bug Fix:** Tambah method `invoice()` ke `PesananController` (method hilang, route sudah ada, blade+dompdf sudah ada)
 - [x] Wayfinder generate — typed routes tersedia di `@/routes/pesanan`
 - [x] Seeder `PesananSeeder` — 12 pesanan dummy mix status
 - [x] Install `barryvdh/laravel-dompdf` v3.1.2
@@ -237,12 +231,23 @@ dari satu modul dalam satu percakapan.
 - Catatan: validasi transisi menuju status “selesai” dan seluruh flow QC akan diuji setelah Tahap 3 selesai
 
 ## 11. Produksi — Tahap 3 (Execution & QC) ✅ SELESAI
-- [x] Migration tambah `produk_id` FK pada `detail_produksi` (RESTRICT)
-- [x] Update Model `DetailProduksi` — tambah `produk_id` ke `$fillable`, relasi `produk()`
-- [x] FormRequest `InputProgressRequest` (produk_id exists, karyawan_id exists, qty min:1, qc_lolos boolean)
-- [x] `ProduksiService::inputProgress()` — BR-12 validasi produk dari pesanan, BR-09 QC sebagai keputusan input
-- [x] QC Lolos: simpan `detail_produksi`, recalculate `qty_selesai` dari SUM, `StockProdukService::addStock()`
-- [x] QC Tidak Lolos: tolak dengan RuntimeException, tidak ada yang disimpan
+- [x] Migration tambah `produk_id` FK pada `detail_produksi`
+- [x] FormRequest `InputProgressRequest`, `ProduksiService::inputProgress()`, `selesaikanProduksi()`, `hitungSummary()`
+- [x] QC sebagai keputusan saat input (tidak disimpan di DB — **direvisi: perlu disimpan, lihat Revisi di bawah**)
+- [x] Build berhasil, UAT 46/46 lulus
+
+## 11. Produksi — Revisi (Post-UAT Requirement Change)
+- [ ] **Bug Fix:** `PesananController::invoice()` — method hilang, perlu ditambahkan
+- [ ] **Pesanan:** Tambah `jenis_pembayaran` ke tabel `pesanan` (migration + model + form + validasi)
+- [ ] **Produksi:** Migration `pesanan_id` nullable + tambah `jenis_produksi` enum(`pesanan`,`restok`) ke tabel `produksi`
+- [ ] **Produksi:** Migration tabel baru `produksi_item` (produksi_id, produk_id, qty_target) — sumber target per produk
+- [ ] **Produksi:** Migration tambah `qc_status` enum(`lolos`,`tidak_lolos`) ke `detail_produksi`
+- [ ] **Produksi:** Revisi form create produksi — step 1 pilih jenis (pesanan/restok), step 2 berbeda per jenis
+- [ ] **Produksi:** Revisi `ProduksiService` — support restok, hitungKebutuhanBahan dari produksi_item
+- [ ] **Produksi:** Revisi dropdown progress — hanya tampil produk yang qty lolos QC < qty_target per produk
+- [ ] **Produksi:** Tambah dua progress bar di halaman show (Progress Produksi + Progress QC)
+- [ ] **Produksi:** Simpan qc_status di detail_produksi saat input progress
+- [ ] Test manual semua revisi
 - [x] `ProduksiService::selesaikanProduksi()` — hanya ubah status, TIDAK menambah stok
 - [x] Guard: `qty_selesai == qty_target` sebelum selesai
 - [x] Guard: produksi selesai tidak bisa progress/batalkan
