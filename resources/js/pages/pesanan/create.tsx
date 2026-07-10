@@ -5,17 +5,22 @@ import { PesananForm } from '@/components/pesanan/pesanan-form';
 import pesanan from '@/routes/pesanan';
 import type { PesananCreateProps, PesananFormData } from '@/types';
 
-export default function PesananCreate({ customers, produks }: PesananCreateProps) {
-    const { data, setData, post, processing, errors } = useForm<PesananFormData>({
-        customer_id:    '',
-        tanggal:        new Date().toISOString().slice(0, 10),
-        items:          [{ produk_id: '', qty: '', harga: '' }],
-        tipe_diskon:    'nominal',
-        diskon:         '',
-        catatan_diskon: '',
-        ongkir:         '',
-        keterangan:     '',
-    });
+export default function PesananCreate({
+    customers,
+    produks,
+}: PesananCreateProps) {
+    const { data, setData, post, processing, errors } =
+        useForm<PesananFormData>({
+            customer_id: '',
+            tanggal: new Date().toISOString().slice(0, 10),
+            jenis_pembayaran: '',
+            items: [{ produk_id: '', qty: '', harga: '' }],
+            tipe_diskon: 'nominal',
+            diskon: '',
+            catatan_diskon: '',
+            ongkir: '',
+            keterangan: '',
+        });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +40,9 @@ export default function PesananCreate({ customers, produks }: PesananCreateProps
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Buat Pesanan Baru</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Buat Pesanan Baru
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Isi form di bawah untuk membuat pesanan baru
                         </p>

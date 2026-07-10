@@ -145,6 +145,26 @@ export default function PesananShow({
                                 </div>
                                 <div className="px-6 py-4">
                                     <p className="text-sm text-muted-foreground">
+                                        Jenis Pembayaran
+                                    </p>
+                                    <p className="mt-1 font-medium">
+                                        {item.jenis_pembayaran ? (
+                                            {
+                                                dp: 'DP (Down Payment)',
+                                                lunas: 'Lunas',
+                                                bertahap: 'Bertahap',
+                                                cod: 'COD',
+                                                termin: 'Termin',
+                                            }[item.jenis_pembayaran]
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                —
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                                <div className="px-6 py-4">
+                                    <p className="text-sm text-muted-foreground">
                                         Dibuat oleh
                                     </p>
                                     <p className="mt-1 font-medium">

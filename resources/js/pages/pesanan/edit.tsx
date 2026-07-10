@@ -5,21 +5,28 @@ import { PesananForm } from '@/components/pesanan/pesanan-form';
 import pesanan from '@/routes/pesanan';
 import type { PesananEditProps, PesananFormData } from '@/types';
 
-export default function PesananEdit({ pesanan: item, customers, produks }: PesananEditProps) {
-    const { data, setData, put, processing, errors } = useForm<PesananFormData>({
-        customer_id:    item.customer_id,
-        tanggal:        item.tanggal.slice(0, 10),
-        items:          (item.detail_pesanan ?? []).map((d) => ({
-            produk_id: d.produk_id,
-            qty:       d.qty,
-            harga:     Number(d.harga),
-        })),
-        tipe_diskon:    'nominal',
-        diskon:         Number(item.diskon) || '',
-        catatan_diskon: '',
-        ongkir:         Number(item.ongkir) || '',
-        keterangan:     item.keterangan ?? '',
-    });
+export default function PesananEdit({
+    pesanan: item,
+    customers,
+    produks,
+}: PesananEditProps) {
+    const { data, setData, put, processing, errors } = useForm<PesananFormData>(
+        {
+            customer_id: item.customer_id,
+            tanggal: item.tanggal.slice(0, 10),
+            jenis_pembayaran: item.jenis_pembayaran ?? '',
+            items: (item.detail_pesanan ?? []).map((d) => ({
+                produk_id: d.produk_id,
+                qty: d.qty,
+                harga: Number(d.harga),
+            })),
+            tipe_diskon: 'nominal',
+            diskon: Number(item.diskon) || '',
+            catatan_diskon: '',
+            ongkir: Number(item.ongkir) || '',
+            keterangan: item.keterangan ?? '',
+        },
+    );
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

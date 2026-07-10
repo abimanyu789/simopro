@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Services\PesananService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -165,6 +166,25 @@ class PesananController extends Controller
         return redirect()
             ->route('pesanan.index')
             ->with('success', "Pesanan {$nomor} berhasil dihapus.");
+    }
+
+    /**
+     * Generate invoice PDF — stream di tab baru (default) atau download (?download=1).
+     */
+    public function invoice(Request $request, Pesanan $pesanan)
+    {
+        $pesanan->load(['customer', 'createdBy', 'detailPesanan.produk']);
+
+        $pdf = Pdf::loadView('pdf.invoice', [
+            'pesanan'      => $pesanan,
+            'nomorInvoice' => $pesanan->nomor_invoice,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = "Invoice-{$pesanan->nomor_invoice}.pdf";
+
+        return $request->boolean('download')
+            ? $pdf->download($filename)
+            : $pdf->stream($filename);
     }
 
     /**

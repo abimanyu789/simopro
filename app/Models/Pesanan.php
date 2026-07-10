@@ -17,6 +17,7 @@ class Pesanan extends Model
         'nomor_pesanan',
         'tanggal',
         'status',
+        'jenis_pembayaran',
         'subtotal',
         'diskon',
         'ongkir',

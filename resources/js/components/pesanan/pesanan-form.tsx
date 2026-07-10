@@ -183,6 +183,47 @@ export function PesananForm({
                             </p>
                         )}
                     </div>
+
+                    {/* Jenis Pembayaran */}
+                    <div className="space-y-2">
+                        <Label htmlFor="jenis_pembayaran">
+                            Jenis Pembayaran
+                        </Label>
+                        <Select
+                            value={data.jenis_pembayaran || 'none'}
+                            onValueChange={(v) =>
+                                setData(
+                                    'jenis_pembayaran',
+                                    v === 'none'
+                                        ? ''
+                                        : (v as import('@/types').JenisPembayaranPesanan),
+                                )
+                            }
+                        >
+                            <SelectTrigger id="jenis_pembayaran">
+                                <SelectValue placeholder="Pilih jenis pembayaran..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">
+                                    Belum ditentukan
+                                </SelectItem>
+                                <SelectItem value="dp">
+                                    DP (Down Payment)
+                                </SelectItem>
+                                <SelectItem value="lunas">Lunas</SelectItem>
+                                <SelectItem value="bertahap">
+                                    Bertahap
+                                </SelectItem>
+                                <SelectItem value="cod">COD</SelectItem>
+                                <SelectItem value="termin">Termin</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {errors.jenis_pembayaran && (
+                            <p className="text-sm text-red-500">
+                                {errors.jenis_pembayaran}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 

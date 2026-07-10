@@ -16,6 +16,7 @@ class PesananRequest extends FormRequest
         return [
             'customer_id'      => ['required', 'integer', 'exists:customer,id'],
             'tanggal'          => ['required', 'date'],
+            'jenis_pembayaran' => ['nullable', 'string', 'in:dp,lunas,bertahap,cod,termin'],
             'diskon'           => ['nullable', 'numeric', 'min:0'],
             'tipe_diskon'      => ['nullable', 'string', 'in:persen,nominal'],
             'ongkir'           => ['nullable', 'numeric', 'min:0'],

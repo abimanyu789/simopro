@@ -17,12 +17,16 @@ export interface DetailPesanan {
     produk?: Produk;
 }
 
+export type JenisPembayaranPesanan =
+    'dp' | 'lunas' | 'bertahap' | 'cod' | 'termin';
+
 export interface Pesanan {
     id: number;
     customer_id: number;
     nomor_pesanan: string;
     tanggal: string;
     status: StatusPesanan;
+    jenis_pembayaran: JenisPembayaranPesanan | null;
     subtotal: string;
     diskon: string;
     ongkir: string;
@@ -47,6 +51,7 @@ export interface PesananItemFormData {
 export interface PesananFormData {
     customer_id: number | '';
     tanggal: string;
+    jenis_pembayaran: JenisPembayaranPesanan | '';
     items: PesananItemFormData[];
     tipe_diskon: TipeDiskon;
     diskon: number | '';
