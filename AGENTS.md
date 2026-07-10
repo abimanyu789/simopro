@@ -33,7 +33,7 @@ Detail task per modul ada di `docs/modules-todo.md`.
 
 ## Entitas utama (ERD)
 User, Customer, Produk, BahanBaku, BOM (`bom_categorie` + `bom_detail`), Karyawan,
-Pesanan + DetailPesanan, Produksi + DetailProduksi (progress per produk dan per karyawan), Pembayaran, ArusKas, StokBahanBaku (log), StokProdukJadi (log).
+Pesanan + DetailPesanan, Produksi + ProduksiItem (target per produk) + ProduksiKaryawan (tim) + DetailProduksi (histori progress), Pembayaran, ArusKas, StokBahanBaku (log), StokProdukJadi (log).
 
 Skema lengkap (kolom & relasi) ada di `docs/database-schema.md` — **status: FINAL**, sudah
 dicocokkan dengan Gambar 4.16 & 4.17. Tidak perlu cek ulang ke folder `diagram/` lagi

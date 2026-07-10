@@ -130,15 +130,22 @@ supaya file ini diperbaiki lagi.
 | qty_target | int | NOT NULL — target per produk pada produksi ini |
 | created_at / updated_at | timestamp | nullable |
 
-### `detail_produksi` (histori progress per produk + karyawan)
+### `detail_produksi` (histori progress per produk)
 | Kolom | Tipe | Ket |
 |---|---|---|
 | id | bigint unsigned | PK |
 | produksi_id | bigint unsigned | NOT NULL, FK → `produksi.id` (RESTRICT) |
 | produk_id | bigint unsigned | NOT NULL, FK → `produk.id` (RESTRICT) |
-| karyawan_id | bigint unsigned | NOT NULL, FK → `karyawan.id` (RESTRICT) |
 | qty_selesai | int | NOT NULL — qty yang dilaporkan pada entry ini |
 | qc_status | enum(`lolos`,`tidak_lolos`) | NOT NULL — hasil QC saat input progress |
+| created_at / updated_at | timestamp | nullable |
+
+### `produksi_karyawan` (daftar tim karyawan yang terlibat pada produksi)
+| Kolom | Tipe | Ket |
+|---|---|---|
+| id | bigint unsigned | PK |
+| produksi_id | bigint unsigned | NOT NULL, FK → `produksi.id` (RESTRICT) |
+| karyawan_id | bigint unsigned | NOT NULL, FK → `karyawan.id` (RESTRICT) |
 | created_at / updated_at | timestamp | nullable |
 
 ### `pembayaran`
@@ -203,10 +210,12 @@ supaya file ini diperbaiki lagi.
 - `produk` n—1 `bom_categorie` (bom_category_id, nullable, RESTRICT)
 - `bom_categorie` 1—n `bom_detail` (RESTRICT)
 - `bahan_baku` 1—n `bom_detail` (RESTRICT)
-- `pesanan` 1—n `produksi` (RESTRICT)
+- `pesanan` 1—n `produksi` (pesanan_id nullable — null jika jenis=restok, RESTRICT)
+- `produksi` 1—n `produksi_item` (RESTRICT)
+- `produk` 1—n `produksi_item` (RESTRICT)
+- `produksi` n—n `karyawan` via `produksi_karyawan` (RESTRICT) — daftar tim, bukan histori
 - `produksi` 1—n `detail_produksi` (RESTRICT)
 - `produk` 1—n `detail_produksi` (RESTRICT)
-- `karyawan` 1—n `detail_produksi` (RESTRICT)
 - `pesanan` 1—n `pembayaran` (RESTRICT)
 - `pembayaran` 1—n `arus_kas` (pembayaran_id, nullable, RESTRICT)
 - `bahan_baku` 1—n `stok_bahan_baku` (RESTRICT)
@@ -215,30 +224,29 @@ supaya file ini diperbaiki lagi.
 ## Catatan implementasi (update dari revisi sebelumnya)
 
 - **Nilai enum status berubah**: `pesanan.status` dan `produksi.status` pakai
-  `selesai`/`dibatalkan` — **bukan** `done`/`cancel` seperti draft sebelumnya. Business
-  rules & dokumentasi lain yang masih menyebut "Done"/"Cancel" perlu disamakan istilahnya
-  (lihat catatan di bawah).
+  `selesai`/`dibatalkan` — **bukan** `done`/`cancel` seperti draft sebelumnya.
 - **Nama kolom log stok berubah**: dulu diusulkan `jenis_perubahan` + `jumlah`, final-nya
-  jadi **`jenis_transaksi`** + **`qty`**. Jenis "cancel_produksi" juga final-nya jadi
-  **`rollback`** (dipakai sama di `stok_bahan_baku` maupun `stok_produk_jadi`).
-- **Kolom `referensi_id` dihapus** dari `stok_bahan_baku`/`stok_produk_jadi` di versi final
-  ini. Konsekuensinya: log riwayat stok tidak bisa langsung dilacak balik ke produksi/pesanan
-  spesifik mana yang menyebabkannya — hanya `jenis_transaksi` + `keterangan` (teks bebas)
-  sebagai konteks. Ini bukan salah, tapi kalau nanti butuh audit trail yang bisa diklik ke
-  produksi terkait, kolom itu perlu ditambah lewat migration baru (bukan mengubah desain
-  yang sudah final).
-- `created_by` di kedua tabel log stok **nullable** (beda dari tabel lain yang NOT NULL) —
-  konsisten dengan DDL, tapi service yang menulis ke tabel ini tetap disarankan selalu
-  mengisi `created_by` supaya jejak audit lengkap.
-- Semua FK pakai `ON DELETE RESTRICT`, sudah konsisten di seluruh tabel.
-- Semua tabel singular kecuali `users` (plural) — tetap berlaku, tidak berubah.
-- `bom_category_id` di `produk` tetap nullable secara DB; validasi "produk harus punya BOM
-  sebelum diproduksi" ditegakkan di level Service, bukan constraint NOT NULL.
+  jadi **`jenis_transaksi`** + **`qty`**. Jenis rollback produksi disebut `rollback`.
+- **Kolom `referensi_id` dihapus** dari `stok_bahan_baku`/`stok_produk_jadi`.
+- **`produksi.pesanan_id` sekarang nullable** — null jika `jenis_produksi = restok`.
+- **Tabel `produksi_item` ditambahkan** sebagai sumber kebenaran target per produk, berlaku
+  untuk Produksi Pesanan maupun Produksi Restok. Untuk Produksi Pesanan, `produksi_item`
+  di-populate otomatis dari `detail_pesanan`. Untuk Produksi Restok, diisi manual oleh admin.
+- **Tabel `produksi_karyawan` ditambahkan** sebagai pivot daftar tim karyawan yang terlibat
+  dalam produksi. Dipilih saat Create Produksi. Bukan histori progress.
+- **`detail_produksi` direvisi**: kolom `karyawan_id` dihapus sepenuhnya (progress = output
+  tim, bukan laporan per individu). Kolom `qc_status` enum(`lolos`,`tidak_lolos`) ditambahkan
+  agar histori QC dapat diaudit dan progress bar QC dapat dihitung.
+- **`pesanan.jenis_pembayaran`** ditambahkan sebagai kontrak pembayaran yang disepakati saat
+  order (DP, Lunas, Bertahap, COD, Termin). Berbeda dari `pembayaran.jenis_pembayaran` yang
+  mencatat realisasi per transaksi bayar.
+- `created_by` di tabel log stok **nullable** tapi service tetap selalu mengisinya.
+- Semua FK pakai `ON DELETE RESTRICT`, konsisten di seluruh tabel.
+- Semua tabel singular kecuali `users` (plural, ikut konvensi Laravel).
 
 ## ⚠️ Perlu disinkronkan ke file lain
-`AGENTS.md` dan `business-rules.md` masih menyebut status pesanan/produksi sebagai
-"Done"/"Cancel" — sebaiknya diubah ke "Selesai"/"Dibatalkan" supaya istilah di semua
-dokumen sama persis dengan enum di database. Beri tahu aku kalau mau sekalian aku perbaiki.
+Pastikan `AGENTS.md` dan `business-rules.md` menggunakan istilah `selesai`/`dibatalkan`
+(bukan `done`/`cancel`) dan mencerminkan entitas `produksi_item` + `produksi_karyawan`.
 
 ## Lampiran — DDL SQL final (sumber kebenaran)
 
@@ -347,6 +355,14 @@ CREATE TABLE pesanan (
         'dibatalkan'
     ) NOT NULL,
 
+    jenis_pembayaran ENUM(
+        'dp',
+        'lunas',
+        'bertahap',
+        'cod',
+        'termin'
+    ) NULL COMMENT 'kontrak pembayaran yang disepakati saat order',
+
     subtotal DECIMAL(15,2),
     diskon DECIMAL(15,2),
     ongkir DECIMAL(15,2),
@@ -391,8 +407,13 @@ CREATE TABLE detail_pesanan (
 CREATE TABLE produksi (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    pesanan_id BIGINT UNSIGNED NOT NULL,
+    pesanan_id BIGINT UNSIGNED NULL COMMENT 'null jika jenis_produksi=restok',
     created_by BIGINT UNSIGNED NOT NULL,
+
+    jenis_produksi ENUM(
+        'pesanan',
+        'restok'
+    ) NOT NULL DEFAULT 'pesanan',
 
     deadline DATE,
 
@@ -426,13 +447,13 @@ CREATE TABLE produksi (
         ON DELETE RESTRICT
 );
 
-CREATE TABLE detail_produksi (
+CREATE TABLE produksi_item (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     produksi_id BIGINT UNSIGNED NOT NULL,
-    karyawan_id BIGINT UNSIGNED NOT NULL,
+    produk_id BIGINT UNSIGNED NOT NULL,
 
-    qty_selesai INT NOT NULL,
+    qty_target INT NOT NULL,
 
     created_at TIMESTAMP NULL,
     updated_at TIMESTAMP NULL,
@@ -441,8 +462,53 @@ CREATE TABLE detail_produksi (
         REFERENCES produksi(id)
         ON DELETE RESTRICT,
 
+    FOREIGN KEY (produk_id)
+        REFERENCES produk(id)
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE produksi_karyawan (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    produksi_id BIGINT UNSIGNED NOT NULL,
+    karyawan_id BIGINT UNSIGNED NOT NULL,
+
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+
+    UNIQUE KEY produksi_karyawan_unique (produksi_id, karyawan_id),
+
+    FOREIGN KEY (produksi_id)
+        REFERENCES produksi(id)
+        ON DELETE RESTRICT,
+
     FOREIGN KEY (karyawan_id)
         REFERENCES karyawan(id)
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE detail_produksi (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    produksi_id BIGINT UNSIGNED NOT NULL,
+    produk_id BIGINT UNSIGNED NOT NULL,
+
+    qty_selesai INT NOT NULL,
+
+    qc_status ENUM(
+        'lolos',
+        'tidak_lolos'
+    ) NOT NULL,
+
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+
+    FOREIGN KEY (produksi_id)
+        REFERENCES produksi(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (produk_id)
+        REFERENCES produk(id)
         ON DELETE RESTRICT
 );
 

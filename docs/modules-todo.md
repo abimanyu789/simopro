@@ -237,17 +237,31 @@ dari satu modul dalam satu percakapan.
 - [x] Build berhasil, UAT 46/46 lulus
 
 ## 11. Produksi — Revisi (Post-UAT Requirement Change)
-- [ ] **Bug Fix:** `PesananController::invoice()` — method hilang, perlu ditambahkan
-- [ ] **Pesanan:** Tambah `jenis_pembayaran` ke tabel `pesanan` (migration + model + form + validasi)
-- [ ] **Produksi:** Migration `pesanan_id` nullable + tambah `jenis_produksi` enum(`pesanan`,`restok`) ke tabel `produksi`
-- [ ] **Produksi:** Migration tabel baru `produksi_item` (produksi_id, produk_id, qty_target) — sumber target per produk
-- [ ] **Produksi:** Migration tambah `qc_status` enum(`lolos`,`tidak_lolos`) ke `detail_produksi`
-- [ ] **Produksi:** Revisi form create produksi — step 1 pilih jenis (pesanan/restok), step 2 berbeda per jenis
-- [ ] **Produksi:** Revisi `ProduksiService` — support restok, hitungKebutuhanBahan dari produksi_item
-- [ ] **Produksi:** Revisi dropdown progress — hanya tampil produk yang qty lolos QC < qty_target per produk
-- [ ] **Produksi:** Tambah dua progress bar di halaman show (Progress Produksi + Progress QC)
-- [ ] **Produksi:** Simpan qc_status di detail_produksi saat input progress
+- [ ] **Prioritas 1 — Bug Fix Invoice:** Tambah `PesananController::invoice()` (method hilang, route + blade + dompdf sudah ada)
+- [ ] **Prioritas 2 — Jenis Pembayaran:** Migration `add_jenis_pembayaran_to_pesanan` + update Model, FormRequest, form create/edit, show page
+- [ ] **Prioritas 3 — Schema Produksi Baru:**
+      - Migration `add_jenis_produksi_to_produksi` (tambah `jenis_produksi` enum, `pesanan_id` → nullable)
+      - Migration `create_produksi_item_table` (`produksi_id`, `produk_id`, `qty_target`)
+      - Migration `create_produksi_karyawan_table` (`produksi_id`, `karyawan_id`, unique key)
+      - Migration `revisi_detail_produksi` (DROP `karyawan_id`, ADD `qc_status` enum(`lolos`,`tidak_lolos`))
+      - Model baru: `ProduksiItem`, `ProduksiKaryawan`
+      - Update Model `Produksi` (nullable `pesanan_id`, `jenis_produksi`, relasi baru)
+      - Update Model `DetailProduksi` (hapus `karyawan_id`, tambah `qc_status`)
+- [ ] **Prioritas 4 — Refactor Produksi Service & Controller:**
+      - `ProduksiService::create()` support dua jenis, populate `produksi_item` + `produksi_karyawan`
+      - `ProduksiService::hitungKebutuhanBahan()` baca dari `produksi_item`
+      - `ProduksiService::inputProgress()` tanpa karyawan, simpan `qc_status`, validasi per produk
+      - `ProduksiService::selesaikanProduksi()` cek berdasarkan `produksi_item`
+      - Update `ProduksiController`, `ProduksiRequest`, `InputProgressRequest`
+- [ ] **Prioritas 5 — Frontend Produksi:**
+      - Update TypeScript types
+      - Refactor `create.tsx` (step jenis, pesanan/restok, pilih karyawan)
+      - Refactor `show.tsx` (dua progress bar, daftar karyawan, histori QC)
+      - Refactor `input-progress-form.tsx` (hapus karyawan, filter dropdown per target)
+- [ ] **Prioritas 6 — Dinamis & Polishing:**
+      - Summary cards produksi dari data aktual
 - [ ] Test manual semua revisi
+- Catatan: gunakan `php artisan migrate:fresh --seed` karena ada perubahan struktur tabel yang sudah ada
 - [x] `ProduksiService::selesaikanProduksi()` — hanya ubah status, TIDAK menambah stok
 - [x] Guard: `qty_selesai == qty_target` sebelum selesai
 - [x] Guard: produksi selesai tidak bisa progress/batalkan
