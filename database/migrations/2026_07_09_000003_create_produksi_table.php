@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('produksi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pesanan_id')
+                ->nullable()
                 ->constrained('pesanan')
                 ->onDelete('restrict');
             $table->foreignId('created_by')
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->enum('status_qc', ['belum_dicek', 'lolos', 'tidak_lolos'])
                 ->default('belum_dicek');
             $table->text('catatan')->nullable();
+            $table->enum('jenis_produksi', ['pesanan', 'restok'])->default('pesanan');
             $table->timestamps();
         });
     }

@@ -6,6 +6,7 @@ use App\Http\Requests\InputProgressRequest;
 use App\Http\Requests\ProduksiRequest;
 use App\Models\Karyawan;
 use App\Models\Pesanan;
+use App\Models\Produk;
 use App\Models\Produksi;
 use App\Services\ProduksiService;
 use Illuminate\Http\Request;
@@ -35,11 +36,13 @@ class ProduksiController extends Controller
 
         $produksis = Produksi::with('pesanan.customer')
             ->when($search, function ($query, $search) {
-                $query->whereHas('pesanan', function ($q) use ($search) {
-                    $q->where('nomor_pesanan', 'like', "%{$search}%")
-                      ->orWhereHas('customer', function ($q2) use ($search) {
-                          $q2->where('nama_customer', 'like', "%{$search}%");
-                      });
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('pesanan', function ($q2) use ($search) {
+                        $q2->where('nomor_pesanan', 'like', "%{$search}%")
+                          ->orWhereHas('customer', function ($q3) use ($search) {
+                              $q3->where('nama_customer', 'like', "%{$search}%");
+                          });
+                    });
                 });
             })
             ->when($status && in_array($status, ['draft', 'proses', 'selesai', 'dibatalkan']), function ($query) use ($status) {
@@ -62,11 +65,11 @@ class ProduksiController extends Controller
     }
 
     /**
-     * Form buat produksi baru — load pesanan valid + preview kebutuhan bahan.
+     * Form create produksi — kirim data sesuai jenis yang dipilih.
      */
     public function create(Request $request)
     {
-        // Pesanan valid: status pending atau proses, belum punya produksi aktif
+        // Pesanan valid: status pending/proses, belum punya produksi aktif
         $pesananValid = Pesanan::with('customer')
             ->whereIn('status', ['pending', 'proses'])
             ->whereDoesntHave('produksi', function ($q) {
@@ -75,26 +78,48 @@ class ProduksiController extends Controller
             ->orderByDesc('created_at')
             ->get(['id', 'nomor_pesanan', 'status', 'customer_id', 'tanggal', 'total']);
 
-        // Jika ada pre-select pesanan_id dari query param, hitung kebutuhan bahan langsung
-        $selectedPesananId   = $request->integer('pesanan_id') ?: null;
-        $kebutuhanBahan      = [];
-        $selectedPesanan     = null;
+        // Semua produk yang punya BOM (untuk Produksi Restok)
+        $produkList = Produk::whereNotNull('bom_category_id')
+            ->orderBy('nama_produk')
+            ->get(['id', 'kode_produk', 'nama_produk', 'stok']);
+
+        // Karyawan aktif untuk dipilih sebagai tim
+        $karyawanList = Karyawan::where('status', 'aktif')
+            ->orderBy('nama_karyawan')
+            ->get(['id', 'nama_karyawan', 'jabatan']);
+
+        // Jika ada pre-select pesanan_id, hitung kebutuhan bahan
+        $selectedPesananId = $request->integer('pesanan_id') ?: null;
+        $kebutuhanBahan    = [];
+        $selectedPesanan   = null;
 
         if ($selectedPesananId) {
+            // Buat Produksi dummy sementara untuk hitungKebutuhanBahan
+            $tempProduksi = new Produksi(['pesanan_id' => $selectedPesananId]);
             $selectedPesanan = Pesanan::with([
                 'customer',
                 'detailPesanan.produk.bomCategorie.bomDetails.bahanBaku',
             ])->find($selectedPesananId);
 
             if ($selectedPesanan) {
-                $kebutuhanBahan = $this->service->hitungKebutuhanBahan($selectedPesanan);
+                // Load produksiItems dari detail_pesanan sementara
+                $tempItems = $selectedPesanan->detailPesanan->map(fn ($d) => (object)[
+                    'produk_id'  => $d->produk_id,
+                    'qty_target' => $d->qty,
+                    'produk'     => $d->produk,
+                ]);
+
+                // Hitung kebutuhan manual (tanpa save ke DB)
+                $kebutuhanBahan = $this->hitungKebutuhanBahanDariItems($tempItems);
             }
         }
 
         return Inertia::render('produksi/create', [
-            'pesananValid'     => $pesananValid,
-            'selectedPesanan'  => $selectedPesanan,
-            'kebutuhanBahan'   => $kebutuhanBahan,
+            'pesananValid'    => $pesananValid,
+            'produkList'      => $produkList,
+            'karyawanList'    => $karyawanList,
+            'selectedPesanan' => $selectedPesanan,
+            'kebutuhanBahan'  => $kebutuhanBahan,
         ]);
     }
 
@@ -103,11 +128,8 @@ class ProduksiController extends Controller
      */
     public function store(ProduksiRequest $request)
     {
-        $pesanan = Pesanan::findOrFail($request->validated('pesanan_id'));
-
         try {
             $produksi = $this->service->create(
-                $pesanan,
                 $request->validated(),
                 auth()->id()
             );
@@ -115,47 +137,51 @@ class ProduksiController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
+        $label = $produksi->jenis_produksi === 'pesanan'
+            ? "pesanan {$produksi->pesanan?->nomor_pesanan}"
+            : "restok";
+
         return redirect()
             ->route('produksi.show', $produksi)
-            ->with('success', "Produksi untuk {$pesanan->nomor_pesanan} berhasil dibuat.");
+            ->with('success', "Produksi {$label} berhasil dibuat.");
     }
 
     /**
-     * Detail produksi — termasuk preview kebutuhan bahan dari BOM.
+     * Detail produksi — kebutuhan bahan, progress per produk, karyawan terlibat.
      */
     public function show(Produksi $produksi)
     {
         $produksi->load([
             'pesanan.customer',
-            'pesanan.detailPesanan.produk',
-            'pesanan.detailPesanan.produk.bomCategorie.bomDetails.bahanBaku',
+            'produksiItems.produk',
+            'produksiKaryawans.karyawan',
             'createdBy',
-            'detailProduksi.karyawan',
             'detailProduksi.produk',
         ]);
 
-        $kebutuhanBahan  = $this->service->hitungKebutuhanBahan($produksi->pesanan);
-        $stokCukup       = $this->service->cekKecukupanStok($produksi->pesanan);
+        $kebutuhanBahan    = $this->service->hitungKebutuhanBahan($produksi);
+        $stokCukup         = $this->service->cekKecukupanStok($produksi);
+        $progressPerProduk = $this->service->hitungProgressPerProduk($produksi);
 
-        // Daftar produk dari pesanan untuk form input progress
-        $produkList = $produksi->pesanan->detailPesanan->map(fn ($d) => [
-            'id'          => $d->produk->id,
-            'kode_produk' => $d->produk->kode_produk,
-            'nama_produk' => $d->produk->nama_produk,
-            'qty_pesanan' => $d->qty,
-        ])->unique('id')->values();
-
-        // Daftar karyawan aktif untuk form input progress
-        $karyawanList = Karyawan::where('status', 'aktif')
-            ->orderBy('nama_karyawan')
-            ->get(['id', 'nama_karyawan', 'jabatan']);
+        // Daftar produk yang masih perlu progress (qty lolos < target)
+        $produkBelumSelesai = $produksi->produksiItems
+            ->filter(fn ($item) => ($progressPerProduk[$item->produk_id]['lolos'] ?? 0) < $item->qty_target)
+            ->map(fn ($item) => [
+                'id'          => $item->produk->id,
+                'kode_produk' => $item->produk->kode_produk,
+                'nama_produk' => $item->produk->nama_produk,
+                'qty_target'  => $item->qty_target,
+                'qty_lolos'   => $progressPerProduk[$item->produk_id]['lolos'] ?? 0,
+                'sisa'        => $item->qty_target - ($progressPerProduk[$item->produk_id]['lolos'] ?? 0),
+            ])
+            ->values();
 
         return Inertia::render('produksi/show', [
-            'produksi'       => $produksi,
-            'kebutuhanBahan' => $kebutuhanBahan,
-            'stokCukup'      => $stokCukup,
-            'produkList'     => $produkList,
-            'karyawanList'   => $karyawanList,
+            'produksi'          => $produksi,
+            'kebutuhanBahan'    => $kebutuhanBahan,
+            'stokCukup'         => $stokCukup,
+            'progressPerProduk' => $progressPerProduk,
+            'produkBelumSelesai' => $produkBelumSelesai,
         ]);
     }
 
@@ -175,8 +201,6 @@ class ProduksiController extends Controller
 
     /**
      * Batalkan produksi.
-     * Draft  → dibatalkan (tanpa rollback stok).
-     * Proses → dibatalkan (rollback seluruh stok bahan baku).
      */
     public function batalkan(Produksi $produksi)
     {
@@ -190,29 +214,31 @@ class ProduksiController extends Controller
     }
 
     /**
-     * Input progress produksi — lolos QC: simpan histori + tambah stok produk jadi.
-     * Tidak lolos QC: tampilkan error, tidak ada yang disimpan.
+     * Input progress produksi — pilih produk, qty, qc_status.
      */
     public function progress(InputProgressRequest $request, Produksi $produksi)
     {
         try {
             $this->service->inputProgress(
-                produksi:   $produksi,
-                produkId:   $request->validated('produk_id'),
-                karyawanId: $request->validated('karyawan_id'),
-                qty:        $request->validated('qty'),
-                qcLolos:    (bool) $request->validated('qc_lolos'),
-                userId:     auth()->id(),
+                produksi:  $produksi,
+                produkId:  $request->validated('produk_id'),
+                qty:       $request->validated('qty'),
+                qcStatus:  $request->validated('qc_status'),
+                userId:    auth()->id(),
             );
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Progress produksi berhasil dicatat. Stok produk jadi telah bertambah.');
+        $msg = $request->validated('qc_status') === 'lolos'
+            ? 'Progress berhasil dicatat. Stok produk jadi bertambah.'
+            : 'Progress dicatat sebagai tidak lolos QC. Stok tidak berubah.';
+
+        return back()->with('success', $msg);
     }
 
     /**
-     * Selesaikan produksi — hanya mengubah status, tidak ada operasi stok.
+     * Selesaikan produksi.
      */
     public function selesai(Produksi $produksi)
     {
@@ -223,5 +249,54 @@ class ProduksiController extends Controller
         }
 
         return back()->with('success', 'Produksi berhasil diselesaikan.');
+    }
+
+    // ─── Helper privat ───────────────────────────────────────────────────────
+
+    /**
+     * Hitung kebutuhan bahan dari collection items sementara (sebelum disimpan ke DB).
+     * Digunakan untuk preview di form create.
+     */
+    private function hitungKebutuhanBahanDariItems($items): array
+    {
+        $kebutuhan = [];
+
+        foreach ($items as $item) {
+            $produk = $item->produk;
+
+            if (!$produk || !$produk->bomCategorie) {
+                continue;
+            }
+
+            foreach ($produk->bomCategorie->bomDetails as $bomDetail) {
+                $bahanBaku = $bomDetail->bahanBaku;
+                if (!$bahanBaku) {
+                    continue;
+                }
+
+                $id           = $bahanBaku->id;
+                $kebutuhanQty = (float) $bomDetail->qty_per_pair * $item->qty_target;
+
+                if (isset($kebutuhan[$id])) {
+                    $kebutuhan[$id]['kebutuhan'] += $kebutuhanQty;
+                } else {
+                    $kebutuhan[$id] = [
+                        'id'            => $id,
+                        'kode_bahan'    => $bahanBaku->kode_bahan,
+                        'nama_bahan'    => $bahanBaku->nama_bahan,
+                        'satuan'        => $bahanBaku->satuan ?? '',
+                        'kebutuhan'     => $kebutuhanQty,
+                        'stok_tersedia' => (float) $bahanBaku->stok,
+                        'cukup'         => true,
+                    ];
+                }
+            }
+        }
+
+        foreach ($kebutuhan as $id => $item) {
+            $kebutuhan[$id]['cukup'] = $item['stok_tersedia'] >= $item['kebutuhan'];
+        }
+
+        return array_values($kebutuhan);
     }
 }

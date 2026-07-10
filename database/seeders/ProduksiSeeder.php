@@ -13,7 +13,7 @@ class ProduksiSeeder extends Seeder
     public function run(): void
     {
         $admin   = User::first();
-        $service = new ProduksiService();
+        $service = app(ProduksiService::class);
 
         if (!$admin) {
             $this->command->warn('ProduksiSeeder: skip — admin belum ada.');

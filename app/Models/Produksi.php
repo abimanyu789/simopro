@@ -13,6 +13,7 @@ class Produksi extends Model
     protected $fillable = [
         'pesanan_id',
         'created_by',
+        'jenis_produksi',
         'deadline',
         'qty_target',
         'qty_selesai',
@@ -29,15 +30,21 @@ class Produksi extends Model
 
     // ─── Status helpers ──────────────────────────────────────────────────────
 
-    public function isDraft(): bool      { return $this->status === 'draft'; }
-    public function isProses(): bool     { return $this->status === 'proses'; }
-    public function isSelesai(): bool    { return $this->status === 'selesai'; }
-    public function isDibatalkan(): bool { return $this->status === 'dibatalkan'; }
+    public function isDraft(): bool       { return $this->status === 'draft'; }
+    public function isProses(): bool      { return $this->status === 'proses'; }
+    public function isSelesai(): bool     { return $this->status === 'selesai'; }
+    public function isDibatalkan(): bool  { return $this->status === 'dibatalkan'; }
 
     /** Produksi aktif = masih draft atau proses */
     public function isAktif(): bool
     {
         return in_array($this->status, ['draft', 'proses']);
+    }
+
+    /** Apakah produksi ini dari pesanan (bukan restok) */
+    public function isPesanan(): bool
+    {
+        return $this->jenis_produksi === 'pesanan';
     }
 
     // ─── Relasi ──────────────────────────────────────────────────────────────
@@ -55,5 +62,15 @@ class Produksi extends Model
     public function detailProduksi(): HasMany
     {
         return $this->hasMany(DetailProduksi::class, 'produksi_id');
+    }
+
+    public function produksiItems(): HasMany
+    {
+        return $this->hasMany(ProduksiItem::class, 'produksi_id');
+    }
+
+    public function produksiKaryawans(): HasMany
+    {
+        return $this->hasMany(ProduksiKaryawan::class, 'produksi_id');
     }
 }

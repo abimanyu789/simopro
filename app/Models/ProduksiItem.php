@@ -5,20 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DetailProduksi extends Model
+class ProduksiItem extends Model
 {
-    protected $table = 'detail_produksi';
+    protected $table = 'produksi_item';
 
     protected $fillable = [
         'produksi_id',
         'produk_id',
-        'qty_selesai',
-        'qc_status',
+        'qty_target',
     ];
 
     protected $casts = [
-        'qty_selesai' => 'integer',
-        'produk_id'   => 'integer',
+        'qty_target' => 'integer',
     ];
 
     public function produksi(): BelongsTo

@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Users, XCircle } from 'lucide-react';
 import { InputProgressForm } from '@/components/produksi/input-progress-form';
 import { ProduksiActionDialog } from '@/components/produksi/produksi-action-dialog';
 import { ProduksiStatusBadge } from '@/components/produksi/produksi-status-badge';
@@ -26,8 +26,8 @@ import pesanan from '@/routes/pesanan';
 import produksiRoute from '@/routes/produksi';
 import type {
     KebutuhanBahan,
-    KaryawanOption,
-    ProdukProgressOption,
+    ProdukBelumSelesai,
+    ProgressPerProduk,
     ProduksiShowProps,
 } from '@/types';
 
@@ -35,20 +35,20 @@ export default function ProduksiShow({
     produksi: item,
     kebutuhanBahan,
     stokCukup,
-    produkList,
-    karyawanList,
+    progressPerProduk,
+    produkBelumSelesai,
 }: ProduksiShowProps) {
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('id-ID', {
+    const formatDate = (s: string | null) => {
+        if (!s) return '-';
+        return new Date(s).toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
         });
     };
 
-    const formatDateTime = (dateString: string) =>
-        new Date(dateString).toLocaleDateString('id-ID', {
+    const formatDateTime = (s: string) =>
+        new Date(s).toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
@@ -56,15 +56,29 @@ export default function ProduksiShow({
             minute: '2-digit',
         });
 
+    // Progress Bar 1: Progress Produksi (qty_selesai lolos / qty_target)
     const progressPct =
         item.qty_target > 0
             ? Math.round((item.qty_selesai / item.qty_target) * 100)
             : 0;
 
+    // Progress Bar 2: Progress QC (lolos / total progress yang diinput)
+    const totalProgress = (item.detail_produksi ?? []).reduce(
+        (s, d) => s + d.qty_selesai,
+        0,
+    );
+    const totalLolos = (item.detail_produksi ?? [])
+        .filter((d) => d.qc_status === 'lolos')
+        .reduce((s, d) => s + d.qty_selesai, 0);
+    const totalTidakLolos = totalProgress - totalLolos;
+
+    const isSelesaiEnabled =
+        item.status === 'proses' && item.qty_selesai >= item.qty_target;
+
     return (
         <>
             <Head
-                title={`Produksi — ${item.pesanan?.nomor_pesanan ?? item.id}`}
+                title={`Produksi — ${item.pesanan?.nomor_pesanan ?? `#${item.id}`}`}
             />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
@@ -83,12 +97,13 @@ export default function ProduksiShow({
                             <div className="mt-1 flex items-center gap-2">
                                 <ProduksiStatusBadge status={item.status} />
                                 <span className="text-sm text-muted-foreground">
-                                    {item.pesanan?.nomor_pesanan}
+                                    {item.jenis_produksi === 'pesanan'
+                                        ? item.pesanan?.nomor_pesanan
+                                        : `Restok #${item.id}`}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    {/* Tombol aksi — Mulai & Batalkan */}
                     <ProduksiActionDialog
                         produksi={item}
                         stokCukup={stokCukup}
@@ -96,7 +111,7 @@ export default function ProduksiShow({
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Kolom kiri — info & BOM */}
+                    {/* ── Kolom Kiri ──────────────────────────────────── */}
                     <div className="space-y-6 lg:col-span-2">
                         {/* Informasi Produksi */}
                         <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
@@ -108,15 +123,28 @@ export default function ProduksiShow({
                             <div className="grid grid-cols-2 divide-x divide-y">
                                 <div className="px-6 py-4">
                                     <p className="text-sm text-muted-foreground">
-                                        Pesanan
+                                        Jenis
                                     </p>
-                                    <Link
-                                        href={pesanan.show.url(item.pesanan_id)}
-                                        className="mt-1 font-medium text-primary underline-offset-4 hover:underline"
-                                    >
-                                        {item.pesanan?.nomor_pesanan ?? '-'}
-                                    </Link>
+                                    <p className="mt-1 font-medium capitalize">
+                                        {item.jenis_produksi}
+                                    </p>
                                 </div>
+                                {item.jenis_produksi === 'pesanan' &&
+                                    item.pesanan && (
+                                        <div className="px-6 py-4">
+                                            <p className="text-sm text-muted-foreground">
+                                                Pesanan
+                                            </p>
+                                            <Link
+                                                href={pesanan.show.url(
+                                                    item.pesanan_id!,
+                                                )}
+                                                className="mt-1 font-medium text-primary underline-offset-4 hover:underline"
+                                            >
+                                                {item.pesanan.nomor_pesanan}
+                                            </Link>
+                                        </div>
+                                    )}
                                 <div className="px-6 py-4">
                                     <p className="text-sm text-muted-foreground">
                                         Customer
@@ -128,20 +156,18 @@ export default function ProduksiShow({
                                 </div>
                                 <div className="px-6 py-4">
                                     <p className="text-sm text-muted-foreground">
-                                        Status
-                                    </p>
-                                    <div className="mt-1">
-                                        <ProduksiStatusBadge
-                                            status={item.status}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="px-6 py-4">
-                                    <p className="text-sm text-muted-foreground">
                                         Deadline
                                     </p>
                                     <p className="mt-1 font-medium">
                                         {formatDate(item.deadline)}
+                                    </p>
+                                </div>
+                                <div className="px-6 py-4">
+                                    <p className="text-sm text-muted-foreground">
+                                        Dibuat Pada
+                                    </p>
+                                    <p className="mt-1 text-sm">
+                                        {formatDateTime(item.created_at)}
                                     </p>
                                 </div>
                                 {item.catatan && (
@@ -154,15 +180,74 @@ export default function ProduksiShow({
                                         </p>
                                     </div>
                                 )}
-                                <div className="px-6 py-4">
-                                    <p className="text-sm text-muted-foreground">
-                                        Dibuat Pada
-                                    </p>
-                                    <p className="mt-1 text-sm">
-                                        {formatDateTime(item.created_at)}
-                                    </p>
-                                </div>
                             </div>
+                        </div>
+
+                        {/* Target Produk */}
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
+                            <div className="border-b px-6 py-4">
+                                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                    Target Produk
+                                </h2>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Produk</TableHead>
+                                        <TableHead className="text-right">
+                                            Target
+                                        </TableHead>
+                                        <TableHead className="text-right">
+                                            Lolos QC
+                                        </TableHead>
+                                        <TableHead className="text-right">
+                                            Sisa
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {(item.produksi_items ?? []).map((pi) => {
+                                        const prog = progressPerProduk[
+                                            pi.produk_id
+                                        ] ?? {
+                                            lolos: 0,
+                                            tidak_lolos: 0,
+                                            target: pi.qty_target,
+                                            selesai: false,
+                                        };
+                                        return (
+                                            <TableRow key={pi.id}>
+                                                <TableCell>
+                                                    <div className="font-medium">
+                                                        {pi.produk
+                                                            ?.nama_produk ??
+                                                            '-'}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {pi.produk
+                                                            ?.kode_produk ??
+                                                            '-'}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right font-mono">
+                                                    {pi.qty_target}
+                                                </TableCell>
+                                                <TableCell className="text-right font-mono font-medium text-green-600 dark:text-green-400">
+                                                    {prog.lolos}
+                                                </TableCell>
+                                                <TableCell
+                                                    className={`text-right font-mono ${prog.selesai ? 'text-muted-foreground' : 'font-medium'}`}
+                                                >
+                                                    {prog.selesai
+                                                        ? '✓'
+                                                        : pi.qty_target -
+                                                          prog.lolos}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
                         </div>
 
                         {/* Kebutuhan Bahan Baku */}
@@ -189,7 +274,6 @@ export default function ProduksiShow({
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Bahan Baku</TableHead>
-                                            <TableHead>Kode</TableHead>
                                             <TableHead className="text-right">
                                                 Dibutuhkan
                                             </TableHead>
@@ -205,11 +289,13 @@ export default function ProduksiShow({
                                         {kebutuhanBahan.map(
                                             (bahan: KebutuhanBahan) => (
                                                 <TableRow key={bahan.id}>
-                                                    <TableCell className="font-medium">
-                                                        {bahan.nama_bahan}
-                                                    </TableCell>
-                                                    <TableCell className="font-mono text-xs text-muted-foreground">
-                                                        {bahan.kode_bahan}
+                                                    <TableCell>
+                                                        <div className="font-medium">
+                                                            {bahan.nama_bahan}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {bahan.kode_bahan}
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell className="text-right font-mono">
                                                         {bahan.kebutuhan.toFixed(
@@ -239,30 +325,107 @@ export default function ProduksiShow({
                                 </Table>
                             ) : (
                                 <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-                                    Produk pada pesanan ini belum memiliki BOM.
+                                    Produk pada produksi ini belum memiliki BOM.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Histori Progress */}
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
+                            <div className="border-b px-6 py-4">
+                                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                    Histori Progress
+                                </h2>
+                            </div>
+                            {(item.detail_produksi ?? []).length > 0 ? (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Produk</TableHead>
+                                            <TableHead className="text-right">
+                                                Qty
+                                            </TableHead>
+                                            <TableHead>QC</TableHead>
+                                            <TableHead>Tanggal</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {(item.detail_produksi ?? []).map(
+                                            (d) => (
+                                                <TableRow key={d.id}>
+                                                    <TableCell>
+                                                        <div className="font-medium">
+                                                            {d.produk
+                                                                ?.nama_produk ??
+                                                                '-'}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {d.produk
+                                                                ?.kode_produk ??
+                                                                '-'}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-mono font-semibold">
+                                                        {d.qty_selesai} pcs
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {d.qc_status ===
+                                                        'lolos' ? (
+                                                            <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
+                                                                <CheckCircle className="size-3" />{' '}
+                                                                Lolos
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-400">
+                                                                <XCircle className="size-3" />{' '}
+                                                                Tidak Lolos
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-muted-foreground">
+                                                        {new Date(
+                                                            d.created_at,
+                                                        ).toLocaleDateString(
+                                                            'id-ID',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ),
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            ) : (
+                                <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                                    Belum ada progress yang dicatat.
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Kolom kanan — progress */}
+                    {/* ── Kolom Kanan ──────────────────────────────────── */}
                     <div className="space-y-6">
-                        {/* Progress */}
+                        {/* Progress Bar 1: Produksi */}
                         <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                             <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                                 Progress Produksi
                             </h2>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">
-                                        Selesai
+                                        Selesai (Lolos QC)
                                     </span>
                                     <span className="font-medium">
                                         {item.qty_selesai} / {item.qty_target}{' '}
                                         pcs
                                     </span>
                                 </div>
-                                {/* Progress bar */}
                                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                                     <div
                                         className="h-full rounded-full bg-primary transition-all"
@@ -273,31 +436,167 @@ export default function ProduksiShow({
                                     {progressPct}%
                                 </p>
                             </div>
-
-                            {/* Status QC */}
-                            <div className="mt-4 border-t pt-4">
-                                <p className="mb-1 text-sm text-muted-foreground">
-                                    Status QC
-                                </p>
-                                <span
-                                    className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                                        item.status_qc === 'lolos'
-                                            ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
-                                            : item.status_qc === 'tidak_lolos'
-                                              ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400'
-                                              : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                                    }`}
-                                >
-                                    {item.status_qc === 'belum_dicek' &&
-                                        'Belum Dicek'}
-                                    {item.status_qc === 'lolos' && 'Lolos QC'}
-                                    {item.status_qc === 'tidak_lolos' &&
-                                        'Tidak Lolos'}
-                                </span>
-                            </div>
                         </div>
 
-                        {/* Warning stok tidak cukup — tampil saat draft & stok kurang */}
+                        {/* Progress Bar 2: QC */}
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                            <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Progress QC
+                            </h2>
+                            {totalProgress > 0 ? (
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                            <CheckCircle className="size-3.5" />{' '}
+                                            Lolos
+                                        </span>
+                                        <span className="font-medium">
+                                            {totalLolos} pcs
+                                        </span>
+                                    </div>
+                                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                                        <div
+                                            className="h-full rounded-full bg-green-500 transition-all"
+                                            style={{
+                                                width: `${totalProgress > 0 ? Math.round((totalLolos / item.qty_target) * 100) : 0}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    {totalTidakLolos > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="flex items-center gap-1 text-destructive">
+                                                <XCircle className="size-3.5" />{' '}
+                                                Tidak Lolos
+                                            </span>
+                                            <span className="font-medium">
+                                                {totalTidakLolos} pcs
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Belum ada progress yang diinput.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Karyawan Terlibat */}
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                <Users className="size-4" /> Tim Karyawan
+                            </h2>
+                            {(item.produksi_karyawans ?? []).length > 0 ? (
+                                <div className="space-y-2">
+                                    {(item.produksi_karyawans ?? []).map(
+                                        (pk) => (
+                                            <div
+                                                key={pk.id}
+                                                className="flex items-center gap-2 text-sm"
+                                            >
+                                                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+                                                    {pk.karyawan?.nama_karyawan?.charAt(
+                                                        0,
+                                                    ) ?? '?'}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {pk.karyawan
+                                                            ?.nama_karyawan ??
+                                                            '-'}
+                                                    </p>
+                                                    {pk.karyawan?.jabatan && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {
+                                                                pk.karyawan
+                                                                    .jabatan
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Belum ada karyawan yang ditugaskan.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Status QC Keseluruhan */}
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background p-4 dark:border-sidebar-border">
+                            <p className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                Status QC Keseluruhan
+                            </p>
+                            <span
+                                className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                                    item.status_qc === 'lolos'
+                                        ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
+                                        : item.status_qc === 'tidak_lolos'
+                                          ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400'
+                                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                                }`}
+                            >
+                                {item.status_qc === 'belum_dicek' &&
+                                    'Belum Dicek'}
+                                {item.status_qc === 'lolos' && 'Lolos QC'}
+                                {item.status_qc === 'tidak_lolos' &&
+                                    'Tidak Lolos'}
+                            </span>
+                        </div>
+
+                        {/* Tombol Selesaikan Produksi */}
+                        {isSelesaiEnabled && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        className="w-full"
+                                        variant="default"
+                                    >
+                                        Selesaikan Produksi
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Selesaikan Produksi
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            Seluruh target produksi (
+                                            {item.qty_target} pcs) telah
+                                            selesai. Status akan diubah menjadi{' '}
+                                            <strong>Selesai</strong>. Tidak ada
+                                            perubahan stok karena stok sudah
+                                            bertambah bertahap.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="outline">
+                                                Batal
+                                            </Button>
+                                        </DialogClose>
+                                        <Button
+                                            onClick={() =>
+                                                router.patch(
+                                                    produksiRoute.selesai.url(
+                                                        item.id,
+                                                    ),
+                                                    {},
+                                                    { preserveScroll: true },
+                                                )
+                                            }
+                                        >
+                                            Ya, Selesaikan
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
+
+                        {/* Warning stok tidak cukup */}
                         {item.status === 'draft' &&
                             !stokCukup &&
                             kebutuhanBahan.length > 0 && (
@@ -307,140 +606,24 @@ export default function ProduksiShow({
                                     dahulu.
                                 </div>
                             )}
-
-                        {/* Tombol Selesaikan Produksi */}
-                        {item.status === 'proses' &&
-                            item.qty_selesai === item.qty_target && (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button
-                                            className="w-full"
-                                            variant="default"
-                                        >
-                                            Selesaikan Produksi
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                                Selesaikan Produksi
-                                            </DialogTitle>
-                                            <DialogDescription>
-                                                Seluruh target produksi (
-                                                {item.qty_target} pcs) telah
-                                                selesai. Status produksi akan
-                                                diubah menjadi{' '}
-                                                <strong>Selesai</strong>. Tidak
-                                                ada perubahan stok karena stok
-                                                sudah bertambah bertahap.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter>
-                                            <DialogClose asChild>
-                                                <Button variant="outline">
-                                                    Batal
-                                                </Button>
-                                            </DialogClose>
-                                            <Button
-                                                onClick={() =>
-                                                    router.patch(
-                                                        produksiRoute.selesai.url(
-                                                            item.id,
-                                                        ),
-                                                        {},
-                                                        {
-                                                            preserveScroll: true,
-                                                        },
-                                                    )
-                                                }
-                                            >
-                                                Ya, Selesaikan
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            )}
                     </div>
                 </div>
-            </div>
 
-            {/* Section Input Progress + Histori — hanya saat proses */}
-            {item.status === 'proses' && (
-                <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Form Input Progress */}
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-                        <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                            Input Progress
-                        </h2>
-                        <InputProgressForm
-                            produksi={item}
-                            produkList={produkList}
-                            karyawanList={karyawanList}
-                        />
-                    </div>
-
-                    {/* Histori Detail Produksi */}
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background lg:col-span-2 dark:border-sidebar-border">
-                        <div className="border-b px-6 py-4">
-                            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                                Histori Progress
+                {/* Section Input Progress — hanya saat proses */}
+                {item.status === 'proses' && (
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                            <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Input Progress
                             </h2>
+                            <InputProgressForm
+                                produksi={item}
+                                produkBelumSelesai={produkBelumSelesai}
+                            />
                         </div>
-                        {(item.detail_produksi ?? []).length > 0 ? (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Produk</TableHead>
-                                        <TableHead>Karyawan</TableHead>
-                                        <TableHead className="text-right">
-                                            Qty
-                                        </TableHead>
-                                        <TableHead>Tanggal</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(item.detail_produksi ?? []).map((d) => (
-                                        <TableRow key={d.id}>
-                                            <TableCell>
-                                                <div className="font-medium">
-                                                    {d.produk?.nama_produk ??
-                                                        '-'}
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    {d.produk?.kode_produk ??
-                                                        '-'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {d.karyawan?.nama_karyawan ??
-                                                    '-'}
-                                            </TableCell>
-                                            <TableCell className="text-right font-mono font-semibold">
-                                                {d.qty_selesai} pcs
-                                            </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground">
-                                                {new Date(
-                                                    d.created_at,
-                                                ).toLocaleDateString('id-ID', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        ) : (
-                            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-                                Belum ada progress yang dicatat.
-                            </div>
-                        )}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </>
     );
 }

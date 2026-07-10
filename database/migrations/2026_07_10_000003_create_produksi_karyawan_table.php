@@ -8,22 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('detail_produksi', function (Blueprint $table) {
+        Schema::create('produksi_karyawan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('produksi_id')
                 ->constrained('produksi')
                 ->onDelete('restrict');
-            $table->foreignId('produk_id')
-                ->constrained('produk')
+            $table->foreignId('karyawan_id')
+                ->constrained('karyawan')
                 ->onDelete('restrict');
-            $table->integer('qty_selesai');
-            $table->enum('qc_status', ['lolos', 'tidak_lolos']);
+            $table->unique(['produksi_id', 'karyawan_id']);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('detail_produksi');
+        Schema::dropIfExists('produksi_karyawan');
     }
 };

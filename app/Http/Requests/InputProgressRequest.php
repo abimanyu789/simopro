@@ -14,33 +14,30 @@ class InputProgressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'produk_id'   => ['required', 'integer', 'exists:produk,id'],
-            'karyawan_id' => ['required', 'integer', 'exists:karyawan,id'],
-            'qty'         => ['required', 'integer', 'min:1'],
-            'qc_lolos'    => ['required', 'boolean'],
+            'produk_id' => ['required', 'integer', 'exists:produk,id'],
+            'qty'       => ['required', 'integer', 'min:1'],
+            'qc_status' => ['required', 'string', 'in:lolos,tidak_lolos'],
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'produk_id'   => 'produk',
-            'karyawan_id' => 'karyawan',
-            'qty'         => 'jumlah progress',
-            'qc_lolos'    => 'hasil QC',
+            'produk_id' => 'produk',
+            'qty'       => 'jumlah progress',
+            'qc_status' => 'status QC',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'produk_id.required'   => 'Produk harus dipilih.',
-            'produk_id.exists'     => 'Produk tidak ditemukan.',
-            'karyawan_id.required' => 'Karyawan harus dipilih.',
-            'karyawan_id.exists'   => 'Karyawan tidak ditemukan.',
-            'qty.required'         => 'Jumlah progress harus diisi.',
-            'qty.min'              => 'Jumlah progress harus lebih dari 0.',
-            'qc_lolos.required'    => 'Hasil QC harus dipilih.',
+            'produk_id.required' => 'Produk harus dipilih.',
+            'produk_id.exists'   => 'Produk tidak ditemukan.',
+            'qty.required'       => 'Jumlah progress harus diisi.',
+            'qty.min'            => 'Jumlah progress harus lebih dari 0.',
+            'qc_status.required' => 'Status QC harus dipilih.',
+            'qc_status.in'       => 'Status QC tidak valid.',
         ];
     }
 }

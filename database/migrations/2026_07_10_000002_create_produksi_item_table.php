@@ -8,19 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('detail_produksi', function (Blueprint $table) {
+        Schema::create('produksi_item', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('produksi_id')
+                ->constrained('produksi')
+                ->onDelete('restrict');
             $table->foreignId('produk_id')
-                ->after('produksi_id')
                 ->constrained('produk')
                 ->onDelete('restrict');
+            $table->integer('qty_target');
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::table('detail_produksi', function (Blueprint $table) {
-            $table->dropForeign(['produk_id']);
-            $table->dropColumn('produk_id');
-        });
+        Schema::dropIfExists('produksi_item');
     }
 };
