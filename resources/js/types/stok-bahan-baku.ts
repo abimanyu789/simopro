@@ -1,7 +1,7 @@
 import type { BahanBaku } from './bahan-baku';
 
 export type JenisTransaksiStok =
-    'restock' | 'produksi' | 'rollback' | 'adjustment';
+    'restock' | 'produksi' | 'rollback' | 'penyesuaian';
 
 export interface StokBahanBaku {
     id: number;

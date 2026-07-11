@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, FileText, Pencil, Trash2 } from 'lucide-react';
+import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { PesananDeleteDialog } from '@/components/pesanan/pesanan-delete-dialog';
 import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
@@ -449,9 +450,9 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
             metode: '',
             keterangan: '',
         });
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         post(pembayaran.store.url(pesananId), {
             preserveScroll: true,

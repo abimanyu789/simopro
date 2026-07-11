@@ -336,6 +336,34 @@ dari satu modul dalam satu percakapan.
 - [x] Build berhasil tanpa error ✅
 - [ ] Test manual: saldo konsisten setelah tambah/ubah/hapus transaksi
 
+---
+
+## Bug Fixes — Post Modul 12 (2026-07-12)
+
+### Bug 4 (Critical) — Blank Page Detail Pesanan: `React is not defined`
+- **Root cause:** `PembayaranForm` dalam `pesanan/show.tsx` menggunakan `React.useState(false)` tanpa `import React`. Project pakai React 19 JSX transform sehingga `React` namespace tidak tersedia secara global.
+- **Fix:** Ubah `React.useState(false)` → `useState(false)` (sudah diimport dari `'react'`)
+- **File:** `resources/js/pages/pesanan/show.tsx`
+- [x] Selesai
+
+### Bug 3 (High) — Produksi bisa dimulai tanpa BOM
+- **Root cause:** `cekKecukupanStok()` mereturn true jika BOM kosong, dan `ProduksiActionDialog` tidak menonaktifkan tombol Mulai Produksi saat validasi produk tanpa BOM lolos.
+- **Fix:** Menambah pengecekan BOM kosong di `ProduksiService` dan memperbarui pesan exception, serta memperjelas warning message di `show.tsx`.
+- **File:** `app/Services/ProduksiService.php`, `resources/js/pages/produksi/show.tsx`
+- [x] Selesai
+
+### Bug 2 (Medium) — Detail Stok Produk Jadi selalu tampil `+` meski transaksi pengurangan
+- **Root cause:** `isPengurangan` di `show.tsx` hanya cek `['pengiriman', 'rollback']`. Penyesuaian negatif dan jenis lain tidak ter-cover. DB menyimpan `qty` sebagai nilai absolut, sehingga tanda tidak bisa ditentukan hanya dari `jenis_transaksi`.
+- **Fix:** Gunakan `stok_sebelum > stok_sesudah` untuk menentukan arah perubahan — ini akurat untuk semua jenis transaksi
+- **File:** `resources/js/pages/stok-produk-jadi/show.tsx`
+- [ ] Belum
+
+### Bug 1 — Penyesuaian Stok Bahan Baku tidak bisa input negatif
+- **Root cause:** Konversi langsung menggunakan `Number()` di `onChange` handler pada `<Input>` membuat pengguna tidak bisa mengetik tanda minus `-` pertama kali.
+- **Fix:** Menghapus konversi `Number()` pada `onChange` dan menggunakan `setData('qty', e.target.value)`.
+- **File:** `resources/js/pages/stok-bahan-baku/create.tsx`
+- [x] Selesai
+
 ## 13. Laporan & Export (cross-cutting)
 - [ ] Export PDF/Excel per modul (bahan baku, produk, karyawan, customer, pesanan, stok, arus kas)
 - [ ] Halaman download laporan dengan filter periode + jenis laporan

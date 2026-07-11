@@ -598,12 +598,9 @@ export default function ProduksiShow({
 
                         {/* Warning stok tidak cukup */}
                         {item.status === 'draft' &&
-                            !stokCukup &&
-                            kebutuhanBahan.length > 0 && (
+                            !stokCukup && (
                                 <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-                                    Stok bahan baku tidak mencukupi. Produksi
-                                    belum bisa dimulai. Lakukan restock terlebih
-                                    dahulu.
+                                    Stok bahan baku tidak mencukupi atau terdapat produk yang belum memiliki BOM. Produksi belum bisa dimulai. Pastikan seluruh produk memiliki BOM dan lakukan restock terlebih dahulu.
                                 </div>
                             )}
                     </div>

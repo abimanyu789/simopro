@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('bahan_baku_id')
                 ->constrained('bahan_baku')
                 ->onDelete('restrict');
-            $table->enum('jenis_transaksi', ['restock', 'produksi', 'rollback', 'adjustment'])
+            $table->enum('jenis_transaksi', ['restock', 'produksi', 'rollback', 'penyesuaian'])
                 ->default('restock');
             $table->decimal('qty', 12, 2);
             $table->decimal('stok_sebelum', 12, 2);

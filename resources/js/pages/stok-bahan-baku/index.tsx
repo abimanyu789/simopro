@@ -77,10 +77,12 @@ export default function StokBahanBakuIndex({
     };
 
     const SortIcon = ({ column }: { column: SortableColumn }) => {
-        if (sortBy !== column)
+        if (sortBy !== column) {
             return (
                 <ChevronsUpDown className="ml-1 inline size-3.5 opacity-50" />
             );
+        }
+
         return sortDir === 'asc' ? (
             <ChevronUp className="ml-1 inline size-3.5" />
         ) : (

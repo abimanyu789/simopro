@@ -160,7 +160,7 @@ class ProduksiService
 
         if (!$this->cekKecukupanStok($produksi)) {
             throw new \RuntimeException(
-                'Produksi tidak dapat dimulai karena stok bahan baku tidak mencukupi.'
+                'Produksi tidak dapat dimulai karena terdapat produk yang belum memiliki BOM atau stok bahan baku tidak mencukupi.'
             );
         }
 
@@ -389,14 +389,30 @@ class ProduksiService
         return array_values($kebutuhan);
     }
 
-    /**
-     * Cek apakah semua stok bahan baku mencukupi untuk memulai produksi.
-     * BR-04: Produksi hanya bisa mulai jika stok bahan cukup.
-     */
     public function cekKecukupanStok(Produksi $produksi): bool
     {
-        foreach ($this->hitungKebutuhanBahan($produksi) as $item) {
-            if (!$item['cukup']) {
+        $produksi->loadMissing([
+            'produksiItems.produk.bomCategorie.bomDetails.bahanBaku',
+        ]);
+
+        // BR-03: Semua produk harus punya BOM
+        foreach ($produksi->produksiItems as $item) {
+            if (!$item->produk || !$item->produk->bom_category_id || !$item->produk->bomCategorie) {
+                return false;
+            }
+        }
+
+        $kebutuhan = $this->hitungKebutuhanBahan($produksi);
+        
+        // Jika tidak ada kebutuhan bahan baku padahal ada produk yang diproduksi, 
+        // berarti BOM-nya kosong (tidak valid).
+        if (empty($kebutuhan) && $produksi->produksiItems->sum('qty_target') > 0) {
+            return false;
+        }
+
+        // BR-04: Semua stok harus mencukupi
+        foreach ($kebutuhan as $bahan) {
+            if (!$bahan['cukup']) {
                 return false;
             }
         }

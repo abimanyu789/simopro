@@ -12,11 +12,11 @@ class StockBahanBakuService
      * Tambah stok bahan baku (restock manual).
      *
      * Digunakan oleh: modul Stok Bahan Baku (restock manual admin).
-     * Dapat diperluas untuk: adjustment.
+     * Dapat diperluas untuk: penyesuaian.
      *
      * @param  BahanBaku $bahanBaku  Model yang stoknya akan ditambah.
      * @param  float     $qty        Jumlah yang ditambahkan (harus > 0).
-     * @param  string    $jenis      Jenis transaksi: 'restock' | 'adjustment'.
+     * @param  string    $jenis      Jenis transaksi: 'restock' | 'penyesuaian'.
      * @param  string|null $keterangan  Catatan opsional.
      */
     public function addStock(
@@ -52,7 +52,7 @@ class StockBahanBakuService
      *
      * @param  BahanBaku $bahanBaku  Model yang stoknya akan dikurangi.
      * @param  float     $qty        Jumlah yang dikurangi (harus > 0).
-     * @param  string    $jenis      Jenis transaksi: 'produksi' | 'rollback' | 'adjustment'.
+     * @param  string    $jenis      Jenis transaksi: 'produksi' | 'rollback' | 'penyesuaian'.
      * @param  string|null $keterangan  Catatan opsional.
      *
      * @throws \RuntimeException  Jika stok tidak mencukupi (BR-01: stok tidak boleh negatif).

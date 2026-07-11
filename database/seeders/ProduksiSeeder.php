@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Pesanan;
-use App\Models\Produksi;
 use App\Models\User;
 use App\Services\ProduksiService;
 use Illuminate\Database\Seeder;
@@ -20,11 +19,7 @@ class ProduksiSeeder extends Seeder
             return;
         }
 
-        // Ambil pesanan yang valid (pending/proses, belum punya produksi aktif)
-        $pesananList = Pesanan::with([
-            'detailPesanan.produk.bomCategorie.bomDetails.bahanBaku',
-        ])
-            ->whereIn('status', ['pending', 'proses'])
+        $pesananList = Pesanan::whereIn('status', ['pending', 'proses'])
             ->whereDoesntHave('produksi', function ($q) {
                 $q->whereIn('status', ['draft', 'proses']);
             })
@@ -40,16 +35,18 @@ class ProduksiSeeder extends Seeder
 
         foreach ($pesananList as $i => $pesanan) {
             try {
+                // Signature baru: create(array $data, int $createdBy)
                 $produksi = $service->create(
-                    $pesanan,
                     [
-                        'deadline' => now()->addDays(rand(7, 30))->format('Y-m-d'),
-                        'catatan'  => $i === 0 ? 'Produksi prioritas untuk pesanan urgent.' : null,
+                        'jenis_produksi' => 'pesanan',
+                        'pesanan_id'     => $pesanan->id,
+                        'deadline'       => now()->addDays(rand(7, 30))->format('Y-m-d'),
+                        'catatan'        => $i === 0 ? 'Produksi prioritas untuk pesanan urgent.' : null,
+                        'karyawan_ids'   => [],
                     ],
                     $admin->id
                 );
 
-                // Update status untuk variasi data dummy
                 $status = $statusList[$i] ?? 'draft';
                 if ($status !== 'draft') {
                     $produksi->update(['status' => $status]);
