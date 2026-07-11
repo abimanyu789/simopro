@@ -13,7 +13,7 @@ use App\Http\Controllers\StokBahanBakuController;
 use App\Http\Controllers\StokProdukJadiController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::redirect('/', '/login')->name('home');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, FileText, Pencil } from 'lucide-react';
 import { PesananDeleteDialog } from '@/components/pesanan/pesanan-delete-dialog';
 import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,17 @@ export default function PesananShow({
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {/* Cetak Invoice — tersedia untuk semua status */}
+                        <a
+                            href={pesanan.invoice.url(item.id)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <Button variant="outline">
+                                <FileText className="mr-2 size-4" />
+                                Cetak Invoice
+                            </Button>
+                        </a>
                         {!isLocked && (
                             <Link href={pesanan.edit.url(item.id)}>
                                 <Button variant="outline">
