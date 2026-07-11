@@ -35,6 +35,10 @@ export default function StokBahanBakuShow({ transaksi }: StokBahanBakuShowProps)
 
     const bahan = transaksi.bahan_baku;
 
+    const isPengurangan = Number(transaksi.stok_sebelum) > Number(transaksi.stok_sesudah);
+    const qtyDisplay = isPengurangan ? `-${formatNumber(transaksi.qty)}` : `+${formatNumber(transaksi.qty)}`;
+    const qtyColor = isPengurangan ? 'text-destructive' : 'text-green-600 dark:text-green-400';
+
     return (
         <>
             <Head title={`Detail Transaksi Stok #${transaksi.id}`} />
@@ -109,8 +113,8 @@ export default function StokBahanBakuShow({ transaksi }: StokBahanBakuShowProps)
                                 <p className="text-sm font-medium text-muted-foreground">
                                     Qty{bahan ? ` (${bahan.satuan})` : ''}
                                 </p>
-                                <p className="mt-1 font-mono text-lg font-bold">
-                                    +{formatNumber(transaksi.qty)}
+                                <p className={`mt-1 font-mono text-lg font-bold ${qtyColor}`}>
+                                    {qtyDisplay}
                                 </p>
                             </div>
                             <div className="col-span-1 px-6 py-4">
@@ -138,8 +142,8 @@ export default function StokBahanBakuShow({ transaksi }: StokBahanBakuShowProps)
                             </div>
                             <div className="px-6 py-4 text-center">
                                 <p className="text-sm font-medium text-muted-foreground">Perubahan</p>
-                                <p className="mt-1 font-mono text-xl font-bold text-green-600 dark:text-green-400">
-                                    +{formatNumber(transaksi.qty)}
+                                <p className={`mt-1 font-mono text-xl font-bold ${qtyColor}`}>
+                                    {qtyDisplay}
                                 </p>
                             </div>
                             <div className="px-6 py-4 text-center">

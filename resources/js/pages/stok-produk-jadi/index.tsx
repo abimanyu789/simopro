@@ -343,58 +343,64 @@ export default function StokProdukJadiIndex({
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                riwayat.data.map((item, idx) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell className="text-muted-foreground">
-                                            {(riwayat.current_page - 1) *
-                                                riwayat.per_page +
-                                                idx +
-                                                1}
-                                        </TableCell>
-                                        <TableCell className="text-sm whitespace-nowrap">
-                                            {formatDate(item.created_at)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="font-medium">
-                                                {item.produk?.nama_produk ??
-                                                    '-'}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {item.produk?.kode_produk ??
-                                                    '-'}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {jenisBadge(item.jenis_transaksi)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono">
-                                            {item.qty}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-muted-foreground">
-                                            {item.stok_sebelum}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono font-medium">
-                                            {item.stok_sesudah}
-                                        </TableCell>
-                                        <TableCell className="max-w-48 truncate text-sm text-muted-foreground">
-                                            {item.keterangan ?? '-'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Link
-                                                href={stokProdukJadi.show.url(
-                                                    item.id,
-                                                )}
-                                            >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
+                                riwayat.data.map((item, idx) => {
+                                    const isPengurangan = Number(item.stok_sebelum) > Number(item.stok_sesudah);
+                                    const qtyColor = isPengurangan ? 'text-destructive' : 'text-green-600 dark:text-green-400';
+                                    const qtyDisplay = isPengurangan ? `-${item.qty}` : `+${item.qty}`;
+
+                                    return (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="text-muted-foreground">
+                                                {(riwayat.current_page - 1) *
+                                                    riwayat.per_page +
+                                                    idx +
+                                                    1}
+                                            </TableCell>
+                                            <TableCell className="text-sm whitespace-nowrap">
+                                                {formatDate(item.created_at)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">
+                                                    {item.produk?.nama_produk ??
+                                                        '-'}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {item.produk?.kode_produk ??
+                                                        '-'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {jenisBadge(item.jenis_transaksi)}
+                                            </TableCell>
+                                            <TableCell className={`text-right font-mono font-medium ${qtyColor}`}>
+                                                {qtyDisplay}
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono text-muted-foreground">
+                                                {item.stok_sebelum}
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono font-medium">
+                                                {item.stok_sesudah}
+                                            </TableCell>
+                                            <TableCell className="max-w-48 truncate text-sm text-muted-foreground">
+                                                {item.keterangan ?? '-'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Link
+                                                    href={stokProdukJadi.show.url(
+                                                        item.id,
+                                                    )}
                                                 >
-                                                    <Eye className="size-4" />
-                                                </Button>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                    >
+                                                        <Eye className="size-4" />
+                                                    </Button>
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>

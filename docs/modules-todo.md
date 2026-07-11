@@ -354,9 +354,9 @@ dari satu modul dalam satu percakapan.
 
 ### Bug 2 (Medium) — Detail Stok Produk Jadi selalu tampil `+` meski transaksi pengurangan
 - **Root cause:** `isPengurangan` di `show.tsx` hanya cek `['pengiriman', 'rollback']`. Penyesuaian negatif dan jenis lain tidak ter-cover. DB menyimpan `qty` sebagai nilai absolut, sehingga tanda tidak bisa ditentukan hanya dari `jenis_transaksi`.
-- **Fix:** Gunakan `stok_sebelum > stok_sesudah` untuk menentukan arah perubahan — ini akurat untuk semua jenis transaksi
-- **File:** `resources/js/pages/stok-produk-jadi/show.tsx`
-- [ ] Belum
+- **Fix:** Gunakan `stok_sebelum > stok_sesudah` untuk menentukan arah perubahan — ini akurat untuk semua jenis transaksi (dilakukan pada modul Stok Produk Jadi & Stok Bahan Baku)
+- **File:** `resources/js/pages/stok-produk-jadi/show.tsx`, `resources/js/pages/stok-produk-jadi/index.tsx`, `resources/js/pages/stok-bahan-baku/show.tsx`, `resources/js/pages/stok-bahan-baku/index.tsx`
+- [x] Selesai
 
 ### Bug 1 — Penyesuaian Stok Bahan Baku tidak bisa input negatif
 - **Root cause:** Konversi langsung menggunakan `Number()` di `onChange` handler pada `<Input>` membuat pengguna tidak bisa mengetik tanda minus `-` pertama kali.
