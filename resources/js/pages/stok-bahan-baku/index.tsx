@@ -168,7 +168,7 @@ export default function StokBahanBakuIndex({
             restock: { label: 'Restock', variant: 'default' },
             produksi: { label: 'Produksi', variant: 'secondary' },
             rollback: { label: 'Rollback', variant: 'outline' },
-            adjustment: { label: 'Adjustment', variant: 'outline' },
+            penyesuaian: { label: 'Penyesuaian', variant: 'outline' },
         };
         const config = map[jenis] ?? {
             label: jenis,
