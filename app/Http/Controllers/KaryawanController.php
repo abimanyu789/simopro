@@ -132,9 +132,7 @@ class KaryawanController extends Controller
     public function destroy(Karyawan $karyawan)
     {
         // Validasi: karyawan tidak bisa dihapus jika masih terlibat produksi aktif (BR Karyawan)
-        if ($karyawan->detailProduksis()->whereHas('produksi', function ($q) {
-            $q->whereIn('status', ['draft', 'proses']);
-        })->exists()) {
+        if ($karyawan->produksis()->whereIn('status', ['draft', 'proses'])->exists()) {
             return back()->with('error', 'Karyawan tidak dapat dihapus karena masih terlibat dalam produksi aktif.');
         }
 

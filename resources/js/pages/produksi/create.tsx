@@ -39,7 +39,7 @@ export default function ProduksiCreate({
     const { data, setData, post, processing, errors } =
         useForm<ProduksiFormData>({
             jenis_produksi: 'pesanan',
-            pesanan_id: '',
+            pesanan_id: selectedPesanan ? Number(selectedPesanan.id) : '',
             items: [{ produk_id: '', qty_target: '' }],
             karyawan_ids: [],
             deadline: '',
@@ -179,7 +179,24 @@ export default function ProduksiCreate({
                                             <SelectValue placeholder="Pilih pesanan..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {pesananValid.map((p) => (
+                                            {/* Merge selectedPesanan ke opsi jika tidak ada di pesananValid */}
+                                            {[
+                                                ...(selectedPesanan &&
+                                                !pesananValid.find(
+                                                    (p) =>
+                                                        p.id === selectedPesanan.id,
+                                                )
+                                                    ? [
+                                                          {
+                                                              id: selectedPesanan.id,
+                                                              nomor_pesanan: selectedPesanan.nomor_pesanan,
+                                                              customer: selectedPesanan.customer,
+                                                              total: selectedPesanan.total,
+                                                          },
+                                                      ]
+                                                    : []),
+                                                ...pesananValid,
+                                            ].map((p) => (
                                                 <SelectItem
                                                     key={p.id}
                                                     value={String(p.id)}

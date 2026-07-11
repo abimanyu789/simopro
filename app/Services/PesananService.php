@@ -20,15 +20,16 @@ class PesananService
             $kalkulasi = $this->hitungTotal($data['items'], $data);
 
             $pesanan = Pesanan::create([
-                'customer_id'   => $data['customer_id'],
-                'created_by'    => $createdBy,
-                'tanggal'       => $data['tanggal'],
-                'status'        => 'pending',
-                'subtotal'      => $kalkulasi['subtotal'],
-                'diskon'        => $kalkulasi['diskon'],
-                'ongkir'        => $data['ongkir'] ?? 0,
-                'total'         => $kalkulasi['total'],
-                'keterangan'    => $data['keterangan'] ?? null,
+                'customer_id'      => $data['customer_id'],
+                'created_by'       => $createdBy,
+                'tanggal'          => $data['tanggal'],
+                'status'           => 'pending',
+                'jenis_pembayaran' => $data['jenis_pembayaran'] ?? null,
+                'subtotal'         => $kalkulasi['subtotal'],
+                'diskon'           => $kalkulasi['diskon'],
+                'ongkir'           => $data['ongkir'] ?? 0,
+                'total'            => $kalkulasi['total'],
+                'keterangan'       => $data['keterangan'] ?? null,
             ]);
 
             $this->syncDetails($pesanan, $data['items']);
@@ -48,13 +49,14 @@ class PesananService
             $kalkulasi = $this->hitungTotal($data['items'], $data);
 
             $pesanan->update([
-                'customer_id'   => $data['customer_id'],
-                'tanggal'       => $data['tanggal'],
-                'subtotal'      => $kalkulasi['subtotal'],
-                'diskon'        => $kalkulasi['diskon'],
-                'ongkir'        => $data['ongkir'] ?? 0,
-                'total'         => $kalkulasi['total'],
-                'keterangan'    => $data['keterangan'] ?? null,
+                'customer_id'      => $data['customer_id'],
+                'tanggal'          => $data['tanggal'],
+                'jenis_pembayaran' => $data['jenis_pembayaran'] ?? null,
+                'subtotal'         => $kalkulasi['subtotal'],
+                'diskon'           => $kalkulasi['diskon'],
+                'ongkir'           => $data['ongkir'] ?? 0,
+                'total'            => $kalkulasi['total'],
+                'keterangan'       => $data['keterangan'] ?? null,
             ]);
 
             // Hapus semua detail lama, ganti dengan yang baru

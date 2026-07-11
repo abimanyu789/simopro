@@ -38,12 +38,10 @@ class Karyawan extends Model
     // ─── Relasi ──────────────────────────────────────────────────────────────
 
     /**
-     * Relasi ke tabel detail_produksi.
-     * Akan diaktifkan sepenuhnya setelah Modul Produksi selesai.
-     * Deklarasi ini sudah siap dipakai untuk validasi hapus nanti.
+     * Relasi ke tabel produksi via pivot produksi_karyawan.
      */
-    public function detailProduksis(): HasMany
+    public function produksis(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(DetailProduksi::class, 'karyawan_id');
+        return $this->belongsToMany(Produksi::class, 'produksi_karyawan', 'karyawan_id', 'produksi_id');
     }
 }
