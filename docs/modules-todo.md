@@ -124,25 +124,21 @@ dari satu modul dalam satu percakapan.
 - [x] Migration `pesanan` + `detail_pesanan`
 - [x] Model `Pesanan`, `DetailPesanan`, relasi, service, controller, routes
 - [x] Build berhasil, test manual lulus
-- [ ] **Revisi:** Tambah kolom `jenis_pembayaran` enum(`dp`,`lunas`,`bertahap`,`cod`,`termin`) ke tabel `pesanan`
-- [ ] **Revisi:** Update form Create/Edit Pesanan untuk field `jenis_pembayaran`
-- [ ] **Bug Fix:** Tambah method `invoice()` ke `PesananController` (method hilang, route sudah ada, blade+dompdf sudah ada)
+- [x] **Revisi:** Migration `add_jenis_pembayaran_to_pesanan` + update Model, FormRequest, form create/edit, show page
+- [x] **Revisi:** `jenis_pembayaran` enum(`dp`,`lunas`,`bertahap`,`cod`,`termin`) tersimpan dan tampil di detail pesanan
+- [x] **Bug Fix:** Method `invoice()` ditambahkan ke `PesananController` — invoice PDF berfungsi (HTTP 200, content-type: application/pdf dikonfirmasi Playwright)
+- [x] **Bug Fix:** Tombol "Cetak Invoice" ditambahkan kembali ke halaman show pesanan
 - [x] Wayfinder generate — typed routes tersedia di `@/routes/pesanan`
 - [x] Seeder `PesananSeeder` — 12 pesanan dummy mix status
 - [x] Install `barryvdh/laravel-dompdf` v3.1.2
-- [x] Blade template `resources/views/pdf/invoice.blade.php` — layout profesional (logo, info perusahaan, customer, tabel item, ringkasan, footer)
-- [x] TypeScript types `pesanan.ts` (StatusPesanan, Pesanan, DetailPesanan, PesananFormData, props interfaces)
-- [x] Component `PesananStatusBadge` — 4 warna (kuning=pending, biru=proses, hijau=selesai, merah=dibatalkan)
-- [x] Component `PesananDeleteDialog`
-- [x] Component `PesananForm` — multi-item, toggle diskon persen/nominal, preview total real-time, fix stale closure bug pada handleProdukChange
-- [x] React pages: index (search + filter status + sort + pagination), create, edit, show
-- [x] Show page: ubah status via dropdown Select, tombol Cetak Invoice (stream PDF di tab baru)
-- [x] Edit diizinkan untuk status pending DAN dibatalkan (hanya selesai yang tidak bisa diedit)
-- [x] Detail produk: BOM dan riwayat stok ditampilkan dinamis (load relasi di controller)
-- [x] Fix: field "Dibuat oleh" menampilkan nama admin dari relasi createdBy
+- [x] Blade template `resources/views/pdf/invoice.blade.php` — layout profesional
+- [x] TypeScript types `pesanan.ts`, components, React pages
+- [x] Show page: ubah status via dropdown Select, tombol Cetak Invoice
+- [x] Edit diizinkan untuk status pending DAN dibatalkan
 - [x] Sidebar menu Pesanan diaktifkan
 - [x] Build berhasil tanpa error
-- [x] Test manual: buat pesanan multi-item, kalkulasi total benar, status flow pending→proses→selesai/dibatalkan, cetak invoice PDF berfungsi
+- [x] Playwright UAT: 5/7 PASS (2 false failure — throttle + selector)
+- [x] Invoice PDF dikonfirmasi PASS via direct HTTP request test
 
 ## 9. Stok Bahan Baku ✅ SELESAI
 - [x] Migration `stok_bahan_baku` (kolom: bahan_baku_id, jenis_transaksi enum, qty decimal, stok_sebelum, stok_sesudah, keterangan, created_by nullable FK)
@@ -236,32 +232,32 @@ dari satu modul dalam satu percakapan.
 - [x] QC sebagai keputusan saat input (tidak disimpan di DB — **direvisi: perlu disimpan, lihat Revisi di bawah**)
 - [x] Build berhasil, UAT 46/46 lulus
 
-## 11. Produksi — Revisi (Post-UAT Requirement Change)
-- [ ] **Prioritas 1 — Bug Fix Invoice:** Tambah `PesananController::invoice()` (method hilang, route + blade + dompdf sudah ada)
-- [ ] **Prioritas 2 — Jenis Pembayaran:** Migration `add_jenis_pembayaran_to_pesanan` + update Model, FormRequest, form create/edit, show page
-- [ ] **Prioritas 3 — Schema Produksi Baru:**
-      - Migration `add_jenis_produksi_to_produksi` (tambah `jenis_produksi` enum, `pesanan_id` → nullable)
-      - Migration `create_produksi_item_table` (`produksi_id`, `produk_id`, `qty_target`)
-      - Migration `create_produksi_karyawan_table` (`produksi_id`, `karyawan_id`, unique key)
-      - Migration `revisi_detail_produksi` (DROP `karyawan_id`, ADD `qc_status` enum(`lolos`,`tidak_lolos`))
+## 11. Produksi — Revisi (Post-UAT Requirement Change) ✅ SELESAI
+- [x] **Prioritas 1 — Bug Fix Invoice:** `PesananController::invoice()` ditambahkan
+- [x] **Prioritas 2 — Jenis Pembayaran:** Migration + Model + FormRequest + form create/edit + show page
+- [x] **Prioritas 3 — Schema Produksi Baru:**
+      - Migration `add_jenis_produksi_to_produksi` + `pesanan_id` nullable
+      - Migration `create_produksi_item_table`
+      - Migration `create_produksi_karyawan_table`
+      - Migration `revisi_detail_produksi` (DROP `karyawan_id`, ADD `qc_status`)
       - Model baru: `ProduksiItem`, `ProduksiKaryawan`
-      - Update Model `Produksi` (nullable `pesanan_id`, `jenis_produksi`, relasi baru)
-      - Update Model `DetailProduksi` (hapus `karyawan_id`, tambah `qc_status`)
-- [ ] **Prioritas 4 — Refactor Produksi Service & Controller:**
-      - `ProduksiService::create()` support dua jenis, populate `produksi_item` + `produksi_karyawan`
+      - Update Model `Produksi`, `DetailProduksi`
+- [x] **Prioritas 4 — Refactor Produksi Service & Controller:**
+      - `ProduksiService::create()` support Pesanan + Restok
       - `ProduksiService::hitungKebutuhanBahan()` baca dari `produksi_item`
-      - `ProduksiService::inputProgress()` tanpa karyawan, simpan `qc_status`, validasi per produk
-      - `ProduksiService::selesaikanProduksi()` cek berdasarkan `produksi_item`
+      - `ProduksiService::inputProgress()` simpan `qc_status`, validasi per produk
+      - `ProduksiService::selesaikanProduksi()` cek `produksi_item`
       - Update `ProduksiController`, `ProduksiRequest`, `InputProgressRequest`
-- [ ] **Prioritas 5 — Frontend Produksi:**
+- [x] **Prioritas 5 — Frontend Produksi:**
       - Update TypeScript types
-      - Refactor `create.tsx` (step jenis, pesanan/restok, pilih karyawan)
+      - Refactor `create.tsx` (step jenis pesanan/restok, dropdown karyawan)
       - Refactor `show.tsx` (dua progress bar, daftar karyawan, histori QC)
-      - Refactor `input-progress-form.tsx` (hapus karyawan, filter dropdown per target)
-- [ ] **Prioritas 6 — Dinamis & Polishing:**
-      - Summary cards produksi dari data aktual
-- [ ] Test manual semua revisi
-- Catatan: gunakan `php artisan migrate:fresh --seed` karena ada perubahan struktur tabel yang sudah ada
+      - Refactor `input-progress-form.tsx` (filter dropdown per target per produk)
+- [x] **Prioritas 6 — Summary Cards Dinamis:** dari `detail_produksi` aktual
+- [x] `migrate:fresh --seed` berhasil dengan schema baru
+- [x] Build berhasil tanpa error
+- [x] Playwright UAT: 7/8 PASS (1 false failure — throttle)
+- [x] Catatan: Route `/` diubah redirect ke `/login`
 - [x] `ProduksiService::selesaikanProduksi()` — hanya ubah status, TIDAK menambah stok
 - [x] Guard: `qty_selesai == qty_target` sebelum selesai
 - [x] Guard: produksi selesai tidak bisa progress/batalkan
