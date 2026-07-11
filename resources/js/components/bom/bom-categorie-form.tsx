@@ -3,13 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Table,
     TableBody,
@@ -136,41 +130,24 @@ export function BomCategorieForm({
                                 {data.details.map((row, index) => (
                                     <TableRow key={index}>
                                         <TableCell className="py-2">
-                                            <Select
-                                                value={row.bahan_baku_id?.toString() ?? ''}
+                                            <SearchableCombobox
+                                                items={bahanBakus
+                                                    .filter(
+                                                        (bb) =>
+                                                            !usedBahanBakuIds.includes(bb.id) ||
+                                                            bb.id === row.bahan_baku_id,
+                                                    )
+                                                    .map((bb) => ({
+                                                        value: bb.id,
+                                                        label: `${bb.nama_bahan} (${bb.satuan ?? '-'})`,
+                                                    }))}
+                                                value={row.bahan_baku_id ?? ''}
                                                 onValueChange={(val) =>
-                                                    updateDetail(index, 'bahan_baku_id', parseInt(val, 10))
+                                                    updateDetail(index, 'bahan_baku_id', Number(val))
                                                 }
-                                            >
-                                                <SelectTrigger
-                                                    className={
-                                                        errors[`details.${index}.bahan_baku_id`]
-                                                            ? 'border-red-500'
-                                                            : ''
-                                                    }
-                                                >
-                                                    <SelectValue placeholder="Pilih bahan baku..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {bahanBakus
-                                                        .filter(
-                                                            (bb) =>
-                                                                !usedBahanBakuIds.includes(bb.id) ||
-                                                                bb.id === row.bahan_baku_id,
-                                                        )
-                                                        .map((bb) => (
-                                                            <SelectItem
-                                                                key={bb.id}
-                                                                value={bb.id.toString()}
-                                                            >
-                                                                {bb.nama_bahan}{' '}
-                                                                <span className="text-muted-foreground">
-                                                                    ({bb.satuan ?? '-'})
-                                                                </span>
-                                                            </SelectItem>
-                                                        ))}
-                                                </SelectContent>
-                                            </Select>
+                                                placeholder="Pilih bahan baku..."
+                                                className={errors[`details.${index}.bahan_baku_id`] ? 'border-red-500' : ''}
+                                            />
                                             {errors[`details.${index}.bahan_baku_id`] && (
                                                 <p className="mt-1 text-xs text-red-500">
                                                     {errors[`details.${index}.bahan_baku_id`]}

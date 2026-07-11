@@ -3,6 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Select,
     SelectContent,
@@ -128,35 +129,16 @@ export function PesananForm({
                         <Label htmlFor="customer_id">
                             Customer <span className="text-red-500">*</span>
                         </Label>
-                        <Select
-                            value={
-                                data.customer_id !== ''
-                                    ? String(data.customer_id)
-                                    : ''
-                            }
-                            onValueChange={(v) =>
-                                setData('customer_id', Number(v))
-                            }
-                        >
-                            <SelectTrigger
-                                id="customer_id"
-                                className={
-                                    errors.customer_id ? 'border-red-500' : ''
-                                }
-                            >
-                                <SelectValue placeholder="Pilih customer..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {customers.map((c) => (
-                                    <SelectItem key={c.id} value={String(c.id)}>
-                                        {c.nama_customer}
-                                        <span className="ml-2 text-xs text-muted-foreground uppercase">
-                                            ({c.jenis_customer})
-                                        </span>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <SearchableCombobox
+                            items={customers.map((c) => ({
+                                value: c.id,
+                                label: `${c.nama_customer} (${c.jenis_customer.toUpperCase()})`,
+                            }))}
+                            value={data.customer_id !== '' ? Number(data.customer_id) : ''}
+                            onValueChange={(v) => setData('customer_id', Number(v))}
+                            placeholder="Pilih customer..."
+                            className={errors.customer_id ? 'border-red-500' : ''}
+                        />
                         {errors.customer_id && (
                             <p className="text-sm text-red-500">
                                 {errors.customer_id}
@@ -268,37 +250,16 @@ export function PesananForm({
                                             Produk
                                         </Label>
                                     )}
-                                    <Select
-                                        value={
-                                            item.produk_id !== ''
-                                                ? String(item.produk_id)
-                                                : ''
-                                        }
-                                        onValueChange={(v) =>
-                                            handleProdukChange(idx, Number(v))
-                                        }
-                                    >
-                                        <SelectTrigger
-                                            className={
-                                                produkError
-                                                    ? 'border-red-500'
-                                                    : ''
-                                            }
-                                        >
-                                            <SelectValue placeholder="Pilih produk..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {produks.map((p) => (
-                                                <SelectItem
-                                                    key={p.id}
-                                                    value={String(p.id)}
-                                                >
-                                                    {p.kode_produk} —{' '}
-                                                    {p.nama_produk}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchableCombobox
+                                        items={produks.map((p) => ({
+                                            value: p.id,
+                                            label: `${p.kode_produk} — ${p.nama_produk}`,
+                                        }))}
+                                        value={item.produk_id !== '' ? Number(item.produk_id) : ''}
+                                        onValueChange={(v) => handleProdukChange(idx, Number(v))}
+                                        placeholder="Pilih produk..."
+                                        className={produkError ? 'border-red-500' : ''}
+                                    />
                                     {produkError && (
                                         <p className="text-xs text-red-500">
                                             {produkError}

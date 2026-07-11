@@ -3,13 +3,7 @@ import { Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import stokProdukJadi from '@/routes/stok-produk-jadi';
 import type { BomCategoryOption, ProdukFormData } from '@/types';
 
@@ -258,38 +252,24 @@ export function ProdukForm({
                         <Label htmlFor="bom_category_id">
                             Bill of Materials (BOM)
                         </Label>
-                        <Select
-                            value={data.bom_category_id?.toString() ?? ''}
+                        <SearchableCombobox
+                            items={[
+                                { value: 0, label: '-- Tidak menggunakan BOM --' },
+                                ...bomCategories.map((bom) => ({
+                                    value: bom.id,
+                                    label: bom.nama_bom,
+                                }))
+                            ]}
+                            value={data.bom_category_id ?? 0}
                             onValueChange={(val) =>
                                 setData(
                                     'bom_category_id',
-                                    val ? parseInt(val, 10) : null,
+                                    val === 0 || val === '0' ? null : Number(val)
                                 )
                             }
-                        >
-                            <SelectTrigger
-                                className={
-                                    errors.bom_category_id
-                                        ? 'border-red-500'
-                                        : ''
-                                }
-                            >
-                                <SelectValue placeholder="Pilih BOM (opsional)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="0">
-                                    -- Tidak menggunakan BOM --
-                                </SelectItem>
-                                {bomCategories.map((bom) => (
-                                    <SelectItem
-                                        key={bom.id}
-                                        value={bom.id.toString()}
-                                    >
-                                        {bom.nama_bom}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                            placeholder="Pilih BOM (opsional)"
+                            className={errors.bom_category_id ? 'border-red-500' : ''}
+                        />
                         {errors.bom_category_id && (
                             <p className="text-sm text-red-500">
                                 {errors.bom_category_id}

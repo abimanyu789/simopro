@@ -3,13 +3,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import produksi from '@/routes/produksi';
 import type {
     InputProgressFormData,
@@ -58,35 +52,16 @@ export function InputProgressForm({
                     </p>
                 ) : (
                     <>
-                        <Select
-                            value={
-                                data.produk_id !== ''
-                                    ? String(data.produk_id)
-                                    : ''
-                            }
-                            onValueChange={(v) =>
-                                setData('produk_id', Number(v))
-                            }
-                        >
-                            <SelectTrigger
-                                id="produk_id"
-                                className={
-                                    errors.produk_id ? 'border-destructive' : ''
-                                }
-                            >
-                                <SelectValue placeholder="Pilih produk..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {produkBelumSelesai.map((p) => (
-                                    <SelectItem key={p.id} value={String(p.id)}>
-                                        {p.kode_produk} — {p.nama_produk}
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                            (sisa: {p.sisa} pcs)
-                                        </span>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <SearchableCombobox
+                            items={produkBelumSelesai.map((p) => ({
+                                value: p.id,
+                                label: `${p.kode_produk} — ${p.nama_produk} (sisa: ${p.sisa} pcs)`,
+                            }))}
+                            value={data.produk_id !== '' ? Number(data.produk_id) : ''}
+                            onValueChange={(v) => setData('produk_id', Number(v))}
+                            placeholder="Pilih produk..."
+                            className={errors.produk_id ? 'border-destructive' : ''}
+                        />
                         {errors.produk_id && (
                             <p className="text-sm text-destructive">
                                 {errors.produk_id}

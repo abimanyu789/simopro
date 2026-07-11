@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Select,
     SelectContent,
@@ -99,31 +100,15 @@ export default function StokProdukJadiCreate({
                                     Produk{' '}
                                     <span className="text-destructive">*</span>
                                 </Label>
-                                <Select
-                                    value={
-                                        data.produk_id !== ''
-                                            ? String(data.produk_id)
-                                            : ''
-                                    }
-                                    onValueChange={(v) =>
-                                        setData('produk_id', Number(v))
-                                    }
-                                >
-                                    <SelectTrigger id="produk_id">
-                                        <SelectValue placeholder="Pilih produk..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {produkList.map((p) => (
-                                            <SelectItem
-                                                key={p.id}
-                                                value={String(p.id)}
-                                            >
-                                                {p.kode_produk} —{' '}
-                                                {p.nama_produk}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchableCombobox
+                                    items={produkList.map((p) => ({
+                                        value: p.id,
+                                        label: `${p.kode_produk} — ${p.nama_produk}`,
+                                    }))}
+                                    value={data.produk_id !== '' ? Number(data.produk_id) : ''}
+                                    onValueChange={(v) => setData('produk_id', Number(v))}
+                                    placeholder="Pilih produk..."
+                                />
                                 {errors.produk_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.produk_id}

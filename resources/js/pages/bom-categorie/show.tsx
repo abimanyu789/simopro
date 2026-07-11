@@ -6,6 +6,7 @@ import { BomDetailEditDialog } from '@/components/bom/bom-detail-edit-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Select,
     SelectContent,
@@ -207,33 +208,16 @@ export default function BomCategorieShow({ bomCategorie: item, bahanBakus }: Bom
                                 <div className="flex gap-3">
                                     <div className="flex-1 space-y-1">
                                         <Label className="sr-only">Bahan Baku</Label>
-                                        <Select
-                                            value={data.bahan_baku_id?.toString() ?? ''}
-                                            onValueChange={(val) =>
-                                                setData('bahan_baku_id', parseInt(val, 10))
-                                            }
-                                        >
-                                            <SelectTrigger
-                                                className={
-                                                    errors.bahan_baku_id ? 'border-red-500' : ''
-                                                }
-                                            >
-                                                <SelectValue placeholder="Pilih bahan baku..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableBahanBakus.map((bb) => (
-                                                    <SelectItem
-                                                        key={bb.id}
-                                                        value={bb.id.toString()}
-                                                    >
-                                                        {bb.nama_bahan}{' '}
-                                                        <span className="text-muted-foreground">
-                                                            ({bb.satuan ?? '-'})
-                                                        </span>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <SearchableCombobox
+                                            items={availableBahanBakus.map((bb) => ({
+                                                value: bb.id,
+                                                label: `${bb.nama_bahan} (${bb.satuan ?? '-'})`,
+                                            }))}
+                                            value={data.bahan_baku_id ?? ''}
+                                            onValueChange={(val) => setData('bahan_baku_id', Number(val))}
+                                            placeholder="Pilih bahan baku..."
+                                            className={errors.bahan_baku_id ? 'border-red-500' : ''}
+                                        />
                                         {errors.bahan_baku_id && (
                                             <p className="text-xs text-red-500">
                                                 {errors.bahan_baku_id}

@@ -4,13 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Table,
     TableBody,
@@ -167,51 +161,25 @@ export default function ProduksiCreate({
                                             *
                                         </span>
                                     </Label>
-                                    <Select
-                                        value={
-                                            data.pesanan_id !== ''
-                                                ? String(data.pesanan_id)
-                                                : ''
-                                        }
-                                        onValueChange={handlePesananChange}
-                                    >
-                                        <SelectTrigger id="pesanan_id">
-                                            <SelectValue placeholder="Pilih pesanan..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {/* Merge selectedPesanan ke opsi jika tidak ada di pesananValid */}
-                                            {[
-                                                ...(selectedPesanan &&
-                                                !pesananValid.find(
-                                                    (p) =>
-                                                        p.id === selectedPesanan.id,
-                                                )
-                                                    ? [
-                                                          {
-                                                              id: selectedPesanan.id,
-                                                              nomor_pesanan: selectedPesanan.nomor_pesanan,
-                                                              customer: selectedPesanan.customer,
-                                                              total: selectedPesanan.total,
-                                                          },
-                                                      ]
-                                                    : []),
-                                                ...pesananValid,
-                                            ].map((p) => (
-                                                <SelectItem
-                                                    key={p.id}
-                                                    value={String(p.id)}
-                                                >
-                                                    {p.nomor_pesanan}
-                                                    {p.customer &&
-                                                        ` — ${p.customer.nama_customer}`}
-                                                    <span className="ml-2 text-xs text-muted-foreground">
-                                                        ({formatRupiah(p.total)}
-                                                        )
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchableCombobox
+                                        items={[
+                                            ...(selectedPesanan && !pesananValid.find((p) => p.id === selectedPesanan.id)
+                                                ? [
+                                                      {
+                                                          value: selectedPesanan.id,
+                                                          label: `${selectedPesanan.nomor_pesanan} ${selectedPesanan.customer ? `— ${selectedPesanan.customer.nama_customer}` : ''} (${formatRupiah(selectedPesanan.total)})`,
+                                                      },
+                                                  ]
+                                                : []),
+                                            ...pesananValid.map((p) => ({
+                                                value: p.id,
+                                                label: `${p.nomor_pesanan} ${p.customer ? `— ${p.customer.nama_customer}` : ''} (${formatRupiah(p.total)})`,
+                                            })),
+                                        ]}
+                                        value={data.pesanan_id !== '' ? Number(data.pesanan_id) : ''}
+                                        onValueChange={(v) => handlePesananChange(String(v))}
+                                        placeholder="Pilih pesanan..."
+                                    />
                                     {errors.pesanan_id && (
                                         <p className="text-sm text-destructive">
                                             {errors.pesanan_id}
@@ -297,52 +265,20 @@ export default function ProduksiCreate({
                                                         Produk
                                                     </Label>
                                                 )}
-                                                <Select
-                                                    value={
-                                                        item.produk_id !== ''
-                                                            ? String(
-                                                                  item.produk_id,
-                                                              )
-                                                            : ''
-                                                    }
+                                                <SearchableCombobox
+                                                    items={produkList.map((p) => ({
+                                                        value: p.id,
+                                                        label: `${p.kode_produk} — ${p.nama_produk}`,
+                                                    }))}
+                                                    value={item.produk_id !== '' ? Number(item.produk_id) : ''}
                                                     onValueChange={(v) => {
-                                                        const updated =
-                                                            data.items.map(
-                                                                (it, i) =>
-                                                                    i === idx
-                                                                        ? {
-                                                                              ...it,
-                                                                              produk_id:
-                                                                                  Number(
-                                                                                      v,
-                                                                                  ),
-                                                                          }
-                                                                        : it,
-                                                            );
-                                                        setData(
-                                                            'items',
-                                                            updated,
+                                                        const updated = data.items.map((it, i) =>
+                                                            i === idx ? { ...it, produk_id: Number(v) } : it
                                                         );
+                                                        setData('items', updated);
                                                     }}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih produk..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {produkList.map((p) => (
-                                                            <SelectItem
-                                                                key={p.id}
-                                                                value={String(
-                                                                    p.id,
-                                                                )}
-                                                            >
-                                                                {p.kode_produk}{' '}
-                                                                —{' '}
-                                                                {p.nama_produk}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                    placeholder="Pilih produk..."
+                                                />
                                             </div>
                                             <div className="space-y-1">
                                                 {idx === 0 && (
@@ -535,73 +471,26 @@ export default function ProduksiCreate({
                                                                 Karyawan
                                                             </Label>
                                                         )}
-                                                        <Select
-                                                            value={String(
-                                                                karyawanId,
-                                                            )}
-                                                            onValueChange={(
-                                                                v,
-                                                            ) => {
-                                                                const updated =
-                                                                    data.karyawan_ids.map(
-                                                                        (
-                                                                            id,
-                                                                            i,
-                                                                        ) =>
-                                                                            i ===
-                                                                            idx
-                                                                                ? Number(
-                                                                                      v,
-                                                                                  )
-                                                                                : id,
-                                                                    );
-                                                                setData(
-                                                                    'karyawan_ids',
-                                                                    updated,
+                                                        <SearchableCombobox
+                                                            items={karyawanList
+                                                                .filter(
+                                                                    (k) =>
+                                                                        !data.karyawan_ids.includes(k.id) ||
+                                                                        k.id === karyawanId,
+                                                                )
+                                                                .map((k) => ({
+                                                                    value: k.id,
+                                                                    label: `${k.nama_karyawan} ${k.jabatan ? `(${k.jabatan})` : ''}`,
+                                                                }))}
+                                                            value={karyawanId}
+                                                            onValueChange={(v) => {
+                                                                const updated = data.karyawan_ids.map((id, i) =>
+                                                                    i === idx ? Number(v) : id
                                                                 );
+                                                                setData('karyawan_ids', updated);
                                                             }}
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Pilih karyawan..." />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {karyawanList
-                                                                    .filter(
-                                                                        (k) =>
-                                                                            !data.karyawan_ids.includes(
-                                                                                k.id,
-                                                                            ) ||
-                                                                            k.id ===
-                                                                                karyawanId,
-                                                                    )
-                                                                    .map(
-                                                                        (k) => (
-                                                                            <SelectItem
-                                                                                key={
-                                                                                    k.id
-                                                                                }
-                                                                                value={String(
-                                                                                    k.id,
-                                                                                )}
-                                                                            >
-                                                                                {
-                                                                                    k.nama_karyawan
-                                                                                }
-                                                                                {k.jabatan && (
-                                                                                    <span className="ml-2 text-xs text-muted-foreground">
-                                                                                        (
-                                                                                        {
-                                                                                            k.jabatan
-                                                                                        }
-
-                                                                                        )
-                                                                                    </span>
-                                                                                )}
-                                                                            </SelectItem>
-                                                                        ),
-                                                                    )}
-                                                            </SelectContent>
-                                                        </Select>
+                                                            placeholder="Pilih karyawan..."
+                                                        />
                                                     </div>
                                                     <div
                                                         className={

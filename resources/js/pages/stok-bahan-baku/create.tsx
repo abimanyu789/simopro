@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Select,
     SelectContent,
@@ -99,30 +100,15 @@ export default function StokBahanBakuCreate({
                                     Bahan Baku{' '}
                                     <span className="text-destructive">*</span>
                                 </Label>
-                                <Select
-                                    value={
-                                        data.bahan_baku_id !== ''
-                                            ? String(data.bahan_baku_id)
-                                            : ''
-                                    }
-                                    onValueChange={(v) =>
-                                        setData('bahan_baku_id', Number(v))
-                                    }
-                                >
-                                    <SelectTrigger id="bahan_baku_id">
-                                        <SelectValue placeholder="Pilih bahan baku..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {bahanBakuList.map((b) => (
-                                            <SelectItem
-                                                key={b.id}
-                                                value={String(b.id)}
-                                            >
-                                                {b.kode_bahan} — {b.nama_bahan}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchableCombobox
+                                    items={bahanBakuList.map((b) => ({
+                                        value: b.id,
+                                        label: `${b.kode_bahan} — ${b.nama_bahan}`,
+                                    }))}
+                                    value={data.bahan_baku_id !== '' ? Number(data.bahan_baku_id) : ''}
+                                    onValueChange={(v) => setData('bahan_baku_id', Number(v))}
+                                    placeholder="Pilih bahan baku..."
+                                />
                                 {errors.bahan_baku_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.bahan_baku_id}

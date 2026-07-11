@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 import {
     Select,
     SelectContent,
@@ -223,27 +224,20 @@ export default function StokProdukJadiIndex({
                         {/* Baris 2: Filters */}
                         <div className="flex flex-wrap gap-2">
                             {/* Filter Produk */}
-                            <Select
-                                value={produkId || 'semua'}
-                                onValueChange={handleProdukFilter}
-                            >
-                                <SelectTrigger className="w-56">
-                                    <SelectValue placeholder="Semua Produk" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="semua">
-                                        Semua Produk
-                                    </SelectItem>
-                                    {produkOptions.map((p) => (
-                                        <SelectItem
-                                            key={p.id}
-                                            value={String(p.id)}
-                                        >
-                                            {p.kode_produk} — {p.nama_produk}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="w-56">
+                                <SearchableCombobox
+                                    items={[
+                                        { value: 'semua', label: 'Semua Produk' },
+                                        ...produkOptions.map((p) => ({
+                                            value: String(p.id),
+                                            label: `${p.kode_produk} — ${p.nama_produk}`,
+                                        }))
+                                    ]}
+                                    value={produkId || 'semua'}
+                                    onValueChange={(val) => handleProdukFilter(String(val))}
+                                    placeholder="Semua Produk"
+                                />
+                            </div>
 
                             {/* Filter Jenis Transaksi */}
                             <Select
