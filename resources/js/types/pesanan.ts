@@ -37,7 +37,9 @@ export interface Pesanan {
     updated_at: string;
     // Relasi
     customer?: Customer;
+    created_by_user?: { id: number; nama: string };
     detail_pesanan?: DetailPesanan[];
+    pembayarans?: import('./pembayaran').Pembayaran[];
 }
 
 // ─── Form data ───────────────────────────────────────────────────────────────

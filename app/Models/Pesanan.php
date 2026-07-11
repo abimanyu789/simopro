@@ -102,4 +102,9 @@ class Pesanan extends Model
     {
         return $this->hasMany(Produksi::class, 'pesanan_id');
     }
+
+    public function pembayarans(): HasMany
+    {
+        return $this->hasMany(Pembayaran::class, 'pesanan_id');
+    }
 }

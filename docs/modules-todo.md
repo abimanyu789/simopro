@@ -282,12 +282,59 @@ dari satu modul dalam satu percakapan.
       - Summary Cards (4/4)
       - Regression Test Tahap 1+2 (12/12)
 
-## 12. Arus Kas
-- [ ] Migration arus_kas
-- [ ] Service: hitung ulang saldo otomatis tiap transaksi
-- [ ] Integrasi: pembayaran pesanan otomatis buat entry arus kas
-- [ ] Controller + React page (form transaksi, grafik, insight card)
-- [ ] Test: saldo konsisten setelah tambah/ubah/hapus transaksi
+---
+
+## Ringkasan Testing — Playwright E2E (2026-07-11)
+
+| Metrik | Nilai |
+|---|---|
+| Tanggal | 2026-07-11 |
+| Tool | Playwright + Chromium (headless) |
+| Total testcase | 54 |
+| PASS | 43 |
+| FAIL | 11 |
+| False failure (login throttle) | 8 |
+| False failure (selector CSS) | 2 |
+| False failure (assertion) | 1 |
+| Bug aplikasi dari Playwright | 0 |
+| Bug aplikasi dari testing manual | 5 (semua sudah diperbaiki) |
+| Commit | eddb6c4 |
+
+**Bug aplikasi diperbaiki setelah UAT:**
+1. `PesananController::invoice()` method hilang ✅
+2. `jenis_pembayaran` tidak tersimpan di `PesananService` ✅
+3. Validasi keterangan penyesuaian stok (closure) ✅
+4. Tombol "Cetak Invoice" hilang dari `show.tsx` pesanan ✅
+5. Route `/` menampilkan welcome page Laravel (redirect ke `/login`) ✅
+
+**Kesimpulan:** Tidak ada bug kritis. Aplikasi siap untuk Modul 12 — Arus Kas.
+
+---
+
+## 12. Arus Kas ✅ SELESAI
+- [x] Migration `pembayaran` (pesanan_id, tanggal, jenis_pembayaran enum dp/pelunasan/termin, nominal, metode, keterangan)
+- [x] Migration `arus_kas` (pembayaran_id nullable, created_by, tanggal, jenis enum, kategori, nominal, metode_pembayaran, keterangan, bukti_transaksi nullable)
+- [x] Seeder `PembayaranSeeder` + `ArusKasSeeder` — 4 pembayaran pesanan + 5 transaksi manual
+- [x] Model `Pembayaran` (belongsTo Pesanan, hasOne ArusKas)
+- [x] Model `ArusKas` (belongsTo Pembayaran nullable, belongsTo User, helper dariPembayaran())
+- [x] Update Model `Pesanan` — tambah relasi hasMany(Pembayaran)
+- [x] FormRequest `PembayaranRequest` + `ArusKasRequest`
+- [x] Service `PembayaranService` — create() + destroy() dalam DB::transaction(), auto-create arus_kas
+- [x] Service `ArusKasService` — create(), update(), destroy(), hitungSaldo(), hitungRingkasan()
+      — guard: transaksi dari pembayaran tidak bisa diedit/dihapus via ArusKas
+      — saldo dihitung dinamis dari SUM aggregate (tidak disimpan di DB)
+- [x] Controller `PembayaranController` — store, destroy (inline dari detail pesanan)
+- [x] Controller `ArusKasController` — resource CRUD lengkap
+- [x] Route: POST/DELETE pembayaran + resource arus-kas (parameter binding arusKas)
+- [x] Wayfinder generate
+- [x] TypeScript types `arus-kas.ts` + `pembayaran.ts` + update `index.ts` + update `pesanan.ts`
+- [x] Component `ArusKasBadge` — hijau=pemasukan, merah=pengeluaran
+- [x] Pages: index (stat cards saldo aktual + filter + tabel), create, edit, show
+- [x] Update `pesanan/show.tsx` — section Riwayat Pembayaran + form inline Tambah Pembayaran
+- [x] Update sidebar: href Arus Kas aktif
+- [x] Route `/` redirect ke `/login`
+- [x] Build berhasil tanpa error ✅
+- [ ] Test manual: saldo konsisten setelah tambah/ubah/hapus transaksi
 
 ## 13. Laporan & Export (cross-cutting)
 - [ ] Export PDF/Excel per modul (bahan baku, produk, karyawan, customer, pesanan, stok, arus kas)

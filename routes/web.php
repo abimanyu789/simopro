@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\ArusKasController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\BomCategorieController;
 use App\Http\Controllers\BomDetailController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProduksiController;
@@ -64,6 +66,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pesanan/{pesanan}/invoice', [PesananController::class, 'invoice'])
         ->name('pesanan.invoice');
 
+    // Pembayaran (inline dari detail pesanan)
+    Route::post('pesanan/{pesanan}/pembayaran', [PembayaranController::class, 'store'])
+        ->name('pembayaran.store');
+    Route::delete('pembayaran/{pembayaran}', [PembayaranController::class, 'destroy'])
+        ->name('pembayaran.destroy');
+
     // Produksi
     Route::resource('produksi', ProduksiController::class)
         ->only(['index', 'create', 'store', 'show']);
@@ -75,6 +83,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('produksi.progress');
     Route::patch('produksi/{produksi}/selesai', [ProduksiController::class, 'selesai'])
         ->name('produksi.selesai');
+
+    // Arus Kas
+    Route::resource('arus-kas', ArusKasController::class)
+        ->parameters(['arus-kas' => 'arusKas']);
 });
 
 require __DIR__.'/settings.php';

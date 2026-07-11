@@ -27,3 +27,5 @@ export type {
 } from './stok-produk-jadi';
 export type * from './pesanan';
 export type * from './produksi';
+export type * from './pembayaran';
+export type * from './arus-kas';

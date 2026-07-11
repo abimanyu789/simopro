@@ -90,7 +90,7 @@ class PesananController extends Controller
      */
     public function show(Pesanan $pesanan)
     {
-        $pesanan->load(['customer', 'createdBy', 'detailPesanan.produk']);
+        $pesanan->load(['customer', 'createdBy', 'detailPesanan.produk', 'pembayarans']);
 
         return Inertia::render('pesanan/show', [
             'pesanan'        => array_merge($pesanan->toArray(), [

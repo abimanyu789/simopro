@@ -20,6 +20,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import arusKasRoute from '@/routes/arus-kas';
 import bahanBaku from '@/routes/bahan-baku';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
@@ -91,7 +92,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Arus Kas',
-        href: '#',
+        href: arusKasRoute.index.url(),
         icon: DollarSign,
     },
 ];

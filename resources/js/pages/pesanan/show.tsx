@@ -1,5 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, FileText, Pencil } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeft, FileText, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { PesananDeleteDialog } from '@/components/pesanan/pesanan-delete-dialog';
 import { PesananStatusBadge } from '@/components/pesanan/pesanan-status-badge';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import pesanan from '@/routes/pesanan';
-import type { PesananShowProps, StatusPesanan } from '@/types';
+import pembayaran from '@/routes/pembayaran';
+import type {
+    PesananShowProps,
+    StatusPesanan,
+    PembayaranFormData,
+} from '@/types';
 
 export default function PesananShow({
     pesanan: item,
@@ -327,7 +333,213 @@ export default function PesananShow({
                     </div>
                 </div>
             </div>
+
+            {/* Section Riwayat Pembayaran */}
+            <div className="mx-auto w-full max-w-6xl">
+                <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
+                    <div className="flex items-center justify-between border-b px-6 py-4">
+                        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                            Riwayat Pembayaran
+                        </h2>
+                        {!isLocked && <PembayaranForm pesananId={item.id} />}
+                    </div>
+                    {(item.pembayarans ?? []).length > 0 ? (
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b text-muted-foreground">
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Tanggal
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Jenis
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Metode
+                                    </th>
+                                    <th className="px-6 py-3 text-right font-medium">
+                                        Nominal
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Keterangan
+                                    </th>
+                                    <th className="w-12 px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(item.pembayarans ?? []).map((p) => (
+                                    <tr
+                                        key={p.id}
+                                        className="border-b last:border-0"
+                                    >
+                                        <td className="px-6 py-3">
+                                            {p.tanggal
+                                                ? new Date(
+                                                      p.tanggal,
+                                                  ).toLocaleDateString(
+                                                      'id-ID',
+                                                      {
+                                                          day: 'numeric',
+                                                          month: 'short',
+                                                          year: 'numeric',
+                                                      },
+                                                  )
+                                                : '-'}
+                                        </td>
+                                        <td className="px-6 py-3 capitalize">
+                                            <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
+                                                {p.jenis_pembayaran.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 text-muted-foreground">
+                                            {p.metode ?? '-'}
+                                        </td>
+                                        <td className="px-6 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400">
+                                            {new Intl.NumberFormat('id-ID', {
+                                                style: 'currency',
+                                                currency: 'IDR',
+                                                minimumFractionDigits: 0,
+                                            }).format(Number(p.nominal))}
+                                        </td>
+                                        <td className="max-w-xs truncate px-6 py-3 text-muted-foreground">
+                                            {p.keterangan ?? '-'}
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            {!isLocked && (
+                                                <button
+                                                    onClick={() =>
+                                                        router.delete(
+                                                            pembayaran.destroy.url(
+                                                                p.id,
+                                                            ),
+                                                            {
+                                                                preserveScroll: true,
+                                                            },
+                                                        )
+                                                    }
+                                                    className="text-muted-foreground hover:text-destructive"
+                                                    title="Hapus pembayaran"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                            Belum ada pembayaran yang dicatat.
+                        </div>
+                    )}
+                </div>
+            </div>
         </>
+    );
+}
+
+// ─── Inline form tambah pembayaran ───────────────────────────────────────────
+
+function PembayaranForm({ pesananId }: { pesananId: number }) {
+    const { data, setData, post, processing, errors, reset } =
+        useForm<PembayaranFormData>({
+            tanggal: new Date().toISOString().slice(0, 10),
+            jenis_pembayaran: '',
+            nominal: '',
+            metode: '',
+            keterangan: '',
+        });
+    const [open, setOpen] = React.useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(pembayaran.store.url(pesananId), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+                setOpen(false);
+            },
+        });
+    };
+
+    return open ? (
+        <form
+            onSubmit={handleSubmit}
+            className="flex flex-wrap items-end gap-2"
+        >
+            <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Tanggal</label>
+                <input
+                    type="date"
+                    value={data.tanggal}
+                    onChange={(e) => setData('tanggal', e.target.value)}
+                    className="h-8 rounded-md border bg-background px-2 text-sm"
+                />
+            </div>
+            <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Jenis</label>
+                <select
+                    value={data.jenis_pembayaran}
+                    onChange={(e) =>
+                        setData('jenis_pembayaran', e.target.value as any)
+                    }
+                    className="h-8 rounded-md border bg-background px-2 text-sm"
+                >
+                    <option value="">Pilih...</option>
+                    <option value="dp">DP</option>
+                    <option value="pelunasan">Pelunasan</option>
+                    <option value="termin">Termin</option>
+                </select>
+            </div>
+            <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">
+                    Nominal (Rp)
+                </label>
+                <input
+                    type="number"
+                    min="0.01"
+                    value={data.nominal}
+                    onChange={(e) =>
+                        setData(
+                            'nominal',
+                            e.target.value === '' ? '' : Number(e.target.value),
+                        )
+                    }
+                    placeholder="0"
+                    className="h-8 w-36 rounded-md border bg-background px-2 text-sm"
+                />
+            </div>
+            <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Metode</label>
+                <input
+                    type="text"
+                    value={data.metode}
+                    onChange={(e) => setData('metode', e.target.value)}
+                    placeholder="Transfer/Tunai..."
+                    className="h-8 w-28 rounded-md border bg-background px-2 text-sm"
+                />
+            </div>
+            <Button type="submit" size="sm" disabled={processing}>
+                {processing ? 'Menyimpan...' : 'Simpan'}
+            </Button>
+            <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setOpen(false)}
+            >
+                Batal
+            </Button>
+            {Object.values(errors).filter(Boolean).length > 0 && (
+                <p className="w-full text-xs text-destructive">
+                    {Object.values(errors)[0]}
+                </p>
+            )}
+        </form>
+    ) : (
+        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+            + Tambah Pembayaran
+        </Button>
     );
 }
 
