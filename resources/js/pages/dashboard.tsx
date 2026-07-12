@@ -7,6 +7,7 @@ import {
     Wallet,
     Wrench,
 } from 'lucide-react';
+import { useState } from 'react';
 import { BestSellersChart } from '@/components/dashboard/best-sellers-chart';
 import { FinancialChart } from '@/components/dashboard/financial-chart';
 import { StatCard } from '@/components/dashboard/stat-card';
@@ -24,6 +25,12 @@ export default function Dashboard({
     topEmployees,
     filter,
 }: DashboardProps) {
+    const queryStartDate = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('start_date') || '';
+    const queryEndDate = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('end_date') || '';
+
+    const [localStart, setLocalStart] = useState(queryStartDate);
+    const [localEnd, setLocalEnd] = useState(queryEndDate);
+
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -42,13 +49,26 @@ export default function Dashboard({
     };
 
     const handleFilterChange = (value: string) => {
-        router.get(dashboard.url(), { filter: value }, { preserveState: true });
+        if (value !== 'range') {
+            router.get(dashboard.url(), { filter: value }, { preserveState: true });
+        } else {
+            router.get(dashboard.url(), { filter: 'range', start_date: localStart, end_date: localEnd }, { preserveState: true });
+        }
+    };
+
+    const applyRange = (s: string, e: string) => {
+        setLocalStart(s);
+        setLocalEnd(e);
+        if (s && e) {
+            router.get(dashboard.url(), { filter: 'range', start_date: s, end_date: e }, { preserveState: true });
+        }
     };
 
     const getFilterLabel = () => {
         switch (filter) {
             case 'tahun_ini': return 'Tahun ini';
             case 'semua': return 'Semua waktu';
+            case 'range': return 'Rentang waktu';
             case 'bulan_ini': 
             default: return 'Bulan ini';
         }
@@ -67,6 +87,23 @@ export default function Dashboard({
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        {filter === 'range' && (
+                            <div className="flex items-center gap-2 rounded-md border border-sidebar-border bg-background px-2 shadow-sm h-9">
+                                <input
+                                    type="date"
+                                    value={localStart}
+                                    onChange={(e) => applyRange(e.target.value, localEnd)}
+                                    className="h-full bg-transparent text-sm outline-none w-auto max-w-[120px]"
+                                />
+                                <span className="text-muted-foreground text-xs">-</span>
+                                <input
+                                    type="date"
+                                    value={localEnd}
+                                    onChange={(e) => applyRange(localStart, e.target.value)}
+                                    className="h-full bg-transparent text-sm outline-none w-auto max-w-[120px]"
+                                />
+                            </div>
+                        )}
                         <Select value={filter} onValueChange={handleFilterChange}>
                             <SelectTrigger className="w-[160px] h-9">
                                 <SelectValue placeholder="Pilih Periode" />
@@ -75,6 +112,7 @@ export default function Dashboard({
                                 <SelectItem value="bulan_ini">Bulan Ini</SelectItem>
                                 <SelectItem value="tahun_ini">Tahun Ini</SelectItem>
                                 <SelectItem value="semua">Semua Waktu</SelectItem>
+                                <SelectItem value="range">Range Tanggal</SelectItem>
                             </SelectContent>
                         </Select>
                         <button className="hidden sm:block rounded-md border border-sidebar-border/70 bg-background px-4 py-1.5 text-sm font-medium hover:bg-accent">
@@ -87,26 +125,57 @@ export default function Dashboard({
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <StatCard
                         title="Total Pemasukan"
-                        value={formatCurrency(stats.totalPemasukan)}
+                        value={formatCurrency(stats.totalPemasukan.value)}
                         icon={DollarSign}
                         iconClassName="bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-500"
-                        trend="up"
-                        trendValue={getFilterLabel()}
+                        trend={
+                            stats.totalPemasukan.percentage !== null
+                                ? stats.totalPemasukan.percentage >= 0
+                                    ? 'up'
+                                    : 'down'
+                                : 'neutral'
+                        }
+                        trendValue={
+                            stats.totalPemasukan.percentage !== null
+                                ? `${Math.abs(stats.totalPemasukan.percentage).toFixed(1)}% vs ${filter === 'tahun_ini' ? 'tahun lalu' : filter === 'range' ? 'periode sebelumnya' : 'bulan lalu'}`
+                                : getFilterLabel()
+                        }
                     />
                     <StatCard
                         title="Total Pengeluaran"
-                        value={formatCurrency(stats.totalPengeluaran)}
+                        value={formatCurrency(stats.totalPengeluaran.value)}
                         icon={ArrowDownRight}
                         iconClassName="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-500"
-                        trend="down"
-                        trendValue={getFilterLabel()}
+                        trend={
+                            stats.totalPengeluaran.percentage !== null
+                                ? stats.totalPengeluaran.percentage > 0
+                                    ? 'down'
+                                    : 'up'
+                                : 'neutral'
+                        }
+                        trendValue={
+                            stats.totalPengeluaran.percentage !== null
+                                ? `${Math.abs(stats.totalPengeluaran.percentage).toFixed(1)}% vs ${filter === 'tahun_ini' ? 'tahun lalu' : filter === 'range' ? 'periode sebelumnya' : 'bulan lalu'}`
+                                : getFilterLabel()
+                        }
                     />
                     <StatCard
                         title="Saldo Kas"
-                        value={formatCurrency(stats.saldo)}
+                        value={formatCurrency(stats.saldo.value)}
                         icon={Wallet}
                         iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-500"
-                        trendValue="Sepanjang waktu"
+                        trend={
+                            stats.saldo.percentage !== null
+                                ? stats.saldo.percentage >= 0
+                                    ? 'up'
+                                    : 'down'
+                                : 'neutral'
+                        }
+                        trendValue={
+                            stats.saldo.percentage !== null
+                                ? `${Math.abs(stats.saldo.percentage).toFixed(1)}% vs ${filter === 'tahun_ini' ? 'tahun lalu' : filter === 'range' ? 'periode sebelumnya' : 'bulan lalu'}`
+                                : 'Sepanjang waktu'
+                        }
                     />
                     <StatCard
                         title="Pesanan Aktif"

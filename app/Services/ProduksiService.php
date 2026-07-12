@@ -287,21 +287,30 @@ class ProduksiService
             ]);
 
             if ($qcStatus === 'lolos') {
-                // Recalculate qty_selesai dari SUM lolos agar konsisten
-                $qtySelesaiBaru = DetailProduksi::where('produksi_id', $produksi->id)
-                    ->where('qc_status', 'lolos')
-                    ->sum('qty_selesai');
-                $produksi->update(['qty_selesai' => $qtySelesaiBaru]);
-
                 // BR-10: Tambah stok produk jadi
                 $this->stockProdukService->addStock(
                     produk:     $produk,
                     qty:        $qty,
                     jenis:      'produksi',
-                    keterangan: "Progress Produksi {$keterangan} \u2014 {$produk->nama_produk}",
+                    keterangan: "Progress Produksi {$keterangan} — {$produk->nama_produk}",
                     createdBy:  $userId,
                 );
             }
+
+            // Recalculate qty_selesai dari SUM lolos agar konsisten
+            $qtySelesaiBaru = DetailProduksi::where('produksi_id', $produksi->id)
+                ->where('qc_status', 'lolos')
+                ->sum('qty_selesai');
+
+            // Calculate overall QC status
+            $adaTidakLolos = DetailProduksi::where('produksi_id', $produksi->id)
+                ->where('qc_status', 'tidak_lolos')
+                ->exists();
+
+            $produksi->update([
+                'qty_selesai' => (int) $qtySelesaiBaru,
+                'status_qc'   => $adaTidakLolos ? 'tidak_lolos' : 'lolos',
+            ]);
 
             return $detail;
         });

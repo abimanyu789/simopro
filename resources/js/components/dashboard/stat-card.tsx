@@ -1,12 +1,13 @@
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 interface StatCardProps {
     title: string;
     value: string | number;
     icon: LucideIcon;
-    trend?: 'up' | 'down' | 'neutral';
-    trendValue?: string;
+    trend?: 'up' | 'down' | 'neutral' | 'custom';
+    trendValue?: React.ReactNode;
     className?: string;
     iconClassName?: string;
 }

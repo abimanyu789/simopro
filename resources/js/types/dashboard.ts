@@ -1,7 +1,12 @@
+export interface FinancialStat {
+    value: number;
+    percentage: number | null;
+}
+
 export interface DashboardStats {
-    totalPemasukan: number;
-    totalPengeluaran: number;
-    saldo: number;
+    totalPemasukan: FinancialStat;
+    totalPengeluaran: FinancialStat;
+    saldo: FinancialStat;
     pesananAktif: number;
     produksiBerjalan: number;
     selesaiProduksi: number;

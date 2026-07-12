@@ -11,20 +11,22 @@ class DashboardController extends Controller
     public function index(\Illuminate\Http\Request $request)
     {
         $filter = $request->query('filter', 'bulan_ini');
+        $startDate = $request->query('start_date', '');
+        $endDate = $request->query('end_date', '');
 
         // Stat Cards
-        $totalPemasukan = $this->getTotalPemasukan($filter);
-        $totalPengeluaran = $this->getTotalPengeluaran($filter);
+        $totalPemasukan = $this->getFinancialStat('pemasukan', $filter, $startDate, $endDate);
+        $totalPengeluaran = $this->getFinancialStat('pengeluaran', $filter, $startDate, $endDate);
         $pesananAktif = $this->getPesananAktif();
         $produksiBerjalan = $this->getProduksiBerjalan();
-        $selesaiProduksi = $this->getSelesaiProduksi($filter);
-        $saldo = $this->getSaldo();
+        $selesaiProduksi = $this->getSelesaiProduksi($filter, $startDate, $endDate);
+        $saldo = $this->getSaldoStat($filter, $startDate, $endDate);
 
         // Financial Chart (12 bulan terakhir)
         $financialChart = $this->getFinancialChart();
 
         // Best Sellers (top 5 produk)
-        $bestSellers = $this->getBestSellers($filter);
+        $bestSellers = $this->getBestSellers($filter, $startDate, $endDate);
 
         // Active Orders Progress
         $activeOrders = $this->getActiveOrders();
@@ -49,43 +51,105 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function getTotalPemasukan(string $filter): float
+    private function getFinancialStat(string $jenis, string $filter, string $startDate = '', string $endDate = ''): array
     {
         if (! Schema::hasTable('arus_kas')) {
-            return 0;
+            return ['value' => 0, 'percentage' => null];
         }
 
         try {
-            $query = DB::table('arus_kas')->where('jenis', 'pemasukan');
-            if ($filter === 'bulan_ini') {
-                $query->whereMonth('tanggal', now()->month)
-                      ->whereYear('tanggal', now()->year);
+            $currentQuery = DB::table('arus_kas')->where('jenis', $jenis);
+            $previousQuery = DB::table('arus_kas')->where('jenis', $jenis);
+
+            if ($filter === 'range' && $startDate && $endDate) {
+                $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+                $end = \Carbon\Carbon::parse($endDate)->endOfDay();
+                $diffInDays = $start->diffInDays($end) + 1;
+
+                $currentQuery->whereBetween('tanggal', [$start, $end]);
+                
+                $prevStart = $start->copy()->subDays($diffInDays);
+                $prevEnd = $end->copy()->subDays($diffInDays);
+                $previousQuery->whereBetween('tanggal', [$prevStart, $prevEnd]);
+            } elseif ($filter === 'bulan_ini') {
+                $currentQuery->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year);
+                $previousQuery->whereMonth('tanggal', now()->subMonth()->month)->whereYear('tanggal', now()->subMonth()->year);
             } elseif ($filter === 'tahun_ini') {
-                $query->whereYear('tanggal', now()->year);
+                $currentQuery->whereYear('tanggal', now()->year);
+                $previousQuery->whereYear('tanggal', now()->subYear()->year);
+            } else {
+                return [
+                    'value' => (float) $currentQuery->sum('nominal'),
+                    'percentage' => null,
+                ];
             }
-            return (float) $query->sum('nominal');
+
+            $currentValue = (float) $currentQuery->sum('nominal');
+            $previousValue = (float) $previousQuery->sum('nominal');
+
+            $percentage = null;
+            if ($previousValue > 0) {
+                $percentage = (($currentValue - $previousValue) / $previousValue) * 100;
+            } elseif ($currentValue > 0) {
+                $percentage = 100;
+            } else {
+                $percentage = 0;
+            }
+
+            return [
+                'value' => $currentValue,
+                'percentage' => $percentage,
+            ];
         } catch (\Exception $e) {
-            return 0;
+            return ['value' => 0, 'percentage' => null];
         }
     }
 
-    private function getTotalPengeluaran(string $filter): float
+    private function getSaldoStat(string $filter, string $startDate = '', string $endDate = ''): array
     {
         if (! Schema::hasTable('arus_kas')) {
-            return 0;
+            return ['value' => 0, 'percentage' => null];
         }
 
         try {
-            $query = DB::table('arus_kas')->where('jenis', 'pengeluaran');
-            if ($filter === 'bulan_ini') {
-                $query->whereMonth('tanggal', now()->month)
-                      ->whereYear('tanggal', now()->year);
-            } elseif ($filter === 'tahun_ini') {
-                $query->whereYear('tanggal', now()->year);
+            $currentValue = (float) (DB::table('arus_kas')->where('jenis', 'pemasukan')->sum('nominal') - DB::table('arus_kas')->where('jenis', 'pengeluaran')->sum('nominal'));
+
+            if ($filter === 'semua') {
+                return ['value' => $currentValue, 'percentage' => null];
             }
-            return (float) $query->sum('nominal');
+
+            $prevPem = DB::table('arus_kas')->where('jenis', 'pemasukan');
+            $prevPeng = DB::table('arus_kas')->where('jenis', 'pengeluaran');
+
+            if ($filter === 'range' && $startDate && $endDate) {
+                $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+                $prevPem->where('tanggal', '<', $start);
+                $prevPeng->where('tanggal', '<', $start);
+            } elseif ($filter === 'bulan_ini') {
+                $prevPem->where('tanggal', '<', now()->startOfMonth());
+                $prevPeng->where('tanggal', '<', now()->startOfMonth());
+            } elseif ($filter === 'tahun_ini') {
+                $prevPem->where('tanggal', '<', now()->startOfYear());
+                $prevPeng->where('tanggal', '<', now()->startOfYear());
+            }
+
+            $previousValue = (float) ($prevPem->sum('nominal') - $prevPeng->sum('nominal'));
+
+            $percentage = null;
+            if ($previousValue > 0) {
+                $percentage = (($currentValue - $previousValue) / $previousValue) * 100;
+            } elseif ($currentValue > 0) {
+                $percentage = 100;
+            } else {
+                $percentage = 0;
+            }
+
+            return [
+                'value' => $currentValue,
+                'percentage' => $percentage,
+            ];
         } catch (\Exception $e) {
-            return 0;
+            return ['value' => 0, 'percentage' => null];
         }
     }
 
@@ -119,22 +183,9 @@ class DashboardController extends Controller
         }
     }
 
-    private function getSaldo(): float
-    {
-        if (! Schema::hasTable('arus_kas')) {
-            return 0;
-        }
 
-        try {
-            $pemasukan = (float) DB::table('arus_kas')->where('jenis', 'pemasukan')->sum('nominal');
-            $pengeluaran = (float) DB::table('arus_kas')->where('jenis', 'pengeluaran')->sum('nominal');
-            return $pemasukan - $pengeluaran;
-        } catch (\Exception $e) {
-            return 0;
-        }
-    }
 
-    private function getSelesaiProduksi(string $filter): int
+    private function getSelesaiProduksi(string $filter, string $startDate = '', string $endDate = ''): int
     {
         if (! Schema::hasTable('produksi')) {
             return 0;
@@ -142,7 +193,12 @@ class DashboardController extends Controller
 
         try {
             $query = DB::table('produksi');
-            if ($filter === 'bulan_ini') {
+            
+            if ($filter === 'range' && $startDate && $endDate) {
+                $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+                $end = \Carbon\Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('updated_at', [$start, $end]);
+            } elseif ($filter === 'bulan_ini') {
                 $query->whereMonth('updated_at', now()->month)
                       ->whereYear('updated_at', now()->year);
             } elseif ($filter === 'tahun_ini') {
@@ -209,7 +265,7 @@ class DashboardController extends Controller
         return $result;
     }
 
-    private function getBestSellers(string $filter): array
+    private function getBestSellers(string $filter, string $startDate = '', string $endDate = ''): array
     {
         if (! Schema::hasTable('detail_pesanan') || ! Schema::hasTable('produk') || ! Schema::hasTable('pesanan')) {
             return [];
@@ -224,7 +280,11 @@ class DashboardController extends Controller
                     DB::raw('SUM(detail_pesanan.qty) as total_qty')
                 );
             
-            if ($filter === 'bulan_ini') {
+            if ($filter === 'range' && $startDate && $endDate) {
+                $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+                $end = \Carbon\Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('pesanan.tanggal', [$start, $end]);
+            } elseif ($filter === 'bulan_ini') {
                 $query->whereMonth('pesanan.tanggal', now()->month)
                       ->whereYear('pesanan.tanggal', now()->year);
             } elseif ($filter === 'tahun_ini') {

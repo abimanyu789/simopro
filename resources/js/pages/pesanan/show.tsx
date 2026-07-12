@@ -340,7 +340,7 @@ export default function PesananShow({
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Form Tambah Pembayaran */}
                     {!isLocked && (
-                        <div className="h-fit rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                        <div className="h-fit rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border lg:col-span-1">
                             <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                                 Tambah Pembayaran
                             </h2>
@@ -383,51 +383,42 @@ export default function PesananShow({
                                             key={p.id}
                                             className="border-b last:border-0"
                                         >
-                                            <td className="px-6 py-3">
+                                            <td className="px-6 py-3 whitespace-nowrap">
                                                 {p.tanggal
                                                     ? new Date(
-                                                          p.tanggal,
-                                                      ).toLocaleDateString(
-                                                          'id-ID',
-                                                          {
-                                                              day: 'numeric',
-                                                              month: 'short',
-                                                              year: 'numeric',
-                                                          },
-                                                      )
+                                                        p.tanggal,
+                                                    ).toLocaleDateString(
+                                                        'id-ID',
+                                                        {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric',
+                                                        },
+                                                    )
                                                     : '-'}
                                             </td>
-                                            <td className="px-6 py-3 capitalize">
+                                            <td className="px-6 py-3 capitalize whitespace-nowrap">
                                                 <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
                                                     {p.jenis_pembayaran.toUpperCase()}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-3 text-muted-foreground">
+                                            <td className="px-6 py-3 text-muted-foreground whitespace-nowrap">
                                                 {p.metode ?? '-'}
                                             </td>
-                                            <td className="px-6 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400">
+                                            <td className="px-6 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400 whitespace-nowrap">
                                                 {new Intl.NumberFormat('id-ID', {
                                                     style: 'currency',
                                                     currency: 'IDR',
                                                     minimumFractionDigits: 0,
                                                 }).format(Number(p.nominal))}
                                             </td>
-                                            <td className="max-w-xs truncate px-6 py-3 text-muted-foreground">
+                                            <td className="px-6 py-3 text-muted-foreground">
                                                 {p.keterangan ?? '-'}
                                             </td>
-                                            <td className="px-6 py-3">
+                                            <td className="px-6 py-3 text-right">
                                                 {!isLocked && (
                                                     <button
-                                                        onClick={() =>
-                                                            router.delete(
-                                                                pembayaran.destroy.url(
-                                                                    p.id,
-                                                                ),
-                                                                {
-                                                                    preserveScroll: true,
-                                                                },
-                                                            )
-                                                        }
+                                                        onClick={() => router.delete(pembayaran.destroy.url(p.id), {preserveScroll: true,})}
                                                         className="text-muted-foreground hover:text-destructive"
                                                         title="Hapus pembayaran"
                                                     >
@@ -478,24 +469,24 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-3"
         >
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Tanggal</label>
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Tanggal</label>
                 <input
                     type="date"
                     value={data.tanggal}
                     onChange={(e) => setData('tanggal', e.target.value)}
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    className="h-8 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Jenis Pembayaran</label>
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Jenis Pembayaran</label>
                 <Select
                     value={data.jenis_pembayaran}
                     onValueChange={(val: any) => setData('jenis_pembayaran', val)}
                 >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full h-8 text-sm">
                         <SelectValue placeholder="Pilih Jenis..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -505,8 +496,8 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
                     </SelectContent>
                 </Select>
             </div>
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">
                     Nominal (Rp)
                 </label>
                 <input
@@ -521,16 +512,16 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
                         )
                     }
                     placeholder="0"
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    className="h-8 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Metode Pembayaran</label>
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Metode Pembayaran</label>
                 <Select
                     value={data.metode}
                     onValueChange={(val) => setData('metode', val)}
                 >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full h-8 text-sm">
                         <SelectValue placeholder="Pilih Metode..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -541,18 +532,18 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
                     </SelectContent>
                 </Select>
             </div>
-            <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Keterangan</label>
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Keterangan</label>
                 <input
                     type="text"
                     value={data.keterangan}
                     onChange={(e) => setData('keterangan', e.target.value)}
-                    placeholder="Catatan tambahan (opsional)..."
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    placeholder="Opsional..."
+                    className="h-8 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
 
-            <Button type="submit" className="mt-2 w-full" disabled={processing}>
+            <Button type="submit" size="sm" className="mt-1 w-full" disabled={processing}>
                 {processing ? 'Menyimpan...' : 'Simpan Pembayaran'}
             </Button>
             {Object.values(errors).filter(Boolean).length > 0 && (
