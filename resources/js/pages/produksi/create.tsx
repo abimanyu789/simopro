@@ -20,7 +20,7 @@ import type {
     KaryawanOption,
     ProduksiCreateProps,
     ProduksiFormData,
-    ProdukOption,
+    ProduksiProdukOption,
 } from '@/types';
 
 export default function ProduksiCreate({

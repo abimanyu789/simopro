@@ -16,7 +16,7 @@ import type {
     CustomerOption,
     PesananFormData,
     PesananItemFormData,
-    ProdukOption,
+    PesananProdukOption,
 } from '@/types';
 
 interface PesananFormProps {
@@ -32,7 +32,7 @@ interface PesananFormProps {
     submitLabel?: string;
     mode: 'create' | 'edit';
     customers: CustomerOption[];
-    produks: ProdukOption[];
+    produks: PesananProdukOption[];
 }
 
 export function PesananForm({
@@ -94,7 +94,7 @@ export function PesananForm({
     ) => {
         const updated = data.items.map((item, i) =>
             i === idx ? { ...item, [field]: value } : item,
-        );
+        ) as PesananItemFormData[];
         setData('items', updated);
     };
 
@@ -105,7 +105,7 @@ export function PesananForm({
 
         const updated = data.items.map((item, i) =>
             i === idx ? { ...item, produk_id: produkId, harga } : item,
-        );
+        ) as PesananItemFormData[];
         setData('items', updated);
     };
 

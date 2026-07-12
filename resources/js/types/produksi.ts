@@ -132,7 +132,7 @@ export interface PesananOption {
     customer?: Customer;
 }
 
-export interface ProdukOption {
+export interface ProduksiProdukOption {
     id: number;
     kode_produk: string;
     nama_produk: string;
@@ -188,7 +188,7 @@ export interface ProduksiIndexProps {
 
 export interface ProduksiCreateProps {
     pesananValid: PesananOption[];
-    produkList: ProdukOption[];
+    produkList: ProduksiProdukOption[];
     karyawanList: KaryawanOption[];
     selectedPesanan:
         | (Pesanan & {

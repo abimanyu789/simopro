@@ -182,7 +182,7 @@ export default function StokBahanBakuCreate({
                                         isRestock ? '0' : 'Contoh: 5 atau -3'
                                     }
                                     value={data.qty}
-                                    onChange={(e) => setData('qty', e.target.value)}
+                                    onChange={(e) => setData('qty', e.target.value === '' ? '' : Number(e.target.value))}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {qtyHelperText}

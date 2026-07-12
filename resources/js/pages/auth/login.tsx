@@ -1,6 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
-import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -19,9 +18,7 @@ type Props = {
 export default function Login({ status, canResetPassword }: Props) {
     return (
         <>
-            <Head title="Login — Provillo" />
-
-            <PasskeyVerify />
+            <Head title="Login — SIMOPRO" />
 
             {status && (
                 <div className="mb-4 rounded-md bg-green-50 p-3 text-center text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
@@ -104,6 +101,6 @@ export default function Login({ status, canResetPassword }: Props) {
 }
 
 Login.layout = {
-    title: 'Masuk ke Provillo',
-    description: 'Masukkan email dan password untuk mengakses sistem manajemen operasional',
+    title: 'Masuk ke SIMOPRO',
+    description: 'Masukkan email dan password untuk mengakses sistem manajemen operasional provillo',
 };

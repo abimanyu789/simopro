@@ -105,8 +105,8 @@ export default function ArusKasCreate() {
                                 <Input
                                     id="nominal"
                                     type="number"
-                                    min="0.01"
-                                    step="0.01"
+                                    min="1"
+                                    step="1"
                                     placeholder="0"
                                     value={data.nominal}
                                     onChange={(e) => setData('nominal', e.target.value === '' ? '' : Number(e.target.value))}
@@ -118,26 +118,42 @@ export default function ArusKasCreate() {
                             {/* Kategori */}
                             <div className="space-y-2">
                                 <Label htmlFor="kategori">Kategori</Label>
-                                <Input
-                                    id="kategori"
-                                    type="text"
-                                    placeholder="cth: Biaya Operasional, Pendapatan Penjualan, Transportasi..."
+                                <Select
                                     value={data.kategori}
-                                    onChange={(e) => setData('kategori', e.target.value)}
-                                />
+                                    onValueChange={(val) => setData('kategori', val)}
+                                >
+                                    <SelectTrigger className={`w-full ${errors.kategori ? 'border-destructive' : ''}`}>
+                                        <SelectValue placeholder="Pilih Kategori..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Pendapatan Penjualan">Pendapatan Penjualan</SelectItem>
+                                        <SelectItem value="Biaya Operasional">Biaya Operasional</SelectItem>
+                                        <SelectItem value="Pembelian Bahan Baku">Pembelian Bahan Baku</SelectItem>
+                                        <SelectItem value="Gaji Karyawan">Gaji Karyawan</SelectItem>
+                                        <SelectItem value="Transportasi">Transportasi</SelectItem>
+                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 {errors.kategori && <p className="text-sm text-destructive">{errors.kategori}</p>}
                             </div>
 
                             {/* Metode Pembayaran */}
                             <div className="space-y-2">
                                 <Label htmlFor="metode_pembayaran">Metode Pembayaran</Label>
-                                <Input
-                                    id="metode_pembayaran"
-                                    type="text"
-                                    placeholder="cth: Transfer Bank, Tunai, QRIS..."
+                                <Select
                                     value={data.metode_pembayaran}
-                                    onChange={(e) => setData('metode_pembayaran', e.target.value)}
-                                />
+                                    onValueChange={(val) => setData('metode_pembayaran', val)}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Metode Pembayaran..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Tunai">Tunai</SelectItem>
+                                        <SelectItem value="Transfer Bank">Transfer Bank</SelectItem>
+                                        <SelectItem value="QRIS">QRIS</SelectItem>
+                                        <SelectItem value="E-Wallet">E-Wallet</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Keterangan */}

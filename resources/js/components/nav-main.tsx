@@ -23,7 +23,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel>MENU</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => {
                     // Check if any sub-item is active

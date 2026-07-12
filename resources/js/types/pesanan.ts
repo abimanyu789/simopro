@@ -95,7 +95,7 @@ export interface CustomerOption {
     jenis_customer: string;
 }
 
-export interface ProdukOption {
+export interface PesananProdukOption {
     id: number;
     kode_produk: string;
     nama_produk: string;
@@ -105,13 +105,13 @@ export interface ProdukOption {
 
 export interface PesananCreateProps {
     customers: CustomerOption[];
-    produks: ProdukOption[];
+    produks: PesananProdukOption[];
 }
 
 export interface PesananEditProps {
     pesanan: Pesanan;
     customers: CustomerOption[];
-    produks: ProdukOption[];
+    produks: PesananProdukOption[];
 }
 
 export interface PesananShowProps {

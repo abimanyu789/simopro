@@ -38,6 +38,7 @@ export function BestSellersChart({ data }: BestSellersChartProps) {
                             tick={{ fill: 'hsl(var(--muted-foreground))' }}
                         />
                         <Tooltip
+                            cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
                             contentStyle={{
                                 backgroundColor: 'hsl(var(--background))',
                                 border: '1px solid hsl(var(--border))',

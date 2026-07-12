@@ -1,7 +1,9 @@
 export interface DashboardStats {
     totalPemasukan: number;
     totalPengeluaran: number;
+    saldo: number;
     pesananAktif: number;
+    produksiBerjalan: number;
     selesaiProduksi: number;
 }
 
@@ -39,4 +41,5 @@ export interface DashboardProps {
     bestSellers: BestSeller[];
     activeOrders: ActiveOrder[];
     topEmployees: TopEmployee[];
+    filter: string;
 }

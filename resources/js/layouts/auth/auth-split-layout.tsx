@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -29,10 +28,10 @@ export default function AuthSplitLayout({
                     href={home()}
                     className="relative z-20 flex items-center gap-3 text-lg font-semibold tracking-tight"
                 >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur-sm">
-                        <AppLogoIcon className="size-5 fill-current text-white" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white overflow-hidden ring-1 ring-white/20 backdrop-blur-sm">
+                        <img src="/LogoProvillo.jpg" alt="Logo" className="size-full object-cover" />
                     </div>
-                    <span>Provillo</span>
+                    <span>SIMOPRO</span>
                 </Link>
 
                 {/* Konten tengah panel */}
@@ -40,13 +39,13 @@ export default function AuthSplitLayout({
                     <div className="mb-8 space-y-1">
                         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80 ring-1 ring-white/20">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                            Sistem Manajemen Operasional
+                            Sistem Manajemen Operasional Provillo
                         </div>
                     </div>
 
                     <blockquote className="space-y-3">
                         <p className="text-2xl font-semibold leading-snug text-white">
-                            Kelola produksi, pesanan, dan keuangan{' '}
+                            Kelola Produksi, Pesanan, dan Keuangan{' '}
                             <span className="text-sky-300">UMKM sepatu</span>{' '}
                             dalam satu platform terpadu.
                         </p>
@@ -65,10 +64,10 @@ export default function AuthSplitLayout({
                         href={home()}
                         className="relative z-20 flex items-center justify-center gap-2 lg:hidden"
                     >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground">
-                            <AppLogoIcon className="size-5 fill-current text-background" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white overflow-hidden">
+                            <img src="/LogoProvillo.jpg" alt="Logo" className="size-full object-cover" />
                         </div>
-                        <span className="text-base font-semibold">Provillo</span>
+                        <span className="text-base font-semibold">SIMOPRO</span>
                     </Link>
 
                     <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">

@@ -329,84 +329,6 @@ export default function ProduksiShow({
                                 </div>
                             )}
                         </div>
-
-                        {/* Histori Progress */}
-                        <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
-                            <div className="border-b px-6 py-4">
-                                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                                    Histori Progress
-                                </h2>
-                            </div>
-                            {(item.detail_produksi ?? []).length > 0 ? (
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Produk</TableHead>
-                                            <TableHead className="text-right">
-                                                Qty
-                                            </TableHead>
-                                            <TableHead>QC</TableHead>
-                                            <TableHead>Tanggal</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {(item.detail_produksi ?? []).map(
-                                            (d) => (
-                                                <TableRow key={d.id}>
-                                                    <TableCell>
-                                                        <div className="font-medium">
-                                                            {d.produk
-                                                                ?.nama_produk ??
-                                                                '-'}
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground">
-                                                            {d.produk
-                                                                ?.kode_produk ??
-                                                                '-'}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-right font-mono font-semibold">
-                                                        {d.qty_selesai} pcs
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {d.qc_status ===
-                                                        'lolos' ? (
-                                                            <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
-                                                                <CheckCircle className="size-3" />{' '}
-                                                                Lolos
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-400">
-                                                                <XCircle className="size-3" />{' '}
-                                                                Tidak Lolos
-                                                            </span>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell className="text-sm text-muted-foreground">
-                                                        {new Date(
-                                                            d.created_at,
-                                                        ).toLocaleDateString(
-                                                            'id-ID',
-                                                            {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                            },
-                                                        )}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ),
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            ) : (
-                                <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-                                    Belum ada progress yang dicatat.
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     {/* ── Kolom Kanan ──────────────────────────────────── */}
@@ -606,10 +528,11 @@ export default function ProduksiShow({
                     </div>
                 </div>
 
-                {/* Section Input Progress — hanya saat proses */}
-                {item.status === 'proses' && (
-                    <div className="grid gap-6 lg:grid-cols-3">
-                        <div className="rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                {/* Section Form & Histori */}
+                <div className="grid gap-6 lg:grid-cols-3 mt-2">
+                    {/* Section Input Progress — hanya saat proses */}
+                    {item.status === 'proses' && (
+                        <div className="h-fit rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                             <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                                 Input Progress
                             </h2>
@@ -618,8 +541,72 @@ export default function ProduksiShow({
                                 produkBelumSelesai={produkBelumSelesai}
                             />
                         </div>
+                    )}
+
+                    {/* Histori Progress */}
+                    <div className={`h-fit rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border ${item.status !== 'proses' ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                        <div className="border-b px-6 py-4">
+                            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Histori Progress
+                            </h2>
+                        </div>
+                        {(item.detail_produksi ?? []).length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Produk</TableHead>
+                                        <TableHead className="text-right">
+                                            Qty
+                                        </TableHead>
+                                        <TableHead>QC</TableHead>
+                                        <TableHead>Tanggal</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {(item.detail_produksi ?? []).map((d) => (
+                                        <TableRow key={d.id}>
+                                            <TableCell>
+                                                <div className="font-medium">
+                                                    {d.produk?.nama_produk ?? '-'}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {d.produk?.kode_produk ?? '-'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono font-semibold">
+                                                {d.qty_selesai} pcs
+                                            </TableCell>
+                                            <TableCell>
+                                                {d.qc_status === 'lolos' ? (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
+                                                        <CheckCircle className="size-3" /> Lolos
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-400">
+                                                        <XCircle className="size-3" /> Tidak Lolos
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-sm text-muted-foreground">
+                                                {new Date(d.created_at).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                                Belum ada progress yang dicatat.
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </>
     );

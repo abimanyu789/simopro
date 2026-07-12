@@ -1,17 +1,18 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import {
     ArrowDownRight,
-    ArrowUpRight,
     DollarSign,
-    Package,
     ShoppingCart,
     Target,
+    Wallet,
+    Wrench,
 } from 'lucide-react';
 import { BestSellersChart } from '@/components/dashboard/best-sellers-chart';
 import { FinancialChart } from '@/components/dashboard/financial-chart';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { dashboard } from '@/routes';
 import type { DashboardProps } from '@/types';
 
@@ -21,6 +22,7 @@ export default function Dashboard({
     bestSellers,
     activeOrders,
     topEmployees,
+    filter,
 }: DashboardProps) {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -39,6 +41,19 @@ export default function Dashboard({
         });
     };
 
+    const handleFilterChange = (value: string) => {
+        router.get(dashboard.url(), { filter: value }, { preserveState: true });
+    };
+
+    const getFilterLabel = () => {
+        switch (filter) {
+            case 'tahun_ini': return 'Tahun ini';
+            case 'semua': return 'Semua waktu';
+            case 'bulan_ini': 
+            default: return 'Bulan ini';
+        }
+    };
+
     return (
         <>
             <Head title="Dashboard" />
@@ -51,36 +66,32 @@ export default function Dashboard({
                             Ringkasan operasional Provillo
                         </p>
                     </div>
-                    <button className="rounded-lg border border-sidebar-border/70 bg-background px-4 py-2 text-sm font-medium hover:bg-accent">
-                        Download Report
-                    </button>
-                </div>
-
-                {/* Filter Row - Non-functional UI */}
-                <div className="flex flex-wrap gap-2">
-                    <select className="rounded-lg border border-sidebar-border/70 bg-background px-3 py-1.5 text-sm">
-                        <option>Bulan Ini</option>
-                    </select>
-                    <select className="rounded-lg border border-sidebar-border/70 bg-background px-3 py-1.5 text-sm">
-                        <option>Semua Kategori</option>
-                    </select>
-                    <select className="rounded-lg border border-sidebar-border/70 bg-background px-3 py-1.5 text-sm">
-                        <option>Semua Status</option>
-                    </select>
-                    <select className="rounded-lg border border-sidebar-border/70 bg-background px-3 py-1.5 text-sm">
-                        <option>Semua Model</option>
-                    </select>
+                    <div className="flex items-center gap-3">
+                        <Select value={filter} onValueChange={handleFilterChange}>
+                            <SelectTrigger className="w-[160px] h-9">
+                                <SelectValue placeholder="Pilih Periode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="bulan_ini">Bulan Ini</SelectItem>
+                                <SelectItem value="tahun_ini">Tahun Ini</SelectItem>
+                                <SelectItem value="semua">Semua Waktu</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <button className="hidden sm:block rounded-md border border-sidebar-border/70 bg-background px-4 py-1.5 text-sm font-medium hover:bg-accent">
+                            Download Report
+                        </button>
+                    </div>
                 </div>
 
                 {/* Stat Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <StatCard
                         title="Total Pemasukan"
                         value={formatCurrency(stats.totalPemasukan)}
                         icon={DollarSign}
                         iconClassName="bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-500"
                         trend="up"
-                        trendValue="Bulan ini"
+                        trendValue={getFilterLabel()}
                     />
                     <StatCard
                         title="Total Pengeluaran"
@@ -88,21 +99,35 @@ export default function Dashboard({
                         icon={ArrowDownRight}
                         iconClassName="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-500"
                         trend="down"
-                        trendValue="Bulan ini"
+                        trendValue={getFilterLabel()}
+                    />
+                    <StatCard
+                        title="Saldo Kas"
+                        value={formatCurrency(stats.saldo)}
+                        icon={Wallet}
+                        iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-500"
+                        trendValue="Sepanjang waktu"
                     />
                     <StatCard
                         title="Pesanan Aktif"
                         value={stats.pesananAktif}
                         icon={ShoppingCart}
-                        iconClassName="bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-500"
+                        iconClassName="bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-500"
                         trendValue="Pending & Proses"
+                    />
+                    <StatCard
+                        title="Produksi Berjalan"
+                        value={stats.produksiBerjalan}
+                        icon={Wrench}
+                        iconClassName="bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-500"
+                        trendValue="Status Proses"
                     />
                     <StatCard
                         title="Selesai Produksi"
                         value={`${stats.selesaiProduksi} unit`}
                         icon={Target}
                         iconClassName="bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-500"
-                        trendValue="Bulan ini"
+                        trendValue={getFilterLabel()}
                     />
                 </div>
 

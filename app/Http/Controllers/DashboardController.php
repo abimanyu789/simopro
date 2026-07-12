@@ -8,19 +8,23 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        $filter = $request->query('filter', 'bulan_ini');
+
         // Stat Cards
-        $totalPemasukan = $this->getTotalPemasukan();
-        $totalPengeluaran = $this->getTotalPengeluaran();
+        $totalPemasukan = $this->getTotalPemasukan($filter);
+        $totalPengeluaran = $this->getTotalPengeluaran($filter);
         $pesananAktif = $this->getPesananAktif();
-        $selesaiProduksi = $this->getSelesaiProduksi();
+        $produksiBerjalan = $this->getProduksiBerjalan();
+        $selesaiProduksi = $this->getSelesaiProduksi($filter);
+        $saldo = $this->getSaldo();
 
         // Financial Chart (12 bulan terakhir)
         $financialChart = $this->getFinancialChart();
 
         // Best Sellers (top 5 produk)
-        $bestSellers = $this->getBestSellers();
+        $bestSellers = $this->getBestSellers($filter);
 
         // Active Orders Progress
         $activeOrders = $this->getActiveOrders();
@@ -32,45 +36,54 @@ class DashboardController extends Controller
             'stats' => [
                 'totalPemasukan' => $totalPemasukan,
                 'totalPengeluaran' => $totalPengeluaran,
+                'saldo' => $saldo,
                 'pesananAktif' => $pesananAktif,
+                'produksiBerjalan' => $produksiBerjalan,
                 'selesaiProduksi' => $selesaiProduksi,
             ],
             'financialChart' => $financialChart,
             'bestSellers' => $bestSellers,
             'activeOrders' => $activeOrders,
             'topEmployees' => $topEmployees,
+            'filter' => $filter,
         ]);
     }
 
-    private function getTotalPemasukan(): float
+    private function getTotalPemasukan(string $filter): float
     {
         if (! Schema::hasTable('arus_kas')) {
             return 0;
         }
 
         try {
-            return (float) DB::table('arus_kas')
-                ->where('jenis', 'pemasukan')
-                ->whereMonth('tanggal', now()->month)
-                ->whereYear('tanggal', now()->year)
-                ->sum('nominal');
+            $query = DB::table('arus_kas')->where('jenis', 'pemasukan');
+            if ($filter === 'bulan_ini') {
+                $query->whereMonth('tanggal', now()->month)
+                      ->whereYear('tanggal', now()->year);
+            } elseif ($filter === 'tahun_ini') {
+                $query->whereYear('tanggal', now()->year);
+            }
+            return (float) $query->sum('nominal');
         } catch (\Exception $e) {
             return 0;
         }
     }
 
-    private function getTotalPengeluaran(): float
+    private function getTotalPengeluaran(string $filter): float
     {
         if (! Schema::hasTable('arus_kas')) {
             return 0;
         }
 
         try {
-            return (float) DB::table('arus_kas')
-                ->where('jenis', 'pengeluaran')
-                ->whereMonth('tanggal', now()->month)
-                ->whereYear('tanggal', now()->year)
-                ->sum('nominal');
+            $query = DB::table('arus_kas')->where('jenis', 'pengeluaran');
+            if ($filter === 'bulan_ini') {
+                $query->whereMonth('tanggal', now()->month)
+                      ->whereYear('tanggal', now()->year);
+            } elseif ($filter === 'tahun_ini') {
+                $query->whereYear('tanggal', now()->year);
+            }
+            return (float) $query->sum('nominal');
         } catch (\Exception $e) {
             return 0;
         }
@@ -91,17 +104,51 @@ class DashboardController extends Controller
         }
     }
 
-    private function getSelesaiProduksi(): int
+    private function getProduksiBerjalan(): int
     {
         if (! Schema::hasTable('produksi')) {
             return 0;
         }
 
         try {
-            return (int) DB::table('produksi')
-                ->whereMonth('updated_at', now()->month)
-                ->whereYear('updated_at', now()->year)
-                ->sum('qty_selesai');
+            return DB::table('produksi')
+                ->where('status', 'proses')
+                ->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    private function getSaldo(): float
+    {
+        if (! Schema::hasTable('arus_kas')) {
+            return 0;
+        }
+
+        try {
+            $pemasukan = (float) DB::table('arus_kas')->where('jenis', 'pemasukan')->sum('nominal');
+            $pengeluaran = (float) DB::table('arus_kas')->where('jenis', 'pengeluaran')->sum('nominal');
+            return $pemasukan - $pengeluaran;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    private function getSelesaiProduksi(string $filter): int
+    {
+        if (! Schema::hasTable('produksi')) {
+            return 0;
+        }
+
+        try {
+            $query = DB::table('produksi');
+            if ($filter === 'bulan_ini') {
+                $query->whereMonth('updated_at', now()->month)
+                      ->whereYear('updated_at', now()->year);
+            } elseif ($filter === 'tahun_ini') {
+                $query->whereYear('updated_at', now()->year);
+            }
+            return (int) $query->sum('qty_selesai');
         } catch (\Exception $e) {
             return 0;
         }
@@ -162,20 +209,29 @@ class DashboardController extends Controller
         return $result;
     }
 
-    private function getBestSellers(): array
+    private function getBestSellers(string $filter): array
     {
-        if (! Schema::hasTable('detail_pesanan') || ! Schema::hasTable('produk')) {
+        if (! Schema::hasTable('detail_pesanan') || ! Schema::hasTable('produk') || ! Schema::hasTable('pesanan')) {
             return [];
         }
 
         try {
-            return DB::table('detail_pesanan')
+            $query = DB::table('detail_pesanan')
                 ->join('produk', 'detail_pesanan.produk_id', '=', 'produk.id')
+                ->join('pesanan', 'detail_pesanan.pesanan_id', '=', 'pesanan.id')
                 ->select(
                     'produk.nama_produk',
                     DB::raw('SUM(detail_pesanan.qty) as total_qty')
-                )
-                ->groupBy('produk.id', 'produk.nama_produk')
+                );
+            
+            if ($filter === 'bulan_ini') {
+                $query->whereMonth('pesanan.tanggal', now()->month)
+                      ->whereYear('pesanan.tanggal', now()->year);
+            } elseif ($filter === 'tahun_ini') {
+                $query->whereYear('pesanan.tanggal', now()->year);
+            }
+
+            return $query->groupBy('produk.id', 'produk.nama_produk')
                 ->orderByDesc('total_qty')
                 ->limit(5)
                 ->get()

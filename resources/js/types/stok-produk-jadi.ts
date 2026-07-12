@@ -18,7 +18,7 @@ export interface StokProdukJadi {
     produk?: Produk;
 }
 
-export interface ProdukOption {
+export interface StokProdukOption {
     id: number;
     kode_produk: string;
     nama_produk: string;
@@ -40,7 +40,7 @@ export interface StokProdukJadiIndexProps {
             active: boolean;
         }[];
     };
-    produkOptions: ProdukOption[];
+    produkOptions: StokProdukOption[];
     filters: {
         search?: string;
         produk_id?: string;
@@ -53,7 +53,7 @@ export interface StokProdukJadiIndexProps {
 }
 
 export interface StokProdukJadiCreateProps {
-    produkList: ProdukOption[];
+    produkList: StokProdukOption[];
     selectedId: number | null;
 }
 

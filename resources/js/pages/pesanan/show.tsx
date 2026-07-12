@@ -335,104 +335,116 @@ export default function PesananShow({
                 </div>
             </div>
 
-            {/* Section Riwayat Pembayaran */}
-            <div className="mx-auto w-full max-w-6xl">
-                <div className="rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border">
-                    <div className="flex items-center justify-between border-b px-6 py-4">
-                        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                            Riwayat Pembayaran
-                        </h2>
-                        {!isLocked && <PembayaranForm pesananId={item.id} />}
-                    </div>
-                    {(item.pembayarans ?? []).length > 0 ? (
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b text-muted-foreground">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Tanggal
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Jenis
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Metode
-                                    </th>
-                                    <th className="px-6 py-3 text-right font-medium">
-                                        Nominal
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Keterangan
-                                    </th>
-                                    <th className="w-12 px-6 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {(item.pembayarans ?? []).map((p) => (
-                                    <tr
-                                        key={p.id}
-                                        className="border-b last:border-0"
-                                    >
-                                        <td className="px-6 py-3">
-                                            {p.tanggal
-                                                ? new Date(
-                                                      p.tanggal,
-                                                  ).toLocaleDateString(
-                                                      'id-ID',
-                                                      {
-                                                          day: 'numeric',
-                                                          month: 'short',
-                                                          year: 'numeric',
-                                                      },
-                                                  )
-                                                : '-'}
-                                        </td>
-                                        <td className="px-6 py-3 capitalize">
-                                            <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
-                                                {p.jenis_pembayaran.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-3 text-muted-foreground">
-                                            {p.metode ?? '-'}
-                                        </td>
-                                        <td className="px-6 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400">
-                                            {new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR',
-                                                minimumFractionDigits: 0,
-                                            }).format(Number(p.nominal))}
-                                        </td>
-                                        <td className="max-w-xs truncate px-6 py-3 text-muted-foreground">
-                                            {p.keterangan ?? '-'}
-                                        </td>
-                                        <td className="px-6 py-3">
-                                            {!isLocked && (
-                                                <button
-                                                    onClick={() =>
-                                                        router.delete(
-                                                            pembayaran.destroy.url(
-                                                                p.id,
-                                                            ),
-                                                            {
-                                                                preserveScroll: true,
-                                                            },
-                                                        )
-                                                    }
-                                                    className="text-muted-foreground hover:text-destructive"
-                                                    title="Hapus pembayaran"
-                                                >
-                                                    <Trash2 className="size-4" />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (
-                        <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-                            Belum ada pembayaran yang dicatat.
+            {/* Section Form & Riwayat Pembayaran */}
+            <div className="mt-2 w-full">
+                <div className="grid gap-6 lg:grid-cols-3">
+                    {/* Form Tambah Pembayaran */}
+                    {!isLocked && (
+                        <div className="h-fit rounded-xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                            <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Tambah Pembayaran
+                            </h2>
+                            <PembayaranForm pesananId={item.id} />
                         </div>
                     )}
+
+                    {/* Tabel Riwayat Pembayaran */}
+                    <div className={`h-fit rounded-xl border border-sidebar-border/70 bg-background dark:border-sidebar-border ${isLocked ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
+                        <div className="border-b px-6 py-4">
+                            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                                Riwayat Pembayaran
+                            </h2>
+                        </div>
+                        {(item.pembayarans ?? []).length > 0 ? (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b text-muted-foreground">
+                                        <th className="px-6 py-3 text-left font-medium">
+                                            Tanggal
+                                        </th>
+                                        <th className="px-6 py-3 text-left font-medium">
+                                            Jenis
+                                        </th>
+                                        <th className="px-6 py-3 text-left font-medium">
+                                            Metode
+                                        </th>
+                                        <th className="px-6 py-3 text-right font-medium">
+                                            Nominal
+                                        </th>
+                                        <th className="px-6 py-3 text-left font-medium">
+                                            Keterangan
+                                        </th>
+                                        <th className="w-12 px-6 py-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(item.pembayarans ?? []).map((p) => (
+                                        <tr
+                                            key={p.id}
+                                            className="border-b last:border-0"
+                                        >
+                                            <td className="px-6 py-3">
+                                                {p.tanggal
+                                                    ? new Date(
+                                                          p.tanggal,
+                                                      ).toLocaleDateString(
+                                                          'id-ID',
+                                                          {
+                                                              day: 'numeric',
+                                                              month: 'short',
+                                                              year: 'numeric',
+                                                          },
+                                                      )
+                                                    : '-'}
+                                            </td>
+                                            <td className="px-6 py-3 capitalize">
+                                                <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
+                                                    {p.jenis_pembayaran.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3 text-muted-foreground">
+                                                {p.metode ?? '-'}
+                                            </td>
+                                            <td className="px-6 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400">
+                                                {new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR',
+                                                    minimumFractionDigits: 0,
+                                                }).format(Number(p.nominal))}
+                                            </td>
+                                            <td className="max-w-xs truncate px-6 py-3 text-muted-foreground">
+                                                {p.keterangan ?? '-'}
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                {!isLocked && (
+                                                    <button
+                                                        onClick={() =>
+                                                            router.delete(
+                                                                pembayaran.destroy.url(
+                                                                    p.id,
+                                                                ),
+                                                                {
+                                                                    preserveScroll: true,
+                                                                },
+                                                            )
+                                                        }
+                                                        className="text-muted-foreground hover:text-destructive"
+                                                        title="Hapus pembayaran"
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+                                Belum ada pembayaran yang dicatat.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
@@ -463,42 +475,44 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
         });
     };
 
-    return open ? (
+    return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-wrap items-end gap-2"
+            className="flex flex-col gap-4"
         >
-            <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Tanggal</label>
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Tanggal</label>
                 <input
                     type="date"
                     value={data.tanggal}
                     onChange={(e) => setData('tanggal', e.target.value)}
-                    className="h-8 rounded-md border bg-background px-2 text-sm"
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
-            <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Jenis</label>
-                <select
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Jenis Pembayaran</label>
+                <Select
                     value={data.jenis_pembayaran}
-                    onChange={(e) =>
-                        setData('jenis_pembayaran', e.target.value as any)
-                    }
-                    className="h-8 rounded-md border bg-background px-2 text-sm"
+                    onValueChange={(val: any) => setData('jenis_pembayaran', val)}
                 >
-                    <option value="">Pilih...</option>
-                    <option value="dp">DP</option>
-                    <option value="pelunasan">Pelunasan</option>
-                    <option value="termin">Termin</option>
-                </select>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih Jenis..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="dp">DP (Down Payment)</SelectItem>
+                        <SelectItem value="pelunasan">Pelunasan</SelectItem>
+                        <SelectItem value="termin">Termin</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
-            <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
                     Nominal (Rp)
                 </label>
                 <input
                     type="number"
-                    min="0.01"
+                    min="1"
+                    step="1"
                     value={data.nominal}
                     onChange={(e) =>
                         setData(
@@ -507,40 +521,46 @@ function PembayaranForm({ pesananId }: { pesananId: number }) {
                         )
                     }
                     placeholder="0"
-                    className="h-8 w-36 rounded-md border bg-background px-2 text-sm"
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
-            <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Metode</label>
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Metode Pembayaran</label>
+                <Select
+                    value={data.metode}
+                    onValueChange={(val) => setData('metode', val)}
+                >
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih Metode..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Tunai">Tunai</SelectItem>
+                        <SelectItem value="Transfer Bank">Transfer Bank</SelectItem>
+                        <SelectItem value="QRIS">QRIS</SelectItem>
+                        <SelectItem value="E-Wallet">E-Wallet</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Keterangan</label>
                 <input
                     type="text"
-                    value={data.metode}
-                    onChange={(e) => setData('metode', e.target.value)}
-                    placeholder="Transfer/Tunai..."
-                    className="h-8 w-28 rounded-md border bg-background px-2 text-sm"
+                    value={data.keterangan}
+                    onChange={(e) => setData('keterangan', e.target.value)}
+                    placeholder="Catatan tambahan (opsional)..."
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                 />
             </div>
-            <Button type="submit" size="sm" disabled={processing}>
-                {processing ? 'Menyimpan...' : 'Simpan'}
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setOpen(false)}
-            >
-                Batal
+
+            <Button type="submit" className="mt-2 w-full" disabled={processing}>
+                {processing ? 'Menyimpan...' : 'Simpan Pembayaran'}
             </Button>
             {Object.values(errors).filter(Boolean).length > 0 && (
-                <p className="w-full text-xs text-destructive">
+                <p className="w-full text-sm text-destructive mt-1">
                     {Object.values(errors)[0]}
                 </p>
             )}
         </form>
-    ) : (
-        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-            + Tambah Pembayaran
-        </Button>
     );
 }
 

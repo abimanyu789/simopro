@@ -23,7 +23,7 @@ export type {
     StokProdukJadiCreateProps,
     StokProdukJadiShowProps,
     PengirimanFormData,
-    ProdukOption as ProdukJadiOption,
+    StokProdukOption as ProdukJadiOption,
 } from './stok-produk-jadi';
 export type * from './pesanan';
 export type * from './produksi';
