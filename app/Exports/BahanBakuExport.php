@@ -9,8 +9,13 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class BahanBakuExport implements FromQuery, WithHeadings, WithMapping, WithStyles
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use App\Exports\Traits\WithExcelValidation;
+
+class BahanBakuExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithEvents
 {
+    use WithExcelValidation;
     /**
     * @return \Illuminate\Database\Eloquent\Builder
     */
@@ -52,6 +57,25 @@ class BahanBakuExport implements FromQuery, WithHeadings, WithMapping, WithStyle
     {
         return [
             1 => ['font' => ['bold' => true]],
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                // Get the count of rows (including header) to apply dynamic range.
+                // Assuming max 1000 rows for general export editability, or dynamic row count.
+                $highestRow = $event->sheet->getHighestRow();
+                $maxRow = max($highestRow, 1000); // Allow editing/adding rows up to 1000 at least.
+
+                $this->addDropdownValidation(
+                    $event->sheet->getDelegate(),
+                    'C', // Kolom Satuan
+                    ['meter', 'pasang', 'buah', 'kilogram', 'lembar'],
+                    $maxRow
+                );
+            },
         ];
     }
 }

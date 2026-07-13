@@ -149,7 +149,9 @@ class BahanBakuController extends Controller
     {
         if ($request->query('format') === 'pdf') {
             $items = BahanBaku::orderBy('kode_bahan')->get();
-            $pdf = Pdf::loadView('exports.bahan-baku', compact('items'));
+            $title = 'Laporan Data Bahan Baku';
+            $count = $items->count();
+            $pdf = Pdf::loadView('exports.bahan-baku', compact('items', 'title', 'count'));
             return $pdf->download('bahan_baku.pdf');
         }
 
