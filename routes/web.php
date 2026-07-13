@@ -21,6 +21,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Master Data - Bahan Baku
+    Route::get('bahan-baku/export', [BahanBakuController::class, 'export'])->name('bahan-baku.export');
+    Route::post('bahan-baku/import', [BahanBakuController::class, 'import'])->name('bahan-baku.import');
+    Route::get('bahan-baku/template', [BahanBakuController::class, 'template'])->name('bahan-baku.template');
     Route::resource('bahan-baku', BahanBakuController::class);
 
     // Master Data - Produk

@@ -6,6 +6,13 @@ use App\Http\Requests\BahanBakuRequest;
 use App\Models\BahanBaku;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\BahanBakuExport;
+use App\Exports\BahanBakuTemplateExport;
+use App\Imports\BahanBakuImport;
+use App\Services\BahanBakuService;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BahanBakuController extends Controller
 {
@@ -133,5 +140,62 @@ class BahanBakuController extends Controller
             ['value' => 'kilogram', 'label' => 'Kilogram (kg)'],
             ['value' => 'lembar', 'label' => 'Lembar'],
         ];
+    }
+
+    /**
+     * Export data ke Excel atau PDF.
+     */
+    public function export(Request $request)
+    {
+        if ($request->query('format') === 'pdf') {
+            $items = BahanBaku::orderBy('kode_bahan')->get();
+            $pdf = Pdf::loadView('exports.bahan-baku', compact('items'));
+            return $pdf->download('bahan_baku.pdf');
+        }
+
+        return Excel::download(new BahanBakuExport, 'bahan_baku.xlsx');
+    }
+
+    /**
+     * Download template import Excel.
+     */
+    public function template()
+    {
+        return Excel::download(new BahanBakuTemplateExport, 'template_import_bahan_baku.xlsx');
+    }
+
+    /**
+     * Import data dari Excel.
+     */
+    public function import(Request $request, BahanBakuService $service)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:2048'],
+        ], [
+            'file.required' => 'File Excel harus diunggah.',
+            'file.mimes' => 'Format file harus berupa .xlsx atau .csv.',
+            'file.max' => 'Ukuran file maksimal adalah 2MB.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $service) {
+                Excel::import(new BahanBakuImport($service), $request->file('file'));
+            });
+
+            return redirect()->back()->with('success', 'Data Bahan Baku berhasil diimport.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            
+            foreach ($failures as $failure) {
+                $row = $failure->row(); // baris ke-berapa
+                $errors = implode(', ', $failure->errors());
+                $errorMessages[] = "Baris {$row}: {$errors}";
+            }
+
+            return redirect()->back()->withErrors(['error' => 'Gagal import: ' . implode(' | ', $errorMessages)]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
     }
 }

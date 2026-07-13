@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { BahanBakuDeleteDialog } from '@/components/bahan-baku/bahan-baku-delete-dialog';
+import { ExportImportMenu } from '@/components/shared/export-import-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -129,12 +130,21 @@ export default function BahanBakuIndex({
                             Kelola data bahan baku untuk produksi
                         </p>
                     </div>
-                    <Link href={bahanBaku.create()}>
-                        <Button>
-                            <Plus className="mr-2 size-4" />
-                            Tambah Bahan Baku
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <ExportImportMenu
+                            exportExcelUrl={`${bahanBaku.export.url()}?format=excel`}
+                            exportPdfUrl={`${bahanBaku.export.url()}?format=pdf`}
+                            importUrl={bahanBaku.import.url()}
+                            templateUrl={bahanBaku.template.url()}
+                            modelName="Bahan Baku"
+                        />
+                        <Link href={bahanBaku.create()}>
+                            <Button>
+                                <Plus className="mr-2 size-4" />
+                                Tambah Bahan Baku
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Toolbar: Search + Filter */}

@@ -365,6 +365,7 @@ dari satu modul dalam satu percakapan.
 - [x] Selesai
 
 ## 13. Laporan & Export (cross-cutting)
-- [ ] Export PDF/Excel per modul (bahan baku, produk, karyawan, customer, pesanan, stok, arus kas)
+- [ ] Export PDF/Excel per modul (bahan baku, bom, produk, karyawan, customer, pesanan, stok, arus kas)
 - [ ] Halaman download laporan dengan filter periode + jenis laporan
 - [ ] Test semua jenis export
+- [ ] Import data dari Excel (bahan baku, bom, produk, karyawan, customer)
