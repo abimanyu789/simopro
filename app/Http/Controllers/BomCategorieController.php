@@ -8,6 +8,9 @@ use App\Models\BomCategorie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Exports\BomExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BomCategorieController extends Controller
 {
