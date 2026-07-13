@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { BomCategorieDeleteDialog } from '@/components/bom/bom-categorie-delete-dialog';
+import { ExportImportMenu } from '@/components/shared/export-import-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -77,12 +78,19 @@ export default function BomCategorieIndex({ bomCategories, filters }: BomCategor
                             Kelola komposisi bahan baku untuk setiap produk
                         </p>
                     </div>
-                    <Link href={bomCategorie.create()}>
-                        <Button>
-                            <Plus className="mr-2 size-4" />
-                            Tambah BOM
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <ExportImportMenu
+                            exportExcelUrl={bomCategorie.export.url() + '?format=excel'}
+                            exportPdfUrl={bomCategorie.export.url() + '?format=pdf'}
+                            modelName="BOM"
+                        />
+                        <Link href={bomCategorie.create()}>
+                            <Button>
+                                <Plus className="mr-2 size-4" />
+                                Tambah BOM
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Toolbar */}

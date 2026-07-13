@@ -6,6 +6,13 @@ use App\Http\Requests\KaryawanRequest;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\KaryawanExport;
+use App\Exports\KaryawanTemplateExport;
+use App\Imports\KaryawanImport;
+use App\Services\KaryawanService;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class KaryawanController extends Controller
 {
@@ -82,9 +89,9 @@ class KaryawanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(KaryawanRequest $request)
+    public function store(KaryawanRequest $request, KaryawanService $service)
     {
-        Karyawan::create($request->validated());
+        $service->store($request->validated());
 
         return redirect()
             ->route('karyawan.index')
@@ -141,5 +148,66 @@ class KaryawanController extends Controller
         return redirect()
             ->route('karyawan.index')
             ->with('success', 'Karyawan berhasil dihapus.');
+    }
+
+    /**
+     * Export data ke Excel atau PDF.
+     */
+    public function export(Request $request)
+    {
+        if ($request->query('format') === 'pdf') {
+            $items = Karyawan::orderBy('nama_karyawan')->get();
+            $title = 'Laporan Data Karyawan';
+            $count = $items->count();
+            $pdf = Pdf::loadView('exports.karyawan', compact('items', 'title', 'count'));
+            return $pdf->download('karyawan.pdf');
+        }
+
+        return Excel::download(new KaryawanExport, 'karyawan.xlsx');
+    }
+
+    /**
+     * Download template import Excel.
+     */
+    public function template()
+    {
+        return Excel::download(new KaryawanTemplateExport, 'template_import_karyawan.xlsx');
+    }
+
+    /**
+     * Import data dari Excel.
+     */
+    public function import(Request $request, KaryawanService $service)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:2048'],
+        ], [
+            'file.required' => 'File Excel harus diunggah.',
+            'file.mimes' => 'Format file harus berupa .xlsx atau .csv.',
+            'file.max' => 'Ukuran file maksimal adalah 2MB.',
+        ]);
+
+        try {
+            $import = new KaryawanImport($service);
+            DB::transaction(function () use ($request, $import) {
+                Excel::import($import, $request->file('file'));
+            });
+
+            $added = $import->getAddedCount();
+            return redirect()->back()->with('success', "Import berhasil. Data berhasil diproses: {$added} data berhasil ditambahkan, 0 data dilewati, 0 data gagal.");
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                $errors = implode(', ', $failure->errors());
+                $errorMessages[] = "Baris {$row}: {$errors}";
+            }
+
+            return redirect()->back()->withErrors(['error' => 'Import gagal. ' . implode(' | ', $errorMessages)]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
     }
 }

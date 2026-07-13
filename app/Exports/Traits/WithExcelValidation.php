@@ -16,6 +16,8 @@ trait WithExcelValidation
      * @param int $maxRow The maximum row to apply the validation to. Default 1000.
      * @param string $errorTitle The title of the error alert.
      * @param string $errorMsg The message of the error alert.
+     * @param bool $useHiddenSheet Whether to use a hidden sheet for validation (recommended for large lists).
+     * @param string $hiddenSheetName Name of the hidden sheet (e.g., 'ValidationData_Customer').
      */
     protected function addDropdownValidation(
         Worksheet $sheet,
@@ -23,20 +25,14 @@ trait WithExcelValidation
         $options,
         int $maxRow = 1000,
         string $errorTitle = 'Input Tidak Valid',
-        string $errorMsg = 'Silakan pilih nilai dari daftar dropdown yang tersedia.'
+        string $errorMsg = 'Silakan pilih nilai dari daftar dropdown yang tersedia.',
+        bool $useHiddenSheet = false,
+        string $hiddenSheetName = 'ValidationOptions'
     ): void {
         if ($options instanceof \Illuminate\Support\Collection) {
             $options = $options->toArray();
         }
-        // Validation length limit in Excel is ~255 characters for comma-separated list.
-        // For larger lists, we usually map to a hidden sheet, but for enum/master data,
-        // if it exceeds 255 chars, it should be done via named ranges. 
-        // For this trait, we handle the simple comma-separated list first.
-        $optionsList = implode(',', $options);
 
-        // Optional: If options list is too long, it might fail in raw format,
-        // but for standard enums like 'meter,kilogram,lembar,buah,pasang' it works perfectly.
-        
         $validation = $sheet->getCell($columnLetter . '2')->getDataValidation();
         $validation->setType(DataValidation::TYPE_LIST);
         $validation->setErrorStyle(DataValidation::STYLE_STOP);
@@ -46,7 +42,34 @@ trait WithExcelValidation
         $validation->setShowDropDown(true);
         $validation->setErrorTitle($errorTitle);
         $validation->setError($errorMsg);
-        $validation->setFormula1('"' . $optionsList . '"');
+
+        if ($useHiddenSheet) {
+            $spreadsheet = $sheet->getParent();
+            $hiddenSheet = $spreadsheet->getSheetByName($hiddenSheetName);
+            
+            if (!$hiddenSheet) {
+                $hiddenSheet = new Worksheet($spreadsheet, $hiddenSheetName);
+                $spreadsheet->addSheet($hiddenSheet);
+                $hiddenSheet->setSheetState(Worksheet::SHEETSTATE_HIDDEN);
+            }
+
+            // Find an empty column in the hidden sheet
+            $colIndex = 1;
+            while ($hiddenSheet->getCellByColumnAndRow($colIndex, 1)->getValue() !== null) {
+                $colIndex++;
+            }
+
+            foreach ($options as $index => $option) {
+                $hiddenSheet->setCellValueByColumnAndRow($colIndex, $index + 1, $option);
+            }
+
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $formula = "'" . $hiddenSheetName . "'!\$" . $colLetter . "\$1:\$" . $colLetter . "\$" . count($options);
+            $validation->setFormula1($formula);
+        } else {
+            $optionsList = implode(',', $options);
+            $validation->setFormula1('"' . $optionsList . '"');
+        }
 
         $sheet->setDataValidation("{$columnLetter}2:{$columnLetter}{$maxRow}", clone $validation);
     }

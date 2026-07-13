@@ -7,6 +7,13 @@ use App\Models\BomCategorie;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\ProdukExport;
+use App\Exports\ProdukTemplateExport;
+use App\Imports\ProdukImport;
+use App\Services\ProdukService;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProdukController extends Controller
 {
@@ -71,9 +78,9 @@ class ProdukController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProdukRequest $request)
+    public function store(ProdukRequest $request, ProdukService $service)
     {
-        Produk::create($request->validated());
+        $service->store($request->validated());
 
         return redirect()
             ->route('produk.index')
@@ -137,5 +144,66 @@ class ProdukController extends Controller
         return redirect()
             ->route('produk.index')
             ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    /**
+     * Export data ke Excel atau PDF.
+     */
+    public function export(Request $request)
+    {
+        if ($request->query('format') === 'pdf') {
+            $items = Produk::orderBy('kode_produk')->get();
+            $title = 'Laporan Data Produk';
+            $count = $items->count();
+            $pdf = Pdf::loadView('exports.produk', compact('items', 'title', 'count'));
+            return $pdf->download('produk.pdf');
+        }
+
+        return Excel::download(new ProdukExport, 'produk.xlsx');
+    }
+
+    /**
+     * Download template import Excel.
+     */
+    public function template()
+    {
+        return Excel::download(new ProdukTemplateExport, 'template_import_produk.xlsx');
+    }
+
+    /**
+     * Import data dari Excel.
+     */
+    public function import(Request $request, ProdukService $service)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:2048'],
+        ], [
+            'file.required' => 'File Excel harus diunggah.',
+            'file.mimes' => 'Format file harus berupa .xlsx atau .csv.',
+            'file.max' => 'Ukuran file maksimal adalah 2MB.',
+        ]);
+
+        try {
+            $import = new ProdukImport($service);
+            DB::transaction(function () use ($request, $import) {
+                Excel::import($import, $request->file('file'));
+            });
+
+            $added = $import->getAddedCount();
+            return redirect()->back()->with('success', "Import berhasil. Data berhasil diproses: {$added} data berhasil ditambahkan, 0 data dilewati, 0 data gagal.");
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                $errors = implode(', ', $failure->errors());
+                $errorMessages[] = "Baris {$row}: {$errors}";
+            }
+
+            return redirect()->back()->withErrors(['error' => 'Import gagal. ' . implode(' | ', $errorMessages)]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
     }
 }

@@ -154,4 +154,20 @@ class BomCategorieController extends Controller
             ->route('bom-categorie.index')
             ->with('success', 'BOM berhasil dihapus.');
     }
+
+    /**
+     * Export data ke Excel atau PDF.
+     */
+    public function export(Request $request)
+    {
+        if ($request->query('format') === 'pdf') {
+            $items = BomCategorie::with('produk')->orderBy('nama_bom')->get();
+            $title = 'Laporan Data Bill of Materials (BOM)';
+            $count = $items->count();
+            $pdf = Pdf::loadView('exports.bom', compact('items', 'title', 'count'));
+            return $pdf->download('bom.pdf');
+        }
+
+        return Excel::download(new BomExport, 'bom.xlsx');
+    }
 }

@@ -27,15 +27,25 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('bahan-baku', BahanBakuController::class);
 
     // Master Data - Produk
+    Route::get('produk/export', [ProdukController::class, 'export'])->name('produk.export');
+    Route::post('produk/import', [ProdukController::class, 'import'])->name('produk.import');
+    Route::get('produk/template', [ProdukController::class, 'template'])->name('produk.template');
     Route::resource('produk', ProdukController::class);
 
     // Master Data - Karyawan
+    Route::get('karyawan/export', [KaryawanController::class, 'export'])->name('karyawan.export');
+    Route::post('karyawan/import', [KaryawanController::class, 'import'])->name('karyawan.import');
+    Route::get('karyawan/template', [KaryawanController::class, 'template'])->name('karyawan.template');
     Route::resource('karyawan', KaryawanController::class);
 
     // Master Data - Customer
+    Route::get('customer/export', [CustomerController::class, 'export'])->name('customer.export');
+    Route::post('customer/import', [CustomerController::class, 'import'])->name('customer.import');
+    Route::get('customer/template', [CustomerController::class, 'template'])->name('customer.template');
     Route::resource('customer', CustomerController::class);
 
     // BOM Category
+    Route::get('bom-categorie/export', [BomCategorieController::class, 'export'])->name('bom-categorie.export');
     Route::resource('bom-categorie', BomCategorieController::class);
 
     // BOM Detail (inline operations — no separate pages)

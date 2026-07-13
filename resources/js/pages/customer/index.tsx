@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } fro
 import { useState } from 'react';
 import { CustomerBadge } from '@/components/customer/customer-badge';
 import { CustomerDeleteDialog } from '@/components/customer/customer-delete-dialog';
+import { ExportImportMenu } from '@/components/shared/export-import-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -93,12 +94,21 @@ export default function CustomerIndex({ customers, filters }: CustomerIndexProps
                             Kelola data customer Provillo
                         </p>
                     </div>
-                    <Link href={customer.create.url()}>
-                        <Button>
-                            <Plus className="mr-2 size-4" />
-                            Tambah Customer
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <ExportImportMenu
+                            exportExcelUrl={customer.export.url() + '?format=excel'}
+                            exportPdfUrl={customer.export.url() + '?format=pdf'}
+                            templateUrl={customer.template.url()}
+                            importUrl={customer.import.url()}
+                            modelName="Customer"
+                        />
+                        <Link href={customer.create.url()}>
+                            <Button>
+                                <Plus className="mr-2 size-4" />
+                                Tambah Customer
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Toolbar: Search + Filter Jenis */}

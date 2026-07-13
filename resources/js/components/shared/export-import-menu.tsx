@@ -24,8 +24,8 @@ import { toast } from 'sonner';
 interface ExportImportMenuProps {
     exportExcelUrl: string;
     exportPdfUrl: string;
-    importUrl: string;
-    templateUrl: string;
+    importUrl?: string;
+    templateUrl?: string;
     modelName: string;
 }
 
@@ -53,7 +53,7 @@ export function ExportImportMenu({
     };
 
     const handleDownloadTemplate = () => {
-        window.location.href = templateUrl;
+        if (templateUrl) window.location.href = templateUrl;
     };
 
     const handleImportSubmit = (e: React.FormEvent) => {
@@ -63,6 +63,8 @@ export function ExportImportMenu({
             toast.error('Pilih file Excel terlebih dahulu.');
             return;
         }
+
+        if (!importUrl) return;
 
         post(importUrl, {
             preserveScroll: true,
@@ -96,15 +98,21 @@ export function ExportImportMenu({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={handleDownloadTemplate}>
-                        <Download className="mr-2 h-4 w-4" />
-                        <span>Download Template</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setImportModalOpen(true)}>
-                        <FileUp className="mr-2 h-4 w-4" />
-                        <span>Import dari Excel</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    {templateUrl && (
+                        <DropdownMenuItem onClick={handleDownloadTemplate}>
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>Download Template</span>
+                        </DropdownMenuItem>
+                    )}
+                    {importUrl && (
+                        <>
+                            <DropdownMenuItem onClick={() => setImportModalOpen(true)}>
+                                <FileUp className="mr-2 h-4 w-4" />
+                                <span>Import dari Excel</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                        </>
+                    )}
                     <DropdownMenuItem onClick={handleExportExcel}>
                         <FileDown className="mr-2 h-4 w-4" />
                         <span>Export ke Excel</span>
@@ -116,7 +124,8 @@ export function ExportImportMenu({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
+            {importUrl && (
+                <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
                 <DialogContent>
                     <form onSubmit={handleImportSubmit}>
                         <DialogHeader>
@@ -163,6 +172,7 @@ export function ExportImportMenu({
                     </form>
                 </DialogContent>
             </Dialog>
+            )}
         </>
     );
 }

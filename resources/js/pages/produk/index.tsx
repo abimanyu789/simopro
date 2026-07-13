@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ProdukDeleteDialog } from '@/components/produk/produk-delete-dialog';
+import { ExportImportMenu } from '@/components/shared/export-import-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -131,6 +132,13 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                         </p>
                     </div>
                     <div className="flex gap-2">
+                        <ExportImportMenu
+                            exportExcelUrl={produk.export.url() + '?format=excel'}
+                            exportPdfUrl={produk.export.url() + '?format=pdf'}
+                            templateUrl={produk.template.url()}
+                            importUrl={produk.import.url()}
+                            modelName="Produk"
+                        />
                         <Link href={bomCategorie.index()}>
                             <Button variant="outline">
                                 <ClipboardList className="mr-2 size-4" />

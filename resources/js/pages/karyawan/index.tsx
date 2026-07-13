@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, Search } fro
 import { useState } from 'react';
 import { KaryawanBadge } from '@/components/karyawan/karyawan-badge';
 import { KaryawanDeleteDialog } from '@/components/karyawan/karyawan-delete-dialog';
+import { ExportImportMenu } from '@/components/shared/export-import-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -116,12 +117,21 @@ export default function KaryawanIndex({
                             Kelola data karyawan Provillo
                         </p>
                     </div>
-                    <Link href={karyawan.create.url()}>
-                        <Button>
-                            <Plus className="mr-2 size-4" />
-                            Tambah Karyawan
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <ExportImportMenu
+                            exportExcelUrl={karyawan.export.url() + '?format=excel'}
+                            exportPdfUrl={karyawan.export.url() + '?format=pdf'}
+                            templateUrl={karyawan.template.url()}
+                            importUrl={karyawan.import.url()}
+                            modelName="Karyawan"
+                        />
+                        <Link href={karyawan.create.url()}>
+                            <Button>
+                                <Plus className="mr-2 size-4" />
+                                Tambah Karyawan
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Toolbar: Search + Filter */}
