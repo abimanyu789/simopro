@@ -164,7 +164,7 @@ class BomCategorieController extends Controller
     public function export(Request $request)
     {
         if ($request->query('format') === 'pdf') {
-            $items = BomCategorie::with('produk')->orderBy('nama_bom')->get();
+            $items = BomCategorie::with(['produk', 'bomDetails.bahanBaku'])->orderBy('nama_bom')->get();
             $title = 'Laporan Data Bill of Materials (BOM)';
             $count = $items->count();
             $pdf = Pdf::loadView('exports.bom', compact('items', 'title', 'count'));
