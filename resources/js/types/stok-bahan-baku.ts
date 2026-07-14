@@ -61,9 +61,13 @@ export interface StokBahanBakuShowProps {
     transaksi: StokBahanBaku;
 }
 
-export interface RestockFormData {
+export interface RestockItemRow {
     bahan_baku_id: number | '';
-    jenis_transaksi: 'restock' | 'penyesuaian';
     qty: number | '';
     keterangan: string;
+}
+
+export interface RestockFormData {
+    jenis_transaksi: 'restock' | 'penyesuaian';
+    items: RestockItemRow[];
 }

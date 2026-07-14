@@ -128,7 +128,7 @@ export default function KaryawanIndex({
                         <Link href={karyawan.create.url()}>
                             <Button>
                                 <Plus className="mr-2 size-4" />
-                                Tambah Karyawan
+                                Tambah Data
                             </Button>
                         </Link>
                     </div>

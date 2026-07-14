@@ -14,6 +14,7 @@ export type {
     StokBahanBakuCreateProps,
     StokBahanBakuShowProps,
     RestockFormData,
+    RestockItemRow,
     BahanBakuOption as BahanBakuStokOption,
 } from './stok-bahan-baku';
 export type {
@@ -23,6 +24,7 @@ export type {
     StokProdukJadiCreateProps,
     StokProdukJadiShowProps,
     PengirimanFormData,
+    PengirimanItemRow,
     StokProdukOption as ProdukJadiOption,
 } from './stok-produk-jadi';
 export type * from './pesanan';

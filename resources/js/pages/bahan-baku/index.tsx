@@ -141,7 +141,7 @@ export default function BahanBakuIndex({
                         <Link href={bahanBaku.create()}>
                             <Button>
                                 <Plus className="mr-2 size-4" />
-                                Tambah Bahan Baku
+                                Tambah Data
                             </Button>
                         </Link>
                     </div>

@@ -7,6 +7,7 @@ use App\Models\BahanBaku;
 use App\Models\StokBahanBaku;
 use App\Services\Inventory\StockBahanBakuService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class StokBahanBakuController extends Controller
@@ -25,8 +26,8 @@ class StokBahanBakuController extends Controller
         $jenisTranaksi = $request->input('jenis_transaksi');
         $tanggalDari   = $request->input('tanggal_dari');
         $tanggalSampai = $request->input('tanggal_sampai');
-        $sortBy       = $request->input('sort_by', 'created_at');
-        $sortDir      = $request->input('sort_dir', 'desc');
+        $sortBy        = $request->input('sort_by', 'created_at');
+        $sortDir       = $request->input('sort_dir', 'desc');
 
         $allowedSorts = ['created_at', 'qty', 'stok_sebelum', 'stok_sesudah', 'jenis_transaksi'];
         if (!in_array($sortBy, $allowedSorts)) {
@@ -57,34 +58,33 @@ class StokBahanBakuController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        // Daftar bahan baku untuk filter dropdown
         $bahanBakuOptions = BahanBaku::orderBy('nama_bahan')
             ->get(['id', 'kode_bahan', 'nama_bahan']);
 
         return Inertia::render('stok-bahan-baku/index', [
-            'riwayat'         => $riwayat,
+            'riwayat'          => $riwayat,
             'bahanBakuOptions' => $bahanBakuOptions,
-            'filters'         => [
-                'search'         => $search,
-                'bahan_baku_id'  => $bahanBakuId,
+            'filters'          => [
+                'search'          => $search,
+                'bahan_baku_id'   => $bahanBakuId,
                 'jenis_transaksi' => $jenisTranaksi,
-                'tanggal_dari'   => $tanggalDari,
-                'tanggal_sampai' => $tanggalSampai,
-                'sort_by'        => $sortBy,
-                'sort_dir'       => $sortDir,
+                'tanggal_dari'    => $tanggalDari,
+                'tanggal_sampai'  => $tanggalSampai,
+                'sort_by'         => $sortBy,
+                'sort_dir'        => $sortDir,
             ],
         ]);
     }
 
     /**
-     * Form tambah restock bahan baku.
+     * Form tambah transaksi stok bahan baku (multi-item).
      */
     public function create(Request $request)
     {
         $bahanBakuList = BahanBaku::orderBy('nama_bahan')
             ->get(['id', 'kode_bahan', 'nama_bahan', 'satuan', 'stok']);
 
-        // Jika ada query param bahan_baku_id, pre-select bahan baku
+        // Pre-select jika ada query param (deep link dari halaman lain)
         $selectedId = $request->input('bahan_baku_id');
 
         return Inertia::render('stok-bahan-baku/create', [
@@ -94,41 +94,50 @@ class StokBahanBakuController extends Controller
     }
 
     /**
-     * Proses transaksi stok bahan baku — routing ke addStock/reduceStock berdasarkan jenis & sign qty.
+     * Proses transaksi stok bahan baku multi-item.
+     * Semua item diproses dalam satu DB::transaction() — jika satu gagal, semua di-rollback.
      */
     public function store(TransaksiBahanBakuRequest $request)
     {
-        $bahanBaku = BahanBaku::findOrFail($request->validated('bahan_baku_id'));
-        $jenis     = $request->validated('jenis_transaksi');
-        $qty       = (float) $request->validated('qty');
-        $keterangan = $request->validated('keterangan');
+        $jenis = $request->validated('jenis_transaksi');
+        $items = $request->validated('items');
 
         try {
-            // Restock selalu tambah. Penyesuaian bisa + atau − tergantung sign qty.
-            if ($jenis === 'restock' || $qty > 0) {
-                $this->service->addStock(
-                    bahanBaku:  $bahanBaku,
-                    qty:        abs($qty),
-                    jenis:      $jenis,
-                    keterangan: $keterangan,
-                );
-            } else {
-                $this->service->reduceStock(
-                    bahanBaku:  $bahanBaku,
-                    qty:        abs($qty),
-                    jenis:      $jenis,
-                    keterangan: $keterangan,
-                );
-            }
+            DB::transaction(function () use ($jenis, $items) {
+                foreach ($items as $item) {
+                    $bahanBaku  = BahanBaku::findOrFail($item['bahan_baku_id']);
+                    $qty        = (float) $item['qty'];
+                    $keterangan = $item['keterangan'] ?? null;
+
+                    // Restock selalu tambah. Penyesuaian bisa + atau − tergantung sign qty.
+                    if ($jenis === 'restock' || $qty > 0) {
+                        $this->service->addStock(
+                            bahanBaku:  $bahanBaku,
+                            qty:        abs($qty),
+                            jenis:      $jenis,
+                            keterangan: $keterangan,
+                        );
+                    } else {
+                        $this->service->reduceStock(
+                            bahanBaku:  $bahanBaku,
+                            qty:        abs($qty),
+                            jenis:      $jenis,
+                            keterangan: $keterangan,
+                        );
+                    }
+                }
+            });
         } catch (\RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        $label = $jenis === 'restock' ? 'Restock' : 'Penyesuaian stok';
+        $label     = $jenis === 'restock' ? 'Restock' : 'Penyesuaian stok';
+        $itemCount = count($items);
+        $suffix    = $itemCount > 1 ? " ({$itemCount} item)" : '';
 
         return redirect()
             ->route('stok-bahan-baku.index')
-            ->with('success', "{$label} {$bahanBaku->nama_bahan} berhasil dicatat.");
+            ->with('success', "{$label} berhasil dicatat{$suffix}.");
     }
 
     /**

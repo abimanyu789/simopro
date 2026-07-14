@@ -196,7 +196,7 @@ export default function StokBahanBakuIndex({
                     <Link href={stokBahanBaku.create.url()}>
                         <Button>
                             <Plus className="mr-2 size-4" />
-                            Restock
+                            Tambah Data
                         </Button>
                     </Link>
                 </div>

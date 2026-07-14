@@ -105,7 +105,7 @@ export default function CustomerIndex({ customers, filters }: CustomerIndexProps
                         <Link href={customer.create.url()}>
                             <Button>
                                 <Plus className="mr-2 size-4" />
-                                Tambah Customer
+                                Tambah Data
                             </Button>
                         </Link>
                     </div>

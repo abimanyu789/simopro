@@ -61,9 +61,13 @@ export interface StokProdukJadiShowProps {
     transaksi: StokProdukJadi;
 }
 
-export interface PengirimanFormData {
+export interface PengirimanItemRow {
     produk_id: number | '';
-    jenis_transaksi: 'pengiriman' | 'penyesuaian';
     qty: number | '';
     keterangan: string;
+}
+
+export interface PengirimanFormData {
+    jenis_transaksi: 'pengiriman' | 'penyesuaian';
+    items: PengirimanItemRow[];
 }

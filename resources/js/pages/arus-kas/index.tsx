@@ -84,7 +84,7 @@ export default function ArusKasIndex({ transaksis, ringkasan, saldoTotal, filter
                     <Link href={arusKas.create.url()}>
                         <Button>
                             <Plus className="mr-2 size-4" />
-                            Tambah Transaksi
+                            Tambah Data
                         </Button>
                     </Link>
                 </div>

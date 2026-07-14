@@ -148,7 +148,7 @@ export default function ProdukIndex({ produks, filters }: ProdukIndexProps) {
                         <Link href={produk.create()}>
                             <Button>
                                 <Plus className="mr-2 size-4" />
-                                Tambah Produk
+                                Tambah Data
                             </Button>
                         </Link>
                     </div>
