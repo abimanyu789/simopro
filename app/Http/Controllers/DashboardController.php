@@ -367,27 +367,32 @@ class DashboardController extends Controller
 
     private function getTopEmployees(): array
     {
-        if (! Schema::hasTable('detail_produksi') || ! Schema::hasTable('karyawan')) {
+        if (! Schema::hasTable('produksi_karyawan') || ! Schema::hasTable('karyawan') || ! Schema::hasTable('produksi')) {
             return [];
         }
 
         try {
-            return DB::table('detail_produksi')
-                ->join('karyawan', 'detail_produksi.karyawan_id', '=', 'karyawan.id')
+            // Karyawan terlibat produksi dicatat di produksi_karyawan.
+            // Output per produksi diambil dari produksi.qty_selesai (total unit selesai per batch produksi).
+            return DB::table('produksi_karyawan')
+                ->join('karyawan', 'produksi_karyawan.karyawan_id', '=', 'karyawan.id')
+                ->join('produksi', 'produksi_karyawan.produksi_id', '=', 'produksi.id')
                 ->select(
+                    'karyawan.id',
                     'karyawan.nama_karyawan',
                     'karyawan.jabatan',
-                    DB::raw('SUM(detail_produksi.qty_selesai) as total_output')
+                    DB::raw('SUM(produksi.qty_selesai) as total_output')
                 )
                 ->where('karyawan.status', 'aktif')
+                ->where('produksi.status', 'selesai')
                 ->groupBy('karyawan.id', 'karyawan.nama_karyawan', 'karyawan.jabatan')
                 ->orderByDesc('total_output')
                 ->limit(3)
                 ->get()
                 ->map(fn ($item) => [
                     'nama_karyawan' => $item->nama_karyawan,
-                    'jabatan' => $item->jabatan ?? 'Karyawan',
-                    'total_output' => (int) $item->total_output,
+                    'jabatan'       => $item->jabatan ?? 'Karyawan',
+                    'total_output'  => (int) $item->total_output,
                 ])
                 ->toArray();
         } catch (\Exception $e) {
