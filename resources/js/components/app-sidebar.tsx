@@ -3,6 +3,7 @@ import {
     Box,
     Database,
     DollarSign,
+    FileBarChart2,
     LayoutGrid,
     ShoppingCart,
     Wrench,
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import arusKasRoute from '@/routes/arus-kas';
+import ReportController from '@/actions/App/Http/Controllers/ReportController';
 import bahanBaku from '@/routes/bahan-baku';
 import bomCategorie from '@/routes/bom-categorie';
 import customer from '@/routes/customer';
@@ -94,6 +96,11 @@ const mainNavItems: NavItem[] = [
         title: 'Arus Kas',
         href: arusKasRoute.index.url(),
         icon: DollarSign,
+    },
+    {
+        title: 'Pusat Laporan',
+        href: ReportController.index.url(),
+        icon: FileBarChart2,
     },
 ];
 

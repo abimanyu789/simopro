@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowDownRight,
     DollarSign,
@@ -115,9 +115,10 @@ export default function Dashboard({
                                 <SelectItem value="range">Range Tanggal</SelectItem>
                             </SelectContent>
                         </Select>
-                        <button className="hidden sm:block rounded-md border border-sidebar-border/70 bg-background px-4 py-1.5 text-sm font-medium hover:bg-accent">
-                            Download Report
-                        </button>
+                        <Link href="/laporan" className="hidden sm:flex items-center gap-2 rounded-md border border-sidebar-border/70 bg-background px-4 py-1.5 text-sm font-medium hover:bg-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                            Pusat Laporan
+                        </Link>
                     </div>
                 </div>
 

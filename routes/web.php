@@ -11,6 +11,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProduksiController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StokBahanBakuController;
 use App\Http\Controllers\StokProdukJadiController;
 use Illuminate\Support\Facades\Route;
@@ -100,6 +101,14 @@ Route::middleware(['auth'])->group(function () {
     // Arus Kas
     Route::resource('arus-kas', ArusKasController::class)
         ->parameters(['arus-kas' => 'arusKas']);
+
+    // Pusat Laporan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/',        [ReportController::class, 'index'])->name('index');
+        Route::get('types',    [ReportController::class, 'types'])->name('types');
+        Route::post('preview', [ReportController::class, 'preview'])->name('preview');
+        Route::get('export',   [ReportController::class, 'export'])->name('export');
+    });
 });
 
 require __DIR__.'/settings.php';
