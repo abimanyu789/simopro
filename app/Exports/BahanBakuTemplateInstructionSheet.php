@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\BahanBaku;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -18,7 +19,7 @@ class BahanBakuTemplateInstructionSheet implements FromArray, WithTitle, WithCol
             ['KOLOM', 'WAJIB', 'KETERANGAN'],
             ['Kode Bahan', 'Ya', 'Kode unik untuk bahan baku. Maksimal 50 karakter. Pastikan belum terdaftar.'],
             ['Nama Bahan', 'Ya', 'Nama lengkap bahan baku. Maksimal 255 karakter.'],
-            ['Satuan', 'Ya', 'Satuan ukur (misal: meter, pcs, kg, dll). Maksimal 50 karakter.'],
+            ['Satuan', 'Ya', 'Satuan ukur yang tersedia: ' . implode(', ', BahanBaku::SATUAN_OPTIONS) . '. Pilih dari dropdown di kolom C.'],
             ['Minimum Stok', 'Ya', 'Batas angka minimal stok untuk notifikasi. Harus berupa angka bulat (integer). Minimal 0.'],
             [''],
             ['CATATAN PENTING:'],

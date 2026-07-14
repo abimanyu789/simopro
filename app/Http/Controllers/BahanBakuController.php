@@ -133,13 +133,10 @@ class BahanBakuController extends Controller
      */
     private function getSatuanOptions(): array
     {
-        return [
-            ['value' => 'meter', 'label' => 'Meter (m)'],
-            ['value' => 'pasang', 'label' => 'Pasang'],
-            ['value' => 'buah', 'label' => 'Buah (pcs)'],
-            ['value' => 'kilogram', 'label' => 'Kilogram (kg)'],
-            ['value' => 'lembar', 'label' => 'Lembar'],
-        ];
+        return array_map(
+            fn(string $satuan) => ['value' => $satuan, 'label' => ucfirst($satuan)],
+            BahanBaku::SATUAN_OPTIONS
+        );
     }
 
     /**

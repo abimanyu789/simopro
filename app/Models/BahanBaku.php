@@ -8,6 +8,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BahanBaku extends Model
 {
     /**
+     * Daftar satuan yang valid — single source of truth untuk seluruh sistem.
+     * Digunakan oleh: FormRequest, Import, Export, Template, dan Controller.
+     */
+    public const SATUAN_OPTIONS = [
+        'meter',
+        'lembar',
+        'buah',
+        'pasang',
+        'pack',
+        'liter',
+        'cone',
+        'kodi',
+        'roll',
+        'pcs',
+        'gram',
+        'kilogram',
+        'lusin',
+    ];
+    /**
      * The table associated with the model.
      *
      * @var string

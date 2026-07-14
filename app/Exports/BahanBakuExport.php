@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\BahanBaku;
+use App\Exports\Traits\WithExcelValidation;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -11,7 +12,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
-use App\Exports\Traits\WithExcelValidation;
 
 class BahanBakuExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithEvents
 {
@@ -72,7 +72,7 @@ class BahanBakuExport implements FromQuery, WithHeadings, WithMapping, WithStyle
                 $this->addDropdownValidation(
                     $event->sheet->getDelegate(),
                     'C', // Kolom Satuan
-                    ['meter', 'pasang', 'buah', 'kilogram', 'lembar'],
+                    BahanBaku::SATUAN_OPTIONS,
                     $maxRow
                 );
             },

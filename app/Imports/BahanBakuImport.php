@@ -2,16 +2,31 @@
 
 namespace App\Imports;
 
+use App\Models\BahanBaku;
 use App\Services\BahanBakuService;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Validation\Rule;
+use App\Imports\Traits\WithStringNormalization;
 
-class BahanBakuImport implements ToCollection, WithHeadingRow, WithValidation, WithChunkReading
+class BahanBakuImport implements ToCollection, WithHeadingRow, WithValidation, WithChunkReading, SkipsEmptyRows
 {
+    use WithStringNormalization;
+
+    protected array $stringFields = [
+        'kode_bahan',
+        'nama_bahan',
+    ];
+
+    // Dinormalisasi ke lowercase sebelum validasi agar "Meter", "METER" → "meter"
+    protected array $lowercaseFields = [
+        'satuan',
+    ];
+
     protected $bahanBakuService;
 
     public function __construct(BahanBakuService $bahanBakuService)
@@ -26,14 +41,12 @@ class BahanBakuImport implements ToCollection, WithHeadingRow, WithValidation, W
     {
         foreach ($rows as $row) {
             $data = [
-                'kode_bahan' => $row['kode_bahan'],
-                'nama_bahan' => $row['nama_bahan'],
-                'satuan' => $row['satuan'],
+                'kode_bahan'   => $row['kode_bahan'],
+                'nama_bahan'   => $row['nama_bahan'],
+                'satuan'       => $row['satuan'],
                 'minimum_stok' => $row['minimum_stok'],
             ];
 
-            // Panggil service untuk menyimpan. 
-            // Karena ini insert only, kita menggunakan store.
             $this->bahanBakuService->store($data);
         }
     }
@@ -41,9 +54,9 @@ class BahanBakuImport implements ToCollection, WithHeadingRow, WithValidation, W
     public function rules(): array
     {
         return [
-            'kode_bahan' => ['required', 'string', 'max:50', Rule::unique('bahan_baku', 'kode_bahan')],
-            'nama_bahan' => ['required', 'string', 'max:255'],
-            'satuan' => ['required', 'string', 'max:50'],
+            'kode_bahan'   => ['required', 'string', 'max:50', Rule::unique('bahan_baku', 'kode_bahan')],
+            'nama_bahan'   => ['required', 'string', 'max:255'],
+            'satuan'       => ['required', 'string', Rule::in(BahanBaku::SATUAN_OPTIONS)],
             'minimum_stok' => ['required', 'integer', 'min:0'],
         ];
     }
