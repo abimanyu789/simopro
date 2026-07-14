@@ -1,5 +1,5 @@
 import { Head, useHttp } from '@inertiajs/react';
-import { FileBarChart2, FileDown, FileSpreadsheet, Printer } from 'lucide-react';
+import { FileBarChart2, FileDown, FileSpreadsheet } from 'lucide-react';
 import { useState } from 'react';
 import { ReportFilter } from '@/components/report-center/ReportFilter';
 import { ReportPreview } from '@/components/report-center/ReportPreview';
@@ -96,15 +96,7 @@ export default function LaporanIndex({ reportTypes }: Props) {
                                     Export Excel
                                 </a>
                             </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => window.print()}
-                                className="flex items-center gap-2"
-                            >
-                                <Printer className="h-4 w-4" />
-                                Cetak
-                            </Button>
+
                         </div>
                     )}
                 </div>

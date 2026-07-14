@@ -9,8 +9,6 @@ use App\Reports\ReportRegistry;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -52,7 +50,7 @@ class ReportController extends Controller
     /**
      * Export ke PDF atau Excel dan kembalikan sebagai download.
      */
-    public function export(ReportExportRequest $request): BinaryFileResponse|StreamedResponse
+    public function export(ReportExportRequest $request): \Symfony\Component\HttpFoundation\Response
     {
         $report  = ReportRegistry::resolve($request->input('type'));
         $filters = $request->filters();
