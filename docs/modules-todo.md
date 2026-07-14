@@ -364,8 +364,57 @@ dari satu modul dalam satu percakapan.
 - **File:** `resources/js/pages/stok-bahan-baku/create.tsx`
 - [x] Selesai
 
-## 13. Laporan & Export (cross-cutting)
-- [ ] Export PDF/Excel per modul (bahan baku, bom, produk, karyawan, customer, pesanan, stok, arus kas)
-- [ ] Halaman download laporan dengan filter periode + jenis laporan
-- [ ] Test semua jenis export
-- [ ] Import data dari Excel (bahan baku, bom, produk, karyawan, customer)
+## 13. Pusat Laporan (Report Center) ✅ SELESAI (commit b892982, 0f65351)
+
+### Backend — Report Architecture
+- [x] Interface `app/Reports/Contracts/ReportInterface.php` (preview/export/count/summary/headings/title/bladeView/filename)
+- [x] Abstract class `app/Reports/BaseReport.php` (shared logic: parseDateFilters, formatRupiah, default preview/count dari export)
+- [x] Registry `app/Reports/ReportRegistry.php` (slug → class resolver, `all()` untuk populate Select)
+- [x] 10 Report classes:
+      - `PesananReport` — filter tanggal, summary 5 cards (total, nilai, selesai, pending, dibatalkan)
+      - `ProduksiReport` — filter deadline, summary 5 cards (total, selesai, proses, draft, unit jadi)
+      - `ArusKasReport` — filter tanggal, summary saldo (pemasukan, pengeluaran, saldo)
+      - `StokBahanBakuReport` — filter tanggal created_at, summary masuk/keluar
+      - `StokProdukJadiReport` — filter tanggal created_at, summary masuk/keluar
+      - `BahanBakuReport` — master data, summary stok normal/kritis
+      - `ProdukReport` — master data dengan harga & stok, summary stok kosong
+      - `CustomerReport` — master data dengan total pesanan
+      - `KaryawanReport` — master data dengan total produksi, summary aktif/nonaktif
+      - `BomReport` — flatMap per BomDetail, summary total BOM + item
+
+### Backend — HTTP Layer
+- [x] `app/Http/Requests/ReportPreviewRequest.php` (validasi type + dari/sampai)
+- [x] `app/Http/Requests/ReportExportRequest.php` (validasi type + format + dari/sampai)
+- [x] `app/Http/Controllers/ReportController.php` — 4 method: index (Inertia render), types (JSON), preview (JSON), export (PDF/Excel download)
+- [x] `app/Exports/Reports/ReportExcelExport.php` — reusable Excel export class (FromCollection + WithHeadings + WithMapping + WithStyles)
+- [x] Routes group `/laporan` (laporan.index, laporan.types, laporan.preview, laporan.export)
+- [x] Wayfinder generate — typed actions di `@/actions/.../ReportController`
+
+### Backend — PDF Blade Views
+- [x] 10 blade views di `resources/views/reports/` (semua `@extends('layouts.pdf')`):
+      `pesanan.blade.php`, `produksi.blade.php`, `arus-kas.blade.php`,
+      `stok-bahan-baku.blade.php`, `stok-produk-jadi.blade.php`,
+      `bahan-baku.blade.php`, `produk.blade.php`, `customer.blade.php`,
+      `karyawan.blade.php`, `bom.blade.php`
+
+### Frontend
+- [x] TypeScript types `resources/js/types/report.ts` (ReportType, ReportSummaryCard, ReportFilters, ReportPreviewResponse)
+- [x] `ReportFilter.tsx` — Select jenis laporan + date input dari/sampai + tombol preview
+- [x] `ReportPreview.tsx` — tabel preview dengan Skeleton loading, empty state, Badge untuk kolom status
+- [x] `ReportSummary.tsx` — summary cards berwarna (8 warna via colorMap)
+- [x] `ReportActions.tsx` — tombol Export PDF + Export Excel (link ke `/laporan/export?...`)
+- [x] Halaman `resources/js/pages/laporan/index.tsx` — layout dua kolom (sidebar filter kiri, konten kanan), breadcrumbs, export actions di header
+- [x] Sidebar update — nav item "Pusat Laporan" dengan icon `FileBarChart2`
+- [x] Dashboard update — tombol "Pusat Laporan" sebagai Link ke `/laporan`
+- [x] Build berhasil tanpa error ✅
+
+### Catatan implementasi
+- Tidak ada migration baru — fitur laporan hanya query data dari tabel yang sudah ada
+- Export PDF pakai DomPDF (sudah terinstall sejak Modul 8), landscape A4
+- Export Excel pakai Maatwebsite Excel (sudah terinstall sejak Modul 3)
+- Return type `export()` controller: `\Symfony\Component\HttpFoundation\Response` (kompatibel DomPDF + Excel)
+- Preview maks 20 baris, export semua baris
+- Fitur Cetak dihapus (tidak dipakai)
+- Import Excel (bahan baku, bom, produk, karyawan, customer) sudah tersedia di masing-masing modul sejak awal — tidak diulang di modul ini
+
+- [ ] Test manual: preview semua 10 jenis laporan, export PDF, export Excel

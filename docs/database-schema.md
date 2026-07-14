@@ -10,11 +10,17 @@ supaya file ini diperbaiki lagi.
 | Kolom | Tipe | Ket |
 |---|---|---|
 | id | bigint unsigned | PK |
-| nama | varchar(255) | NOT NULL |
+| name | varchar(255) | NOT NULL — kolom default Laravel |
 | email | varchar(255) | NOT NULL, unique |
+| email_verified_at | timestamp | nullable |
 | password | varchar(255) | NOT NULL |
-| role | enum(`admin`) | NOT NULL, default `admin` |
+| two_factor_secret | text | nullable — Fortify 2FA |
+| two_factor_recovery_codes | text | nullable — Fortify 2FA |
+| two_factor_confirmed_at | timestamp | nullable — Fortify 2FA |
+| remember_token | varchar(100) | nullable |
 | created_at / updated_at | timestamp | nullable |
+
+> Catatan: tabel `users` menggunakan kolom default Laravel + Fortify. Tidak ada kolom `nama` atau `role` — semua admin karena hanya 1 aktor.
 
 ### `customer`
 | Kolom | Tipe | Ket |
@@ -154,8 +160,8 @@ supaya file ini diperbaiki lagi.
 | id | bigint unsigned | PK |
 | pesanan_id | bigint unsigned | NOT NULL, FK → `pesanan.id` (RESTRICT) |
 | tanggal | date | nullable |
-| jenis_pembayaran | enum(`dp`,`pelunasan`) | NOT NULL |
-| nominal | decimal(15,2) | nullable |
+| jenis_pembayaran | enum(`dp`,`pelunasan`,`termin`) | NOT NULL — realisasi per transaksi bayar |
+| nominal | decimal(15,2) | NOT NULL |
 | metode | varchar(100) | nullable |
 | keterangan | text | nullable |
 | created_at / updated_at | timestamp | nullable |
@@ -244,9 +250,18 @@ supaya file ini diperbaiki lagi.
 - Semua FK pakai `ON DELETE RESTRICT`, konsisten di seluruh tabel.
 - Semua tabel singular kecuali `users` (plural, ikut konvensi Laravel).
 
-## ⚠️ Perlu disinkronkan ke file lain
-Pastikan `AGENTS.md` dan `business-rules.md` menggunakan istilah `selesai`/`dibatalkan`
-(bukan `done`/`cancel`) dan mencerminkan entitas `produksi_item` + `produksi_karyawan`.
+### `passkeys`
+| Kolom | Tipe | Ket |
+|---|---|---|
+| id | bigint unsigned | PK |
+| user_id | bigint unsigned | NOT NULL, FK → `users.id` |
+| name | varchar(255) | NOT NULL |
+| credential_id | varchar(255) | NOT NULL |
+| credential | json | NOT NULL |
+| last_used_at | timestamp | nullable |
+| created_at / updated_at | timestamp | nullable |
+
+> Tabel ini dibuat otomatis oleh Laravel Fortify saat passkey support diaktifkan. Tidak dipakai aktif di SIMOPRO — hanya ada karena migration Fortify dijalankan.
 
 ## Lampiran — DDL SQL final (sumber kebenaran)
 
